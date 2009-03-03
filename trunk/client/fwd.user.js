@@ -33,11 +33,18 @@
 	THE SOFTWARE.
 */
 
+var lastViewedPost = null;
+
 function feedme_main() {
+    setupStyles();
     document.getElementById('entries').addEventListener('click', register_entry_click, false);
 }
 
 function register_entry_click() {
+    if($(".feedme-enabled").parents("#current-entry").size() > 0) {
+	// if we're still looking at the same item, just return
+	return;
+    }
     $(".feedme-enabled").remove();
     
     var people = {
@@ -66,11 +73,23 @@ function suggest_people(people, body) {
 	var header = $(".feedme-enabled");
 	for (var i=0; i<people.length; i++) {
 		var person = people[i];
-		header.append('<div class="fwd-person" style="display: inline;">');
-		header.append(person['name']);
-		header.append("<img src='" + person['photo'] + "' style='width: 50px;'>");
-		header.append('</div>');
+		header.append('<div class="fwd-person" style="display: inline;">' + person['name'] + '</div>');
+		//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
 	}
+	
+	$(".fwd-person").click(toggleSuggestion);
+}
+
+function toggleSuggestion(event) {
+	$(this).toggleClass("toggle");
+	console.log($(this));
+}
+
+function setupStyles() {
+	var buttonStyle = '.fwd-person { height: 25px; padding: 10px; border: 1px solid darkGray; margin-right: 10px; cursor: pointer; }';
+	GM_addStyle(buttonStyle);
+	var toggleStyle = '.toggle { background-color: gray; }';
+	GM_addStyle(toggleStyle);
 }
 
 // from http://joanpiedra.com/jquery/greasemonkey/ and
