@@ -34,6 +34,7 @@
 */
 
 var lastViewedPost = null;
+var autocompleteData = null;
 
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -41,15 +42,17 @@ var lastViewedPost = null;
 function init() {
     // Fail gracefully if Firebug's not installed
     try { console.log('init console... done'); } catch(e) { console = { log: function() {} } }
+    console.log("Libraries loaded.");
     
     setupStyles();
+    initAutocomplete();
     $("#entries").click(register_entry_click);
 }
 
 /*
  * Callback when the user clicks to expand a GReader post.
  */
-function register_entry_click() {
+function register_entry_click(event) {
     if($(".fwd-suggestions").parents("#current-entry").size() > 0) {
 	// if we're still looking at the same item, just return
 	return;
@@ -76,7 +79,7 @@ function register_entry_click() {
     };
     
     var body = $(".entry-body");
-    suggest_people(people['people'], body);    
+    suggest_people(people['people'], body);
 }
 
 /*
@@ -91,37 +94,60 @@ function suggest_people(people, body) {
 	}
 	$(".fwd-person").click(toggleSuggestion);
 	
-	suggest_autocomplete($(".fwd-suggestion-container"));
+	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete"></input>').append('<img class="fwd-addImg" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
+	suggest_autocomplete();
 }
 
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, header) {
-	var newGuy = header.append('<div class="fwd-person"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>');
+	header.append('<div class="fwd-person"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>');
 	//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
 }
 
 /*
  * Adds a jQuery autocomplete element to the suggestion div.  Hooks up listeners to the new friends that get added.
  */
-function suggest_autocomplete(header) {
-	header.append('<input class="fwd-autocomplete"></input>');
-	$(".fwd-autocomplete").autocomplete(["c++", "java", "php", "coldfusion", "javascript", "asp"], {
+function suggest_autocomplete() {
+	autocompleteWait();
+}
+
+function autocompleteWait() {
+        if(autocompleteData == null) {
+		window.setTimeout(autocompleteWait,100);
+	} else {         
+		populateAutocomplete();
+	}
+}
+
+function populateAutocomplete() {
+	console.log("populating.");
+	$(".fwd-autocomplete").autocomplete(autocompleteData, {
 		width: 150,
 		max: 6,
 		highlight: false,
 		multiple: false,
 		scroll: true,
-		scrollHeight: 300
+		scrollHeight: 300,
+		matchContains: true,
+		autoFill: false,
+		formatItem: function(row, i, max) {
+			return row.name + " [" + row.to + "]";
+		},
+		formatMatch: function(row, i, max) {
+			return row.name + " " + row.to;
+		},
+		formatResult: function(row) {
+			return row.to;
+		}
 	}).result(function(event, item) {
-		addFriend(item, $(".fwd-suggestions"));		// add the newly suggested friend to the list
+		$(this).val('');
+		addFriend(item.name, $(".fwd-suggestions"));		// add the newly suggested friend to the list
 		var newFriend = $(".fwd-person:last");		// find the new guy
 		newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
 	});
 	
-	// + sign
-	header.append('<img class="fwd-addImg" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
 	$('.fwd-addImg').click(function(event) { $('.fwd-autocomplete').search() });
 }
 
@@ -138,7 +164,7 @@ function toggleSuggestion(event) {
 function setupStyles() {
 	var suggestionStyle = '.fwd-suggestions { display: inline-block; }';
 	GM_addStyle(suggestionStyle);
-	var buttonStyle = '.fwd-person { display: inline-block; line-height: 25px; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
+	var buttonStyle = '.fwd-person { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
 	GM_addStyle(buttonStyle);
 	var toggleStyle = '.fwd-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; }';
 	GM_addStyle(toggleStyle);
@@ -146,6 +172,73 @@ function setupStyles() {
 	GM_addStyle(autocompleteStyle);
 	var addImgStyle= '.fwd-addImg { margin-left: 5px; }';
 	GM_addStyle(addImgStyle);
+}
+
+// Original author mattkolb
+// http://userscripts.org/scripts/show/29604
+function initAutocomplete() {
+	// my email address
+	// add your email to have it display as the top result on all searches
+	// example: var my_email = ["me@myself.com", "my_other@address.com"];
+	var my_email = [];
+	var contacts_xml_url = "http://docs.google.com/c/data/contacts?max=1000";
+	// whether to add your gmail address to the list of suggestions
+	var add_gmail = true;
+	var contact_entries = [];
+	GM_xmlhttpRequest({
+	    method: 'GET',
+	    url: contacts_xml_url,
+	    headers: {
+		'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey/0.3',
+		'Accept': 'application/atom+xml,application/xml,text/xml'
+	    },
+	    onload: function(responseDetails) {
+		var parser = new DOMParser();
+		var dom = parser.parseFromString(responseDetails.responseText,
+		    "application/xml");
+		if (add_gmail) {
+			var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
+			var email = dom.getElementsByTagName('Email')[0].textContent;
+			if (display_email != 'undefined') {
+				var found = false;
+				for (var i in my_email) {
+					if (my_email[i] == display_email) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					my_email.push(display_email);
+				}
+			}
+			if (email != 'undefined') {
+				found = false;
+				for (var i in my_email) {
+					if (my_email[i] == email) {
+						found = true;
+						break;
+					}
+				}
+				if (!found) {
+					my_email.push(email);
+				}
+			}
+		}
+
+		var xml_objects = dom.getElementsByTagName('Object');
+		for (var i = 0; i < xml_objects.length; i++) {
+			var display_names = xml_objects[i].getElementsByTagName('DisplayName');
+			if (display_names.length > 0) {
+				var xml_addresses = xml_objects[i].getElementsByTagName('Address');
+				for (var j = 0; j < xml_addresses.length; j++) {
+					contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
+				}
+			}
+		}
+		
+		autocompleteData = contact_entries;
+	    }
+	});
 }
 
 // This is called on startup -- initializes jQuery etc.
@@ -157,6 +250,12 @@ function setupStyles() {
     GM_JQ.src = 'http://jquery.com/src/jquery-latest.js';
     GM_JQ.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(GM_JQ);
+    
+// Add GData API
+    var GM_GD = document.createElement('script');
+    GM_GD.src = 'http://www.google.com/jsapi';
+    GM_GD.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(GM_GD);
     
 // Add jQuery-autocomplete
     var JQ_autocomplete = document.createElement('script');
@@ -172,7 +271,8 @@ function setupStyles() {
 
 // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
-        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined') {
+	// wait if jQuery, jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
+        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
 		window.setTimeout(GM_wait,100);
     } else { 
         $ = unsafeWindow.jQuery;
