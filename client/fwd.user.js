@@ -61,32 +61,57 @@ function register_entry_click(event) {
     // Now we know we're looking at a new post -- we need to populate the friend list.
     $(".fwd-suggestions").remove();
     
-    var people = {
-    "people": [
-        {
-            "name": "Michael Bernstein",
-            "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
-        },
-        {
-            "name": "Adam Marcus",
-            "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
-        },
-        {
-            "name": "David Karger",
-            "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
-        } 
-    ]
-    };
-    
-    var body = $(".entry-body");
-    suggest_people(people['people'], body);
+    suggest_people();
 }
 
 /*
  * Adds the friend suggestions contained in array people to node body.
  */
-function suggest_people(people, body) {
-	body.before('<div class="fwd-suggestion-container">Recommend for:&nbsp;<div class="fwd-suggestions"></div></div>');
+function suggest_people() {
+	var body = $(".entry-body");
+	
+	var defaultAutocompleteText = "Type a name";
+	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div>');
+	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete fwd-autocompleteToggle" value="' + defaultAutocompleteText + '"></input>')
+	.append('<img class="fwd-addImg" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
+	
+	// Clear the autocomplete when they start typing
+	$('.fwd-autocomplete').focus(function() {
+		$(this).val('');
+		$(this).toggleClass('fwd-autocompleteToggle');
+	});
+	$('.fwd-autocomplete').blur(function() { 
+		if ($(this).val() == '') {
+			$(this).val(defaultAutocompleteText);
+		}
+		$(this).toggleClass('fwd-autocompleteToggle');
+	});
+	
+	// faking it
+	var people = {
+	    "people": [
+		{
+		    "name": "Michael Bernstein",
+		    "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
+		},
+		{
+		    "name": "Adam Marcus",
+		    "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
+		},
+		{
+		    "name": "David Karger",
+		    "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
+		} 
+	    ]
+	};
+	
+	// we're going to simulate a 1.5 second roundtrip to the server to get suggestions
+	// so that I can build the UI
+	window.setTimeout(function() { populateSuggestions(people['people'], body); }, 1500);
+}
+
+function populateSuggestions(people, body) {
+	$("#fwd-people-placeholder").remove();
 	var header = $(".fwd-suggestions");
 	for (var i=0; i<people.length; i++) {
 		var person = people[i];
@@ -94,7 +119,6 @@ function suggest_people(people, body) {
 	}
 	$(".fwd-person").click(toggleSuggestion);
 	
-	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete"></input>').append('<img class="fwd-addImg" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
 	suggest_autocomplete();
 }
 
@@ -102,7 +126,7 @@ function suggest_people(people, body) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, header) {
-	header.append('<div class="fwd-person"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>');
+	$('<div class="fwd-person" ><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
 	//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
 }
 
@@ -156,22 +180,6 @@ function populateAutocomplete() {
  */
 function toggleSuggestion(event) {
 	$(this).toggleClass("fwd-toggle");
-}
-
-/*
- * Adds Fwd:'s CSS styles to the page.
- */
-function setupStyles() {
-	var suggestionStyle = '.fwd-suggestions { display: inline-block; }';
-	GM_addStyle(suggestionStyle);
-	var buttonStyle = '.fwd-person { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
-	GM_addStyle(buttonStyle);
-	var toggleStyle = '.fwd-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; }';
-	GM_addStyle(toggleStyle);
-	var autocompleteStyle = '.fwd-autocomplete { width: 150px; }';
-	GM_addStyle(autocompleteStyle);
-	var addImgStyle= '.fwd-addImg { margin-left: 5px; }';
-	GM_addStyle(addImgStyle);
 }
 
 // Original author mattkolb
@@ -239,6 +247,24 @@ function initAutocomplete() {
 		autocompleteData = contact_entries;
 	    }
 	});
+}
+
+/*
+ * Adds Fwd:'s CSS styles to the page.
+ */
+function setupStyles() {
+	var suggestionStyle = '.fwd-suggestions { display: inline-block; }';
+	GM_addStyle(suggestionStyle);
+	var buttonStyle = '.fwd-person { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
+	GM_addStyle(buttonStyle);
+	var toggleStyle = '.fwd-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; }';
+	GM_addStyle(toggleStyle);
+	var autocompleteStyle = '.fwd-autocomplete { width: 150px; }';
+	GM_addStyle(autocompleteStyle);
+	var autocompleteToggleStyle = '.fwd-autocompleteToggle { color: gray; }';
+	GM_addStyle(autocompleteToggleStyle);
+	var addImgStyle= '.fwd-addImg { margin-left: 5px; }';
+	GM_addStyle(addImgStyle);
 }
 
 // This is called on startup -- initializes jQuery etc.
