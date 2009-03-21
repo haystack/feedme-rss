@@ -6,7 +6,7 @@
 // @include             http://*.google.com/reader/*
 // @include             https://google.com/reader/*
 // @include             https://*.google.com/reader/*
-
+// @unwrap 
 // ==/UserScript==
 
 /**
@@ -33,8 +33,9 @@
 	THE SOFTWARE.
 */
 
-var lastViewedPost = null;
 var autocompleteData = null;
+var user = 3;	// DEBUG!
+console.log("Debug user 3");
 
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -46,7 +47,8 @@ function init() {
     
     setupStyles();
     initAutocomplete();
-    $("#entries").click(register_entry_click);
+    $("#entries").click(register_entry_click)
+    $(document).keypress(register_entry_click);
 }
 
 /*
@@ -63,6 +65,7 @@ function register_entry_click(event) {
     
     suggest_people();
 }
+
 
 /*
  * Adds the friend suggestions contained in array people to node body.
@@ -87,36 +90,46 @@ function suggest_people() {
 		$(this).toggleClass('fwd-autocompleteToggle');
 	});
 	
-	// faking it
-	var people = {
-	    "people": [
-		{
-		    "name": "Michael Bernstein",
-		    "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
-		},
-		{
-		    "name": "Adam Marcus",
-		    "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
-		},
-		{
-		    "name": "David Karger",
-		    "photo": "http://people.csail.mit.edu/msbernst/images/michael.jpg" 
-		} 
-	    ]
-	};
-	
-	// we're going to simulate a 1.5 second roundtrip to the server to get suggestions
-	// so that I can build the UI
-	window.setTimeout(function() { populateSuggestions(people['people'], body); }, 1500);
+	server_recommend();
 }
 
-function populateSuggestions(people, body) {
+function server_recommend(post_url) {
+	console.log("ajax send: " + post_url);
+	var post_url = escape($('.entry-title-link').attr('href'));
+	var feed_url_loc = location.href.indexOf('feed%2F');
+	var feed_url = location.href.substring(feed_url_loc + 'feed%2F'.length);	
+	$.getJSON("http://fwd.csail.mit.edu:8000/recommend?sharer=3&posturl=" + post_url + "&feedurl=" + feed_url + "&callback=?", handle_recommend_response);
+}
+
+function handle_recommend_response(json, textStatus) {
+	console.log("recommendation heard back: " + textStatus);
+	populateSuggestions(json);
+}
+
+function populateSuggestions(json) {
+	var people = json["users"];
+	var post_url = json["posturl"];
+	var previously_shared = json["shared"];
+	console.log(previously_shared);
+	
+	// We need to make sure that this result is for the post we're looking at
+	// However, gReader adds elements to the URL by the time we get the callback,
+	// so we use an indexOf to look for the substring rather than equality
+	// e.g., post_url = http://www.facebook.com/profile.php?id=2305336
+	//        $('.entry-title-link').attr('href') = http://www.facebook.com/profile.php?id=2305336&story_fbid=58363672851
+	if ($('.entry-title-link').attr('href').indexOf(post_url) == -1)
+	{
+		return;	// it returned late, from a previous post -- ignore
+	}
+		
 	$("#fwd-people-placeholder").remove();
 	var header = $(".fwd-suggestions");
 	for (var i=0; i<people.length; i++) {
-		var person = people[i];
-		addFriend(person['name'], header);		
+		var person = people[i]['fields'];
+		addFriend(person['first_name'] + ' ' + person['last_name'], header);		
 	}
+	
+	// Make the elements interactive
 	$(".fwd-person").click(toggleSuggestion);
 	
 	suggest_autocomplete();
@@ -180,6 +193,14 @@ function populateAutocomplete() {
  */
 function toggleSuggestion(event) {
 	$(this).toggleClass("fwd-toggle");
+	console.log("AJAX: sharing post");
+	var post_url = escape($('.entry-title-link').attr('href'));
+	$.getJSON("http://fwd.csail.mit.edu:8000/share?posturl=" + post_url + "&sharer=" + 3 + "&receiver=" + 4 + "&callback=?", handle_share_response);
+}
+
+function handle_share_response(data, textStatus)
+{
+	console.log("Share response: " + textStatus);
 }
 
 // Original author mattkolb
@@ -267,16 +288,17 @@ function setupStyles() {
 	GM_addStyle(addImgStyle);
 }
 
+
 // This is called on startup -- initializes jQuery etc.
 
 // from http://joanpiedra.com/jquery/greasemonkey/ and
 // http://groups.google.com/group/ubiquity-firefox/msg/c4d1336793e5d6ed
 // Add jQuery
     var GM_JQ = document.createElement('script');
-    GM_JQ.src = 'http://jquery.com/src/jquery-latest.js';
+    GM_JQ.src = 'http://code.jquery.com/jquery-latest.js';
     GM_JQ.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(GM_JQ);
-    
+
 // Add GData API
     var GM_GD = document.createElement('script');
     GM_GD.src = 'http://www.google.com/jsapi';
@@ -294,15 +316,15 @@ function setupStyles() {
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
     
-
-// Check if jQuery and jQuery-autocomplete are loaded
+    // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
 	// wait if jQuery, jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
         if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
 		window.setTimeout(GM_wait,100);
-    } else { 
-        $ = unsafeWindow.jQuery;
-        init(); }
+	}
+	else { 
+		$ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
+		init(); 
+	}
     }
     GM_wait();
-
