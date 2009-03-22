@@ -34,8 +34,6 @@
 */
 
 var autocompleteData = null;
-var user = 3;	// DEBUG!
-console.log("Debug user 3");
 
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -55,6 +53,10 @@ function init() {
  * Callback when the user clicks to expand a GReader post.
  */
 function register_entry_click(event) {
+    if ($("#current-entry").size() == 0) {
+	// there are no open feed items
+	return;
+    }
     if($(".fwd-suggestions").parents("#current-entry").size() > 0) {
 	// if we're still looking at the same item, just return
 	return;
@@ -95,10 +97,10 @@ function suggest_people() {
 
 function server_recommend(post_url) {
 	console.log("ajax send: " + post_url);
-	var post_url = escape($('.entry-title-link').attr('href'));
+	var post_url = encodeURIComponent($('.entry-title-link').attr('href'));
 	var feed_url_loc = location.href.indexOf('feed%2F');
 	var feed_url = location.href.substring(feed_url_loc + 'feed%2F'.length);	
-	$.getJSON("http://fwd.csail.mit.edu:8000/recommend?sharer=3&posturl=" + post_url + "&feedurl=" + feed_url + "&callback=?", handle_recommend_response);
+	$.getJSON("http://fwd.csail.mit.edu:8000/recommend/feed/" + feed_url + "/post/" + post_url + "?callback=?", handle_recommend_response);
 }
 
 function handle_recommend_response(json, textStatus) {
@@ -110,7 +112,6 @@ function populateSuggestions(json) {
 	var people = json["users"];
 	var post_url = json["posturl"];
 	var previously_shared = json["shared"];
-	console.log(previously_shared);
 	
 	// We need to make sure that this result is for the post we're looking at
 	// However, gReader adds elements to the URL by the time we get the callback,
@@ -194,8 +195,8 @@ function populateAutocomplete() {
 function toggleSuggestion(event) {
 	$(this).toggleClass("fwd-toggle");
 	console.log("AJAX: sharing post");
-	var post_url = escape($('.entry-title-link').attr('href'));
-	$.getJSON("http://fwd.csail.mit.edu:8000/share?posturl=" + post_url + "&sharer=" + 3 + "&receiver=" + 4 + "&callback=?", handle_share_response);
+	var post_url = encodeURIComponent($('.entry-title-link').attr('href'));
+	$.getJSON("http://fwd.csail.mit.edu:8000/share/post/" + post_url + "/recipient/msbernst" + "?callback=?", handle_share_response);
 }
 
 function handle_share_response(data, textStatus)
