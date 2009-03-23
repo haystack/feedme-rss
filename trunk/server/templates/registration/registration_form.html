@@ -5,10 +5,16 @@ Hello! Please register an account!<br/>
 <form method="post" action="">
 <dl>
 {% for field in form %}
+{% comment %}
+  {% ifnotequal field.label_tag "<label for=\"id_username\">username</label>" %}
+{% endcomment %}
     <dt>{{ field.label_tag }}</dt>
     <dd>{{ field }}</dd>
     {% if field.help_text %}<dd>{{ field.help_text }}</dd>{% endif %}
     {% if field.errors %}<dd class="myerrors">{{ field.errors }}</dd>{% endif %}
+{% comment %}
+  {% endifnotequal %}
+{% endcomment %}
 {% endfor %}
 </dl>
 <input type="submit" />
