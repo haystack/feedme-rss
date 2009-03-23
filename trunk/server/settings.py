@@ -1,6 +1,6 @@
 # Django settings for server project.
 import os.path
-import private_settings
+from private_settings import *
 
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
