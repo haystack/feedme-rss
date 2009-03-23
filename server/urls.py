@@ -15,7 +15,7 @@ urlpatterns = patterns('',
 
     # Uncomment the next line to enable the admin:
     url(r'^admin/(.*)', admin.site.root, name="admin"),
-    (r'^accounts/', include('registration.urls')),
+    url(r'^accounts/', include('registration.urls')),
     url(r'^recommend/', 'server.fwd.recommend.recommend', name='recommend'),
     url(r'^share/recipient/(?P<recipient_username>\S+)/toggle/(?P<toggle>\d)', 'server.fwd.share.share', name='share'),
     url(r'^share/email/(?P<recipient_email>\S+)/toggle/(?P<toggle>\d)', 'server.fwd.share.share'),
