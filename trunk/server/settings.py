@@ -73,7 +73,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     #'django.contrib.admindocs',
-    'server.fwd',
+    'msb-server.fwd',
     'registration'
 )
 
