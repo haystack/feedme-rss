@@ -33,8 +33,8 @@
 	THE SOFTWARE.
 */
 
+var port = 8001;
 var autocompleteData = null;
-
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
  */
@@ -44,6 +44,7 @@ function init() {
     console.log("Libraries loaded.");
     
     setupStyles();
+    log_in();
     initAutocomplete();
     $("#entries").click(register_entry_click)
     $(document).keypress(register_entry_click);
@@ -53,19 +54,24 @@ function init() {
  * Callback when the user clicks to expand a GReader post.
  */
 function register_entry_click(event) {
-    if ($("#current-entry").size() == 0) {
-	// there are no open feed items
-	return;
-    }
-    if($(".fwd-suggestions").parents("#current-entry").size() > 0) {
-	// if we're still looking at the same item, just return
-	return;
-    }
-    
-    // Now we know we're looking at a new post -- we need to populate the friend list.
-    $(".fwd-suggestions").remove();
-    
-    suggest_people();
+	try {
+		if ($("#current-entry").size() == 0) {
+			// there are no open feed items
+			return;
+		}
+		if($(".fwd-suggestions").parents("#current-entry").size() > 0) {
+			// if we're still looking at the same item, just return
+			return;
+		}
+	    
+		// Now we know we're looking at a new post -- we need to populate the friend list.
+		console.log("click heard");
+		$(".fwd-suggestions").remove();
+	    
+		suggest_people();
+	} catch (e) { 
+		console.log(e) 
+	}
 }
 
 
@@ -81,6 +87,7 @@ function suggest_people() {
 	.append('<img class="fwd-addImg" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
 	
 	// Clear the autocomplete when they start typing
+	suggest_autocomplete();
 	$('.fwd-autocomplete').focus(function() {
 		$(this).val('');
 		$(this).toggleClass('fwd-autocompleteToggle');
@@ -95,23 +102,60 @@ function suggest_people() {
 	server_recommend();
 }
 
-function server_recommend(post_url) {
-	console.log("ajax send: " + post_url);
-	var post_url = encodeURIComponent($('.entry-title-link').attr('href'));
+function server_recommend() {
+	var post_url = $('#current-entry .entry-title a').attr('href');
 	var feed_url_loc = location.href.indexOf('feed%2F');
-	var feed_url = location.href.substring(feed_url_loc + 'feed%2F'.length);	
-	$.getJSON("http://fwd.csail.mit.edu:8000/recommend/feed/" + feed_url + "/post/" + post_url + "?callback=?", handle_recommend_response);
+	var feed_url = location.href.substring(feed_url_loc + 'feed%2F'.length);
+	var post_title = $('#current-entry .entry-container .entry-title').text();
+	var post_contents = $('#current-entry .entry-body').text();
+	
+	var theurl = "recommend/";
+	var data = {
+		feed_url: feed_url,
+		post_url: post_url,
+		post_title: post_title,
+		post_contents: post_contents
+	}
+	
+	ajax_post(theurl, data, populateSuggestions);
 }
 
-function handle_recommend_response(json, textStatus) {
-	console.log("recommendation heard back: " + textStatus);
-	populateSuggestions(json);
+// gives Greasemonkey control so we can call the XMLhttprequest. This is a security risk.
+function ajax_post(url, data, callback)
+{
+	url = 'http://fwd.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
+	window.setTimeout(function() {
+		GM_xmlhttpRequest({
+		method: 'POST',
+		url: url,
+		data: $.param(data),
+		headers: {
+			'User-Agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+			'Content-Type': 'application/x-www-form-urlencoded',
+			'Accept': 'application/json, text/javascript'
+		},
+		onload: function(responseDetails) {
+			if (responseDetails.status == 200) {
+				console.log('response received');
+				callback(eval("(" + responseDetails.responseText + ")"));
+			}
+			else {
+				console.log('AJAX error: ' + responseDetails.statusText);
+			}
+		},
+		onerror: function(responseDetails) {
+			console.log('error');
+		}
+		});
+	}, 0);
 }
 
 function populateSuggestions(json) {
+	console.log(json);
 	var people = json["users"];
 	var post_url = json["posturl"];
 	var previously_shared = json["shared"];
+	console.log(people);
 	
 	// We need to make sure that this result is for the post we're looking at
 	// However, gReader adds elements to the URL by the time we get the callback,
@@ -127,20 +171,18 @@ function populateSuggestions(json) {
 	var header = $(".fwd-suggestions");
 	for (var i=0; i<people.length; i++) {
 		var person = people[i]['fields'];
-		addFriend(person['first_name'] + ' ' + person['last_name'], header);		
+		addFriend(person['email'], person['email'], header);		
 	}
 	
 	// Make the elements interactive
 	$(".fwd-person").click(toggleSuggestion);
-	
-	suggest_autocomplete();
 }
 
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
-function addFriend(name, header) {
-	$('<div class="fwd-person" ><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
+function addFriend(name, email, header) {
+	$('<div class="fwd-person" id="' + email + '"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
 	//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
 }
 
@@ -168,7 +210,7 @@ function populateAutocomplete() {
 		multiple: false,
 		scroll: true,
 		scrollHeight: 300,
-		matchContains: true,
+		matchContains: false,
 		autoFill: false,
 		formatItem: function(row, i, max) {
 			return row.name + " [" + row.to + "]";
@@ -181,12 +223,13 @@ function populateAutocomplete() {
 		}
 	}).result(function(event, item) {
 		$(this).val('');
-		addFriend(item.name, $(".fwd-suggestions"));		// add the newly suggested friend to the list
+		addFriend(item.name, item.to, $(".fwd-suggestions"));		// add the newly suggested friend to the list
 		var newFriend = $(".fwd-person:last");		// find the new guy
 		newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
 	});
 	
 	$('.fwd-addImg').click(function(event) { $('.fwd-autocomplete').search() });
+	console.log('population complete');
 }
 
 /*
@@ -194,19 +237,31 @@ function populateAutocomplete() {
  */
 function toggleSuggestion(event) {
 	$(this).toggleClass("fwd-toggle");
-	console.log("AJAX: sharing post");
-	var post_url = encodeURIComponent($('.entry-title-link').attr('href'));
-	$.getJSON("http://fwd.csail.mit.edu:8000/share/post/" + post_url + "/recipient/msbernst" + "?callback=?", handle_share_response);
+	var share = $(this).hasClass("fwd-toggle");	// are we sharing or canceling?
+	
+	var recipientEmail = $(this).attr('id');
+	var url = "share/email/" + recipient_email ;
+	url += "/toggle/" + (share ? 1 : 0);
+	console.log(url);
+	
+	console.log("AJAX: sharing post with " + recipient + " " + recipientEmail);
+	var data = {
+		post_url: $('#current-entry .entry-title a').attr('href'),
+	}
+	
+	ajax_post(url, data, handle_share_response);
+	//$.getJSON("http://fwd.csail.mit.edu:8000/share/post/" + post_url + "/recipient/msbernst" + "?callback=?", handle_share_response);
 }
 
-function handle_share_response(data, textStatus)
+function handle_share_response(data)
 {
-	console.log("Share response: " + textStatus);
+	console.log(data);
 }
 
 // Original author mattkolb
 // http://userscripts.org/scripts/show/29604
 function initAutocomplete() {
+	console.log('initializing autocomplete');
 	// my email address
 	// add your email to have it display as the top result on all searches
 	// example: var my_email = ["me@myself.com", "my_other@address.com"];
@@ -223,6 +278,7 @@ function initAutocomplete() {
 		'Accept': 'application/atom+xml,application/xml,text/xml'
 	    },
 	    onload: function(responseDetails) {
+		console.log('autocomplete data received');
 		var parser = new DOMParser();
 		var dom = parser.parseFromString(responseDetails.responseText,
 		    "application/xml");
@@ -267,6 +323,7 @@ function initAutocomplete() {
 		}
 		
 		autocompleteData = contact_entries;
+		console.log('autocomplete data set');
 	    }
 	});
 }
@@ -289,6 +346,16 @@ function setupStyles() {
 	GM_addStyle(addImgStyle);
 }
 
+function log_in() {
+	$("body").append('<iframe id="login-iframe" src="http://fwd.csail.mit.edu:8000/loggedin" width="400px" height="400px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="1" style="position: absolute; left: 50px; top: 50px; z-index: 999; background-color: white;"></iframe>');
+	$('#login-iframe').ready(function() {
+		if ($('#login-iframe').attr('src') == 'http://fwd.csail.mit.edu:8000/loggedin') {
+			// they have a session
+			$('#login-iframe').remove();
+		}
+	});
+}
+
 
 // This is called on startup -- initializes jQuery etc.
 
@@ -298,13 +365,7 @@ function setupStyles() {
     var GM_JQ = document.createElement('script');
     GM_JQ.src = 'http://code.jquery.com/jquery-latest.js';
     GM_JQ.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(GM_JQ);
-
-// Add GData API
-    var GM_GD = document.createElement('script');
-    GM_GD.src = 'http://www.google.com/jsapi';
-    GM_GD.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(GM_GD);
+    document.getElementsByTagName('head')[0].appendChild(GM_JQ);    
     
 // Add jQuery-autocomplete
     var JQ_autocomplete = document.createElement('script');
@@ -323,7 +384,7 @@ function setupStyles() {
         if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
 		window.setTimeout(GM_wait,100);
 	}
-	else { 
+	else {
 		$ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
 		init(); 
 	}
