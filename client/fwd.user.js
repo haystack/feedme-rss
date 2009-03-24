@@ -124,7 +124,7 @@ function server_recommend() {
 function ajax_post(url, data, callback)
 {
 	url = 'http://fwd.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
-	window.setTimeout(function() {
+	window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
 		GM_xmlhttpRequest({
 		method: 'POST',
 		url: url,
@@ -151,7 +151,6 @@ function ajax_post(url, data, callback)
 }
 
 function populateSuggestions(json) {
-	console.log(json);
 	var people = json["users"];
 	var post_url = json["posturl"];
 	var previously_shared = json["shared"];
@@ -173,6 +172,10 @@ function populateSuggestions(json) {
 		var person = people[i]['fields'];
 		addFriend(person['email'], person['email'], header);		
 	}
+	for (var j=0; j<previously_shared.length; j++) {
+		var person = previously_shared[j]['fields'];
+		$('[email="' + person['email'] + '"]').toggleClass("fwd-toggle");
+	}
 	
 	// Make the elements interactive
 	$(".fwd-person").click(toggleSuggestion);
@@ -182,7 +185,7 @@ function populateSuggestions(json) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, header) {
-	$('<div class="fwd-person" id="' + email + '"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
+	$('<div class="fwd-person" email="' + email + '"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
 	//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
 }
 
@@ -239,12 +242,12 @@ function toggleSuggestion(event) {
 	$(this).toggleClass("fwd-toggle");
 	var share = $(this).hasClass("fwd-toggle");	// are we sharing or canceling?
 	
-	var recipientEmail = $(this).attr('id');
-	var url = "share/email/" + recipient_email ;
+	var recipientEmail = $(this).attr('email');
+	var url = "share/email/" + recipientEmail;
 	url += "/toggle/" + (share ? 1 : 0);
 	console.log(url);
 	
-	console.log("AJAX: sharing post with " + recipient + " " + recipientEmail);
+	console.log("AJAX: sharing post with " + recipientEmail);
 	var data = {
 		post_url: $('#current-entry .entry-title a').attr('href'),
 	}
