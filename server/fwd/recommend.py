@@ -31,8 +31,16 @@ def recommend(request):
     sharer.save()
 
   users = User.objects.filter(is_active=True).exclude(username=sharer_user.username)
+
   # find out if we've already shared it with anyone
-  shared_users = SharedPost.objects.filter(post=post, sharer=sharer)    
+  try:
+    shared_post = SharedPost.objects.get(post=post, sharer=sharer)
+    shared_post_receivers = SharedPostReceiver.objects.filter(shared_post=shared_post)
+    shared_users = []
+    for shared_user in shared_post_receivers:
+      shared_users.append(shared_user.receiver.user)
+  except SharedPost.DoesNotExist:
+    shared_users = []
   
   json = serializers.serialize('json', users)
   shared_json = serializers.serialize('json', shared_users)
