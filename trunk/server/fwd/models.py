@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+import nltk
 
 # Create your models here.
 # TODO: at some point, remove primary keys for objects that don't need them
@@ -35,15 +36,18 @@ class Post(models.Model):
 
     def tokenize(self):
         "Returns a tokenized frequency distribution of the post contents"
-        import nltk
+        print 'tokenizing'
         contents = nltk.clean_html(self.contents)
         tokens = nltk.word_tokenize(contents)
         text = nltk.Text(tokens)
 
         porter = nltk.PorterStemmer()
         stopwords = nltk.corpus.stopwords.words('english')
-        frequency_dist = nltk.FreqDist(porter.stem(lower(w)) for w in text
-                                       if w not in stopwords and w.isalpha())
+        words = []
+        for w in text:
+            if w not in stopwords and w.isalpha():
+                words.append(porter.stem(w))
+        frequency_dist = nltk.FreqDist(words)
         return frequency_dist
     
     def __unicode__(self):
