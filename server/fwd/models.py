@@ -28,9 +28,27 @@ class Post(models.Model):
     feed = models.ForeignKey(Feed)
     title = models.TextField()
     contents = models.TextField()
+
+    def get_term_vector(self):
+        "Returns a QuerySet term vector for this post"
+        return TermVectorCell.objects.filter(post=self);
+
+    def tokenize(self):
+        "Returns a tokenized frequency distribution of the post contents"
+        import nltk
+        contents = nltk.clean_html(self.contents)
+        tokens = nltk.word_tokenize(contents)
+        text = nltk.Text(tokens)
+
+        porter = nltk.PorterStemmer()
+        stopwords = nltk.corpus.stopwords.words('english')
+        frequency_dist = nltk.FreqDist(porter.stem(lower(w)) for w in text
+                                       if w not in stopwords and w.isalpha())
+        return frequency_dist
     
     def __unicode__(self):
         return self.title + ": " + self.url;
+   
 
 class SharedPost(models.Model):
     post = models.ForeignKey(Post)
@@ -46,3 +64,17 @@ class SharedPostReceiver(models.Model):
     receiver = models.ForeignKey(Receiver)
     def __unicode__(self):
         return u'receiver: ' + unicode(self.receiver) + u' sender: ' + unicode(self.shared_post);
+
+class Term(models.Model):
+    term = models.CharField(max_length=255, unique=True)
+
+    def __unicode__(self):
+        return unicode(self.term);
+
+class TermVectorCell(models.Model):
+    term = models.ForeignKey(Term)
+    count = models.IntegerField()
+    post = models.ForeignKey(Post)
+
+    def __unicode__(self):
+        return unicode(self.term) + u': ' + unicode(self.count);
