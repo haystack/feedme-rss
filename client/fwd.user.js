@@ -117,6 +117,7 @@ function server_recommend() {
 		post_contents: post_contents
 	}
 	
+	console.log(data)
 	ajax_post(theurl, data, populateSuggestions);
 }
 
