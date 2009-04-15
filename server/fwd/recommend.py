@@ -49,7 +49,8 @@ def recommend(request):
   except SharedPost.DoesNotExist:
     shared_users = []
 
-  recommendations = n_best_friends(post)
+  print 'get recommendations'
+  recommendations = n_best_friends(post, sharer)
   print recommendations
   json = serializers.serialize('json', recommendations, ensure_ascii=False)
   shared_json = serializers.serialize('json', shared_users, ensure_ascii=False)
@@ -74,24 +75,24 @@ def create_term_vector(post):
     term_vector_cell.save()
 
         
-def n_best_friends(post):
+def n_best_friends(post, sharer):
   post_vector = TermVectorCell.objects.filter(
     post=post).select_related()
-  print 'post vector ' + str(post_vector)
   post_norm = vector_norm(post_vector)
   print post_norm
   if post_norm == 0:
     return []
   
   scores = []
-  for receiver in Receiver.objects.all():
+  friends = Receiver.objects.filter(
+    sharedpostreceiver__shared_post__sharer=sharer).distinct()
+  for receiver in friends:
     # Get all term vector cells in posts that were recommended to receiver
     shared_posts = Post.objects.filter(
       sharedpost__sharedpostreceiver__receiver=receiver)
     # will contain the distances to all the articles that have been shared
     cosine_distances = []
 
-    print 'num of posts' + str(len(shared_posts))
     for shared_post in shared_posts:
       term_counts = TermVectorCell.objects.filter(post=post).select_related()
       if len(term_counts) == 0:
