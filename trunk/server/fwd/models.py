@@ -37,14 +37,16 @@ class Post(models.Model):
     def tokenize(self):
         "Returns a tokenized frequency distribution of the post contents"
         print 'tokenizing'
-        contents = nltk.clean_html(self.contents)
-        tokens = nltk.word_tokenize(contents)
+        text = nltk.clean_html(self.title) + ' ' + \
+                   nltk.clean_html(self.contents)
+        tokens = nltk.word_tokenize(text)
         text = nltk.Text(tokens)
 
         porter = nltk.PorterStemmer()
         stopwords = nltk.corpus.stopwords.words('english')
         words = []
         for w in text:
+            w = w.lower()
             if w not in stopwords and w.isalpha():
                 words.append(porter.stem(w))
         frequency_dist = nltk.FreqDist(words)
