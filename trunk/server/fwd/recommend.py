@@ -86,15 +86,20 @@ def n_best_friends(post, sharer):
   scores = []
   friends = Receiver.objects.filter(
     sharedpostreceiver__shared_post__sharer=sharer).distinct()
+  # Cache all the terms in posts this person has shared -- we need quick
+  # access so we can iterate over them
+  all_terms = TermVectorCell.objects.filter(post__sharedpost__sharer=sharer).select_related()
   for receiver in friends:
+    print 'reviewing friend: ' + receiver.user.username
     # Get all term vector cells in posts that were recommended to receiver
     shared_posts = Post.objects.filter(
       sharedpost__sharedpostreceiver__receiver=receiver)
+
     # will contain the distances to all the articles that have been shared
     cosine_distances = []
 
     for shared_post in shared_posts:
-      term_counts = TermVectorCell.objects.filter(post=post).select_related()
+      term_counts = all_terms.filter(post=shared_post)
       if len(term_counts) == 0:
         continue
       
@@ -119,6 +124,7 @@ def n_best_friends(post, sharer):
   # now find the top 3
   sorted_friends = sorted(
     scores, key=operator.itemgetter('score'))[len(scores)-3:]
+  print sorted_friends
   return map(lambda friend:friend['receiver'].user, sorted_friends)
   
 def vector_norm(term_vectors):
