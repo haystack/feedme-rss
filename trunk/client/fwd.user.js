@@ -82,9 +82,9 @@ function suggest_people() {
 	var body = $(".entry-body");
 	
 	var defaultAutocompleteText = "Type a name";
-	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div>');
-	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete fwd-autocompleteToggle" value="' + defaultAutocompleteText + '"></input>')
-	.append('<img class="fwd-addImg" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
+	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions wait-for-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div>');
+	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete fwd-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input>')
+	.append('<img class="fwd-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete();
@@ -107,7 +107,7 @@ function server_recommend() {
 	var feed_url_loc = location.href.indexOf('feed%2F');
 	var feed_url = location.href.substring(feed_url_loc + 'feed%2F'.length);
 	var post_title = $('#current-entry .entry-container .entry-title').text();
-	var post_contents = $('#current-entry .entry-body').text();
+	var post_contents = $('#current-entry .entry-body').html();
 	
 	var theurl = "recommend/";
 	var data = {
@@ -180,6 +180,7 @@ function populateSuggestions(json) {
 	
 	// Make the elements interactive
 	$(".fwd-person").click(toggleSuggestion);
+	$(".wait-for-suggestions").removeClass("wait-for-suggestions");
 }
 
 /*
@@ -348,6 +349,8 @@ function setupStyles() {
 	GM_addStyle(autocompleteToggleStyle);
 	var addImgStyle= '.fwd-addImg { margin-left: 5px; }';
 	GM_addStyle(addImgStyle);
+	var waitForSuggestionStyle= '.wait-for-suggestions { visibility: hidden; }';
+	GM_addStyle(waitForSuggestionStyle);
 }
 
 function log_in() {
