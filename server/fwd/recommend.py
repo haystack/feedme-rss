@@ -122,8 +122,11 @@ def n_best_friends(post, sharer):
       scores.append(score)
 
   # now find the top 3
+  print scores
   sorted_friends = sorted(
-    scores, key=operator.itemgetter('score'))[len(scores)-3:]
+    scores, key=operator.itemgetter('score'))
+  if len(sorted_friends) > 3:
+    sorted_friends = sorted_friends[len(sorted_friends)-3:]
   print sorted_friends
   return map(lambda friend:friend['receiver'].user, sorted_friends)
   
