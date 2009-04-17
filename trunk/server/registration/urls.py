@@ -19,14 +19,14 @@ various steps of the user-signup process.
 
 """
 
-
 from django.conf.urls.defaults import *
 from django.views.generic.simple import direct_to_template
 from django.contrib.auth import views as auth_views
 
 from registration.views import activate
 from registration.views import register
-
+from email_usernames.forms import EmailRegistrationForm
+from email_usernames.views import email_login
 
 urlpatterns = patterns('',
                        # Activation keys get matched by \w+ instead of the more specific
@@ -37,9 +37,13 @@ urlpatterns = patterns('',
                            activate,
                            name='registration_activate'),
                        url(r'^login/$',
-                           auth_views.login,
+                           email_login,
                            {'template_name': 'registration/login.html'},
-                           name='auth_login'),
+                           name='email-login'),
+                       url(r'^login/complete/$',
+                           direct_to_template,
+                           {'template': 'registration/login_complete.html'},
+                           name='registration_complete'),                           
                        url(r'^logout/$',
                            auth_views.logout,
                            {'template_name': 'registration/logout.html'},
@@ -62,9 +66,7 @@ urlpatterns = patterns('',
                        url(r'^password/reset/done/$',
                            auth_views.password_reset_done,
                            name='auth_password_reset_done'),
-                       url(r'^register/$',
-                           register,
-                           name='registration_register'),
+                        url(r'^register/$', register, { 'form_class':EmailRegistrationForm }, name="registration_register"),
                        url(r'^register/complete/$',
                            direct_to_template,
                            {'template': 'registration/registration_complete.html'},
