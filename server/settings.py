@@ -74,9 +74,19 @@ INSTALLED_APPS = (
     'django.contrib.admin',
     #'django.contrib.admindocs',
     'server.fwd',
-    'registration'
+    'registration',
+    'email_usernames'
+)
+
+AUTHENTICATION_BACKENDS = (
+    # Our custom auth backend that allows email addresses to be used as
+    # usernames.
+    'email_usernames.backends.EmailOrUsernameModelBackend', 
+    # Default auth backend that handles everything else.
+    'django.contrib.auth.backends.ModelBackend', 
 )
 
 # app-specific settings
 ACCOUNT_ACTIVATION_DAYS = 7
-LOGIN_REDIRECT_URL = '/accounts/register/complete/'
+REGISTER_COMPLETE_URL = '/accounts/register/complete/'
+LOGIN_REDIRECT_URL = '/accounts/login/complete/'

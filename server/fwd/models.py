@@ -2,6 +2,9 @@ from django.db import models
 from django.contrib.auth.models import User
 import nltk
 
+# make email addresses be 75 characters like usernames
+User._meta.get_field_by_name('username')[0].max_length=75
+
 # Create your models here.
 # TODO: at some point, remove primary keys for objects that don't need them
 #  (Sharer, Receiver, SharedPost, etc.)
