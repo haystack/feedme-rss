@@ -3,7 +3,6 @@ from django.core import serializers
 from django.contrib.auth.models import User
 from models import *
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 import re
 
 @login_required
@@ -49,16 +48,18 @@ def share(request, toggle, recipient_username=None, recipient_email=None):
     shared_post_receiver = SharedPostReceiver(shared_post=shared_post, receiver=receiver)
     shared_post_receiver.save()
 
-  if share:
-    send_mail('%s' % post.title, '%s \n%s \n%s \nsent by %s \npowered by Fwd: pass it on.' % (post.title, post.url, post.contents, sharer.user.email), '%s' % (sharer.user.email), [receiver.user.email], fail_silently=False)
-  else:
+  #if share:
+    # e-mail will get sent automatically by cron process in ../send_mail.py
+    # send_post_email(shared_post, receiver)
+  if not share:
     shared_post_receiver.delete()
     if len(SharedPostReceiver.objects.filter(shared_post=shared_post)) == 0:
       shared_post.delete()
     
-  script_output = "{'response': 'ok'}"
+  script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
 
 # returns an email address reformatted to be a username (alphanumeric only)
 def format_email(email):
   return re.sub(r'\W', '_', email)
+

@@ -1,0 +1,6 @@
+FeedMe requires the following Python dependencies:
+
+- NLTK
+  - Numpy
+  - Matplotlib
+  - Prover9
