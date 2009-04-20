@@ -82,9 +82,10 @@ function suggest_people() {
 	var body = $(".entry-body");
 	
 	var defaultAutocompleteText = "Type a name";
-	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions wait-for-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div>');
+	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions wait-for-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div></div>');
 	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete fwd-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input>')
-	.append('<img class="fwd-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>');
+	.append('<img class="fwd-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>')
+	.append('<div class="comment wait-for-suggestions"><textarea id="comments"></textarea></div>');
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete();
@@ -98,6 +99,7 @@ function suggest_people() {
 		}
 		$(this).toggleClass('fwd-autocompleteToggle');
 	});
+	$('#comments').blur(add_comment);
 	
 	server_recommend();
 }
@@ -254,11 +256,27 @@ function toggleSuggestion(event) {
 		post_url: $('#current-entry .entry-title a').attr('href'),
 	}
 	
+	console.log(data);
 	ajax_post(url, data, handle_share_response);
-	//$.getJSON("http://fwd.csail.mit.edu:8000/share/post/" + post_url + "/recipient/msbernst" + "?callback=?", handle_share_response);
 }
 
 function handle_share_response(data)
+{
+	console.log(data);
+}
+
+function add_comment(event) {
+	var data = {
+		post_url: $('#current-entry .entry-title a').attr('href'),
+		comment: $(this).val()
+	}
+	var url = "comment/";
+	
+	console.log(data)
+	ajax_post(url, data, handle_comment_response);
+}
+
+function handle_comment_response(data)
 {
 	console.log(data);
 }
@@ -351,6 +369,8 @@ function setupStyles() {
 	GM_addStyle(addImgStyle);
 	var waitForSuggestionStyle= '.wait-for-suggestions { visibility: hidden; }';
 	GM_addStyle(waitForSuggestionStyle);
+	var commentStyle = '.comment textarea { height: 42px; width: 415px; }';
+	GM_addStyle(commentStyle);
 }
 
 function log_in() {
