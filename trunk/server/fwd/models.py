@@ -63,7 +63,7 @@ class SharedPost(models.Model):
     comment = models.TextField()
     
     def __unicode__(self):
-        return unicode(self.sharer) + u' ' + unicode(self.time);
+        return unicode(self.sharer) + u' post: ' + unicode(self.post);
     
 class SharedPostReceiver(models.Model):
     shared_post = models.ForeignKey(SharedPost)
