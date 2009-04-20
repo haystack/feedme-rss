@@ -85,7 +85,7 @@ function suggest_people() {
 	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions wait-for-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div></div>');
 	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete fwd-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input>')
 	.append('<img class="fwd-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>')
-	.append('<div class="comment wait-for-suggestions"><textarea id="comments"></textarea></div>');
+	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea><a id="send-button" href="javascript:{}">Send</a></div>');
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete();
@@ -100,6 +100,7 @@ function suggest_people() {
 		$(this).toggleClass('fwd-autocompleteToggle');
 	});
 	$('#comments').blur(add_comment);
+	$('#send-button').click(send_mail);
 	
 	server_recommend();
 }
@@ -239,6 +240,12 @@ function populateAutocomplete() {
 	console.log('population complete');
 }
 
+
+function handle_ajax_response(data)
+{
+	console.log(data);
+}
+
 /*
  * Callback when somebody is recommended a post.
  */
@@ -257,12 +264,14 @@ function toggleSuggestion(event) {
 	}
 	
 	console.log(data);
-	ajax_post(url, data, handle_share_response);
-}
-
-function handle_share_response(data)
-{
-	console.log(data);
+	ajax_post(url, data, handle_ajax_response);
+	
+	if ($(".fwd-toggle").length > 0) {
+		$('#expand-container').removeClass('expand-container');
+	} else
+	{
+		$('#expand-container').addClass('expand-container');
+	}
 }
 
 function add_comment(event) {
@@ -273,12 +282,19 @@ function add_comment(event) {
 	var url = "comment/";
 	
 	console.log(data)
-	ajax_post(url, data, handle_comment_response);
+	ajax_post(url, data, handle_ajax_response);
 }
 
-function handle_comment_response(data)
-{
-	console.log(data);
+function send_mail(event) {
+	$('#expand-container').addClass('expand-container');
+	
+	var data = {
+		post_url: $('#current-entry .entry-title a').attr('href'),
+	}
+	var url = "send/";
+	
+	console.log(data)
+	ajax_post(url, data, handle_ajax_response);
 }
 
 // Original author mattkolb
@@ -369,14 +385,16 @@ function setupStyles() {
 	GM_addStyle(addImgStyle);
 	var waitForSuggestionStyle= '.wait-for-suggestions { visibility: hidden; }';
 	GM_addStyle(waitForSuggestionStyle);
-	var commentStyle = '.comment textarea { height: 42px; width: 415px; }';
+	var expandContainerStyle = '.expand-container { display: none; }';
+	GM_addStyle(expandContainerStyle);
+	var commentStyle = '.comment-textarea { height: 42px; width: 415px; margin-top: 10px; margin-right: 20px; }';
 	GM_addStyle(commentStyle);
 }
 
 function log_in() {
-	$("body").append('<iframe id="login-iframe" src="http://fwd.csail.mit.edu:8000/loggedin" width="400px" height="400px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="1" style="position: absolute; left: 50px; top: 50px; z-index: 999; background-color: white;"></iframe>');
+	$("body").append('<iframe id="login-iframe" src="http://fwd.csail.mit.edu:' + port + '/loggedin" width="400px" height="400px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="1" style="position: absolute; left: 50px; top: 50px; z-index: 999; background-color: white;"></iframe>');
 	$('#login-iframe').ready(function() {
-		if ($('#login-iframe').attr('src') == 'http://fwd.csail.mit.edu:8000/loggedin') {
+		if ($('#login-iframe').attr('src') == 'http://fwd.csail.mit.edu:' + port + '/loggedin') {
 			// they have a session
 			$('#login-iframe').remove();
 		}
