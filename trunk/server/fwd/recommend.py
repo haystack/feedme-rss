@@ -18,6 +18,30 @@ def recommend(request):
   post_title = request.POST['post_title']
   post_contents = request.POST['post_contents']
 
+  post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
+                                  post_title=post_title, \
+                                  post_contents=post_contents, \
+                                  sharer_user = sharer_user)
+  feed = post_objects['feed']
+  post = post_objects['post']
+  sharer = post_objects['sharer']
+  shared_post = post_objects['shared_post']
+  shared_post_receivers = post_objects['shared_post_receivers']
+  shared_users = post_objects['shared_users']
+
+  print 'get recommendations'
+  recommendations = n_best_friends(post, sharer)
+  print recommendations
+  json = serializers.serialize('json', recommendations, ensure_ascii=False)
+  shared_json = serializers.serialize('json', shared_users, ensure_ascii=False)
+  
+  script_output = '{"posturl": "' + post.url + '", "users": ' + \
+                  json + ', "shared": ' + shared_json + '}'
+  return HttpResponse(script_output, mimetype='application/json')
+
+
+def get_post_objects(feed_url, post_url, post_title, post_contents, \
+                     sharer_user):
   # create objects if we need to
   try:
     feed = Feed.objects.get(rss_url=feed_url)
@@ -28,7 +52,8 @@ def recommend(request):
     post = Post.objects.get(url=post_url)
     print 'post exists'    
   except Post.DoesNotExist:
-    post = Post(url=post_url, feed=feed, title=post_title, contents=post_contents)
+    post = Post(url=post_url, feed=feed, title=post_title,
+                contents=post_contents)
     post.save()
     print 'creating term vector'
     create_term_vector(post)
@@ -42,21 +67,24 @@ def recommend(request):
   # find out if we've already shared it with anyone
   try:
     shared_post = SharedPost.objects.get(post=post, sharer=sharer)
-    shared_post_receivers = SharedPostReceiver.objects.filter(shared_post=shared_post)
+    shared_post_receivers = SharedPostReceiver.objects \
+                            .filter(shared_post=shared_post)
     shared_users = []
     for shared_user in shared_post_receivers:
       shared_users.append(shared_user.receiver.user)
   except SharedPost.DoesNotExist:
+    shared_post = None
     shared_users = []
+    shared_post_receivers = []
 
-  print 'get recommendations'
-  recommendations = n_best_friends(post, sharer)
-  print recommendations
-  json = serializers.serialize('json', recommendations, ensure_ascii=False)
-  shared_json = serializers.serialize('json', shared_users, ensure_ascii=False)
-  
-  script_output = '{posturl: \'' + post.url + '\', users: ' + json + ', shared: ' + shared_json + '}'
-  return HttpResponse(script_output, mimetype='application/json')
+  post_objects = dict()
+  post_objects['feed'] = feed
+  post_objects['post'] = post
+  post_objects['sharer'] = sharer
+  post_objects['shared_post'] = shared_post
+  post_objects['shared_post_receivers'] = shared_post_receivers
+  post_objects['shared_users'] = shared_users
+  return post_objects
 
 
 def create_term_vector(post):
@@ -86,20 +114,18 @@ def n_best_friends(post, sharer):
   scores = []
   friends = Receiver.objects.filter(
     sharedpostreceiver__shared_post__sharer=sharer).distinct()
-  # Cache all the terms in posts this person has shared -- we need quick
-  # access so we can iterate over them
-  all_terms = TermVectorCell.objects.filter(post__sharedpost__sharer=sharer).select_related()
+
   for receiver in friends:
     print 'reviewing friend: ' + receiver.user.username
     # Get all term vector cells in posts that were recommended to receiver
-    shared_posts = Post.objects.filter(
-      sharedpost__sharedpostreceiver__receiver=receiver)
-
+    shared_posts = SharedPost.objects.filter(sharedpostreceiver__receiver = receiver)
+        
     # will contain the distances to all the articles that have been shared
     cosine_distances = []
 
     for shared_post in shared_posts:
-      term_counts = all_terms.filter(post=shared_post)
+      term_counts = TermVectorCell.objects.filter(post=shared_post.post). \
+                    select_related()
       if len(term_counts) == 0:
         continue
       
@@ -129,6 +155,7 @@ def n_best_friends(post, sharer):
     sorted_friends = sorted_friends[len(sorted_friends)-3:]
   print sorted_friends
   return map(lambda friend:friend['receiver'].user, sorted_friends)
+
   
 def vector_norm(term_vectors):
   norm = 0

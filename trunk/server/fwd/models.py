@@ -5,7 +5,6 @@ import nltk
 # make email addresses be 75 characters like usernames
 User._meta.get_field_by_name('username')[0].max_length=75
 
-# Create your models here.
 # TODO: at some point, remove primary keys for objects that don't need them
 #  (Sharer, Receiver, SharedPost, etc.)
 
@@ -43,12 +42,11 @@ class Post(models.Model):
         text = nltk.clean_html(self.title) + ' ' + \
                    nltk.clean_html(self.contents)
         tokens = nltk.word_tokenize(text)
-        text = nltk.Text(tokens)
 
         porter = nltk.PorterStemmer()
         stopwords = nltk.corpus.stopwords.words('english')
         words = []
-        for w in text:
+        for w in tokens:
             w = w.lower()
             if w not in stopwords and w.isalpha():
                 words.append(porter.stem(w))
@@ -64,6 +62,7 @@ class SharedPost(models.Model):
     sharer = models.ForeignKey(Sharer)
     comment = models.TextField()
     time = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default = False)
     
     def __unicode__(self):
         return unicode(self.sharer) + u' ' + unicode(self.time);
