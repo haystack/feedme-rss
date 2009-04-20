@@ -61,8 +61,6 @@ class SharedPost(models.Model):
     post = models.ForeignKey(Post)
     sharer = models.ForeignKey(Sharer)
     comment = models.TextField()
-    time = models.DateTimeField(auto_now_add=True)
-    sent = models.BooleanField(default = False)
     
     def __unicode__(self):
         return unicode(self.sharer) + u' ' + unicode(self.time);
@@ -70,6 +68,9 @@ class SharedPost(models.Model):
 class SharedPostReceiver(models.Model):
     shared_post = models.ForeignKey(SharedPost)
     receiver = models.ForeignKey(Receiver)
+    time = models.DateTimeField(auto_now_add=True)
+    sent = models.BooleanField(default = False)
+    
     def __unicode__(self):
         return u'receiver: ' + unicode(self.receiver) + u' sender: ' + unicode(self.shared_post);
 

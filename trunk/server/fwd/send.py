@@ -1,14 +1,22 @@
-from django.core.management import setup_environ
-import settings
-setup_environ(settings)
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+from models import *
+from django.contrib.auth.decorators import login_required
 import datetime
 from server.fwd.models import *
 from django.core.mail import EmailMultiAlternatives
 import nltk
-import daemon
-import time
 
-debug_to_file = True
+@login_required
+def send(request):
+    post_url = request.POST['post_url']
+    sharer = Sharer.objects.get(user = request.user)
+    shared_post = SharedPost.objects.filter(sharer=sharer) \
+                  .get(post__url = post_url)
+    send_post(shared_post)
+
+    script_output = "{\"response\": \"ok\"}"
+    return HttpResponse(script_output, mimetype='application/json')
 
 def start_email_daemon():
     """Creates a daemon to send emails every 20 seconds.  Uses daemon.py
@@ -18,46 +26,45 @@ def start_email_daemon():
 
     Source: http://code.activestate.com/recipes/278731/
     """
+    from django.core.management import setup_environ
+    import settings
+    setup_environ(settings)
+    import daemon
+
     daemon.createDaemon()
 
+    debug_to_file = True
     while True:
-        send_email()
+        unsent = SharedPost.objects \
+                 .filter(sharedpostreceiver__sent__exact = False)
+        for shared_post in unsent:
+            send_post_email(shared_post)
         time.sleep(20)
 
-def send_email():
-    if debug_to_file is True:
-        log = open('/var/virtualhost/sites/fwd/send_daemon.log', \
-                   'a')
-        log.write('Sending mail \n')
 
-    now = datetime.datetime.now()
-    low_watermark = now - datetime.timedelta(seconds=20)
-    posts_to_send = SharedPost.objects.filter(sent__exact = False) \
-                        .filter(time__lte = low_watermark)
-    print posts_to_send
-        
-    for post_to_send in posts_to_send:
-        receivers = SharedPostReceiver.objects.filter( \
-                shared_post = post_to_send)
-        for receiver in receivers:
-            if debug_to_file is True:
-                log.write('sending ' + post_to_send.post.title + \
-                              ' to ' + receiver.receiver.user.username + '\n')
-            send_post_email(post_to_send, receiver.receiver)
-        post_to_send.sent = True
-        post_to_send.save()
-    if debug_to_file is True:
-        log.write('done sending \n\n')
-        log.close()
+def send_post(post_to_send):
+    receivers = SharedPostReceiver.objects \
+                .filter(shared_post = post_to_send) \
+                .filter(sent__exact = False)
+
+    send_post_email(post_to_send, receivers)
+
+    receivers.sent = True
+    for receiver in receivers:
+        receiver.save()
 
 
-def send_post_email(shared_post, receiver):
+def send_post_email(shared_post, receivers):
   "Sends the post in an email to the recipient"
   post = shared_post.post
   subject = post.title
   from_email = shared_post.sharer.user.email
-  to_email = receiver.user.email
+  to_emails = [receiver.receiver.user.email for receiver in receivers]
   comment = shared_post.comment
+
+  print('sending ' + shared_post.post.title + \
+        ' to ' + str(to_emails) + '\n')
+  
   html_content = u''
   if comment is not u'':
       html_content += comment + '<br /><br />'
@@ -75,11 +82,6 @@ def send_post_email(shared_post, receiver):
                   u"friends spamming you? Email us at feedme@csail.mit.edu."
 
   text_content = nltk.clean_html(html_content)
-  email = EmailMultiAlternatives(subject, text_content, from_email, [to_email])
+  email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
   email.attach_alternative(html_content, "text/html")
   email.send()
-
-  #old way of sending mail
-  #send_mail('%s' % post.title, '%s \n%s \n%s \nsent by %s \npowered by Fwd: pass it on.' % (post.title, post.url, post.contents, sharer.user.email), '%s' % (sharer.user.email), [receiver.user.email], fail_silently=False)
-
-

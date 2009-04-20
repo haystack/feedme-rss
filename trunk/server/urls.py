@@ -21,4 +21,5 @@ urlpatterns = patterns('',
     url(r'^share/email/(?P<recipient_email>\S+)/toggle/(?P<toggle>\d)', 'server.fwd.share.share'),
     url(r'^loggedin/', 'server.fwd.loggedin.logged_in', name='logged in'),
     url(r'^comment/', 'server.fwd.comment.comment', name='comment'),
+    url(r'^send/', 'server.fwd.send.send', name='send'),
 )
