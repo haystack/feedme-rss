@@ -1,17 +1,30 @@
 from django.http import HttpResponse
 from django.core import serializers
 from django.contrib.auth.models import User
-from models import *
 from django.contrib.auth.decorators import login_required
-import re
 from django.core.mail import EmailMultiAlternatives
+from django.utils import html
+from models import *
+import re
 import nltk
+import codecs, sys
+
+# set stdout to Unicode so we can write Unicode strings to stdout
+# todo: create some sort of startup script which calls this
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 @login_required
 def share(request):
   post_url = request.POST['post_url']
   recipient_emails = request.POST.getlist('recipients')
+
+  # Escape any HTML in the comment, turn \n's into <br>'s, and autolink
+  # any URLs in the text
   comment = request.POST['comment']
+  if comment != "":
+    comment = html.escape(comment)
+    comment = html.linebreaks(comment)
+    comment = html.urlize(comment)
 
   shared_post = create_shared_post(request.user, \
                                    post_url, recipient_emails, comment)
@@ -62,7 +75,7 @@ def create_shared_post(user_sharer, post_url, recipient_emails, comment):
         shared_post=shared_post, receiver=receiver)
       shared_post_receiver.save()
 
-    return shared_post
+  return shared_post
 
 
 def send_post(post_to_send):
@@ -78,16 +91,14 @@ def send_post(post_to_send):
 
 
 def send_post_email(shared_post, receivers):
-  "Sends the post in an email to the recipient"
+  """Sends the post in an email to the recipient"""
   post = shared_post.post
   subject = post.title
   from_email = shared_post.sharer.user.email
-  print receivers
   to_emails = [receiver.receiver.user.email for receiver in receivers]
   comment = shared_post.comment
 
-  print('sending ' + shared_post.post.title + \
-        ' to ' + str(to_emails) + '\n')
+  print u'sending ' + subject + u' to ' + unicode(to_emails)
   
   html_content = u''
   if comment is not u'':
