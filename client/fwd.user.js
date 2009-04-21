@@ -99,8 +99,8 @@ function suggest_people() {
 		}
 		$(this).toggleClass('fwd-autocompleteToggle');
 	});
-	$('#comments').blur(add_comment);
-	$('#send-button').click(send_mail);
+	//$('#comments').blur(add_comment);
+	$('#send-button').click(share_post);
 	
 	server_recommend();
 }
@@ -253,6 +253,7 @@ function toggleSuggestion(event) {
 	$(this).toggleClass("fwd-toggle");
 	var share = $(this).hasClass("fwd-toggle");	// are we sharing or canceling?
 	
+	/*
 	var recipientEmail = $(this).attr('email');
 	var url = "share/email/" + recipientEmail;
 	url += "/toggle/" + (share ? 1 : 0);
@@ -265,6 +266,7 @@ function toggleSuggestion(event) {
 	
 	console.log(data);
 	ajax_post(url, data, handle_ajax_response);
+	*/
 	
 	if ($(".fwd-toggle").length > 0) {
 		$('#expand-container').removeClass('expand-container');
@@ -274,6 +276,27 @@ function toggleSuggestion(event) {
 	}
 }
 
+function share_post(event) 
+{
+	var recipientDivs = $(".fwd-toggle");
+	var recipients = new Array();
+	for (var i=0; i < recipientDivs.length; i++)
+	{
+		recipients[i] = recipientDivs[i].getAttribute("email");
+	}
+	
+	var url = "share/";
+	console.log("Sharing post with: " + recipients);
+	var data = {
+		post_url: $('#current-entry .entry-title a').attr('href'),
+		recipients: recipients,
+		comment: $('#comments').val()
+	}
+	console.log(data);
+	ajax_post(url, data, handle_ajax_response);
+}
+
+/*
 function add_comment(event) {
 	var data = {
 		post_url: $('#current-entry .entry-title a').attr('href'),
@@ -296,6 +319,7 @@ function send_mail(event) {
 	console.log(data)
 	ajax_post(url, data, handle_ajax_response);
 }
+*/
 
 // Original author mattkolb
 // http://userscripts.org/scripts/show/29604
