@@ -83,7 +83,7 @@ class Term(models.Model):
 class TermVectorCell(models.Model):
     term = models.ForeignKey(Term)
     count = models.IntegerField()
-    Receiver = models.ForeignKey(Receiver)
+    receiver = models.ForeignKey(Receiver)
 
     def __unicode__(self):
         return unicode(self.term) + u': ' + unicode(self.count);
