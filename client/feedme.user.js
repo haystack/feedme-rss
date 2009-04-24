@@ -1,6 +1,6 @@
 // ==UserScript==
-// @name          Fwd:
-// @namespace     http://fwd.csail.mit.edu
+// @name          Feedme:
+// @namespace     http://feedme.csail.mit.edu
 // @description   A Greasemonkey script that adds sharing functionality to Google Reader
 // @include             http://google.com/reader/*
 // @include             http://*.google.com/reader/*
@@ -59,14 +59,14 @@ function register_entry_click(event) {
 			// there are no open feed items
 			return;
 		}
-		if($(".fwd-suggestions").parents("#current-entry").size() > 0) {
+		if($(".feedme-suggestions").parents("#current-entry").size() > 0) {
 			// if we're still looking at the same item, just return
 			return;
 		}
 	    
 		// Now we know we're looking at a new post -- we need to populate the friend list.
 		console.log("click heard");
-		$(".fwd-suggestions").remove();
+		$(".feedme-suggestions").remove();
 	    
 		suggest_people();
 	} catch (e) { 
@@ -82,22 +82,22 @@ function suggest_people() {
 	var body = $(".entry-body");
 	
 	var defaultAutocompleteText = "Type a name";
-	body.before('<div class="fwd-suggestion-container">Recommend to:&nbsp;<div class="fwd-suggestions wait-for-suggestions"><div id="fwd-people-placeholder" class="fwd-person">&nbsp;</div></div></div></div>');
-	$(".fwd-suggestion-container").append('<input class="fwd-autocomplete fwd-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input>')
-	.append('<img class="fwd-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/fwd/plus.png"></img>')
+	body.before('<div class="feedme-suggestion-container">Recommend to:&nbsp;<div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
+	$(".feedme-suggestion-container").append('<input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input>')
+	.append('<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img>')
 	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea><a id="send-button" href="javascript:{}">Send</a></div>');
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete();
-	$('.fwd-autocomplete').focus(function() {
+	$('.feedme-autocomplete').focus(function() {
 		$(this).val('');
-		$(this).toggleClass('fwd-autocompleteToggle');
+		$(this).toggleClass('feedme-autocompleteToggle');
 	});
-	$('.fwd-autocomplete').blur(function() { 
+	$('.feedme-autocomplete').blur(function() { 
 		if ($(this).val() == '') {
 			$(this).val(defaultAutocompleteText);
 		}
-		$(this).toggleClass('fwd-autocompleteToggle');
+		$(this).toggleClass('feedme-autocompleteToggle');
 	});
 	//$('#comments').blur(add_comment);
 	$('#send-button').click(share_post);
@@ -127,7 +127,7 @@ function server_recommend() {
 // gives Greasemonkey control so we can call the XMLhttprequest. This is a security risk.
 function ajax_post(url, data, callback)
 {
-	url = 'http://fwd.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
+	url = 'http://feedme.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
 	window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
 		GM_xmlhttpRequest({
 		method: 'POST',
@@ -170,19 +170,19 @@ function populateSuggestions(json) {
 		return;	// it returned late, from a previous post -- ignore
 	}
 		
-	$("#fwd-people-placeholder").remove();
-	var header = $(".fwd-suggestions");
+	$("#feedme-people-placeholder").remove();
+	var header = $(".feedme-suggestions");
 	for (var i=0; i<people.length; i++) {
 		var person = people[i]['fields'];
 		addFriend(person['email'], person['email'], header);		
 	}
 	for (var j=0; j<previously_shared.length; j++) {
 		var person = previously_shared[j]['fields'];
-		$('[email="' + person['email'] + '"]').toggleClass("fwd-toggle");
+		$('[email="' + person['email'] + '"]').toggleClass("feedme-toggle");
 	}
 	
 	// Make the elements interactive
-	$(".fwd-person").click(toggleSuggestion);
+	$(".feedme-person").click(toggleSuggestion);
 	$(".wait-for-suggestions").removeClass("wait-for-suggestions");
 }
 
@@ -190,7 +190,7 @@ function populateSuggestions(json) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, header) {
-	$('<div class="fwd-person" email="' + email + '"><a class="fwd-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
+	$('<div class="feedme-person" email="' + email + '"><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
 	//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
 }
 
@@ -211,7 +211,7 @@ function autocompleteWait() {
 
 function populateAutocomplete() {
 	console.log("populating.");
-	$(".fwd-autocomplete").autocomplete(autocompleteData, {
+	$(".feedme-autocomplete").autocomplete(autocompleteData, {
 		width: 300,
 		max: 6,
 		highlight: false,
@@ -231,12 +231,12 @@ function populateAutocomplete() {
 		}
 	}).result(function(event, item) {
 		$(this).val('');
-		addFriend(item.name, item.to, $(".fwd-suggestions"));		// add the newly suggested friend to the list
-		var newFriend = $(".fwd-person:last");		// find the new guy
+		addFriend(item.name, item.to, $(".feedme-suggestions"));		// add the newly suggested friend to the list
+		var newFriend = $(".feedme-person:last");		// find the new guy
 		newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
 	});
 	
-	$('.fwd-addImg').click(function(event) { $('.fwd-autocomplete').search() });
+	$('.feedme-addImg').click(function(event) { $('.feedme-autocomplete').search() });
 	console.log('population complete');
 }
 
@@ -250,8 +250,8 @@ function handle_ajax_response(data)
  * Callback when somebody is recommended a post.
  */
 function toggleSuggestion(event) {
-	$(this).toggleClass("fwd-toggle");
-	var share = $(this).hasClass("fwd-toggle");	// are we sharing or canceling?
+	$(this).toggleClass("feedme-toggle");
+	var share = $(this).hasClass("feedme-toggle");	// are we sharing or canceling?
 	
 	/*
 	var recipientEmail = $(this).attr('email');
@@ -268,7 +268,7 @@ function toggleSuggestion(event) {
 	ajax_post(url, data, handle_ajax_response);
 	*/
 	
-	if ($(".fwd-toggle").length > 0) {
+	if ($(".feedme-toggle").length > 0) {
 		$('#expand-container').removeClass('expand-container');
 	} else
 	{
@@ -278,7 +278,7 @@ function toggleSuggestion(event) {
 
 function share_post(event) 
 {
-	var recipientDivs = $(".fwd-toggle");
+	var recipientDivs = $(".feedme-toggle");
 	var recipients = new Array();
 	for (var i=0; i < recipientDivs.length; i++)
 	{
@@ -392,20 +392,20 @@ function initAutocomplete() {
 }
 
 /*
- * Adds Fwd:'s CSS styles to the page.
+ * Adds feedme:'s CSS styles to the page.
  */
 function setupStyles() {
-	var suggestionStyle = '.fwd-suggestions { display: inline-block; }';
+	var suggestionStyle = '.feedme-suggestions { display: inline-block; }';
 	GM_addStyle(suggestionStyle);
-	var buttonStyle = '.fwd-person { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
+	var buttonStyle = '.feedme-person { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
 	GM_addStyle(buttonStyle);
-	var toggleStyle = '.fwd-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; }';
+	var toggleStyle = '.feedme-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; }';
 	GM_addStyle(toggleStyle);
-	var autocompleteStyle = '.fwd-autocomplete { width: 150px; }';
+	var autocompleteStyle = '.feedme-autocomplete { width: 150px; }';
 	GM_addStyle(autocompleteStyle);
-	var autocompleteToggleStyle = '.fwd-autocompleteToggle { color: gray; }';
+	var autocompleteToggleStyle = '.feedme-autocompleteToggle { color: gray; }';
 	GM_addStyle(autocompleteToggleStyle);
-	var addImgStyle= '.fwd-addImg { margin-left: 5px; }';
+	var addImgStyle= '.feedme-addImg { margin-left: 5px; }';
 	GM_addStyle(addImgStyle);
 	var waitForSuggestionStyle= '.wait-for-suggestions { visibility: hidden; }';
 	GM_addStyle(waitForSuggestionStyle);
@@ -416,9 +416,9 @@ function setupStyles() {
 }
 
 function log_in() {
-	$("body").append('<iframe id="login-iframe" src="http://fwd.csail.mit.edu:' + port + '/loggedin" width="400px" height="400px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="1" style="position: absolute; left: 50px; top: 50px; z-index: 999; background-color: white;"></iframe>');
+	$("body").append('<iframe id="login-iframe" src="http://feedme.csail.mit.edu:' + port + '/loggedin" width="400px" height="400px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="1" style="position: absolute; left: 50px; top: 50px; z-index: 999; background-color: white;"></iframe>');
 	$('#login-iframe').ready(function() {
-		if ($('#login-iframe').attr('src') == 'http://fwd.csail.mit.edu:' + port + '/loggedin') {
+		if ($('#login-iframe').attr('src') == 'http://feedme.csail.mit.edu:' + port + '/loggedin') {
 			// they have a session
 			$('#login-iframe').remove();
 		}
@@ -438,12 +438,12 @@ function log_in() {
     
 // Add jQuery-autocomplete
     var JQ_autocomplete = document.createElement('script');
-    JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/fwd/jquery.autocomplete.js';
+    JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.autocomplete.js';
     JQ_autocomplete.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
     var link = document.createElement('link');
     link.rel = 'stylesheet';
-    link.href = 'http://groups.csail.mit.edu/haystack/fwd/jquery.autocomplete.css';
+    link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery.autocomplete.css';
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
     
