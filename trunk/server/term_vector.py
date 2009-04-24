@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from server.feedme.models import *
 from django.db import transaction
 
+@transaction.commit_manually
 def create_receiver_vectors():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
@@ -13,15 +14,12 @@ def create_receiver_vectors():
     # person's counts, then just add in the posts shared with them
     # since then instead of recomputing from scratch
 
+    # clear old vectors
+    TermVectorCell.objects.all().delete()
+      
     for receiver in Receiver.objects.all():
         print u'updating terms for: ' + receiver.user.username
 
-        # clear old vectors on the person
-        # todo: this will momentarily make the person have _no profile_,
-        # which is undesirable, but there's no easy way to manage the
-        # transaction to fix this
-        old_terms = TermVectorCell.objects.filter(receiver = receiver).delete()
-        
         # add new vectors
         received_posts = Post.objects.filter(
             sharedpost__sharedpostreceiver__receiver = receiver)
@@ -37,9 +35,9 @@ def create_receiver_vectors():
                     term.save()
 
                 try:
-                    term_vector_cell = TermVectorCell.objects.get(
-                        receiver = receiver,
-                        term = term)
+                    term_vector_cell = TermVectorCell.objects \
+                                       .filter(receiver = receiver) \
+                                       .get(term = term)
                 except TermVectorCell.DoesNotExist:
                     term_vector_cell = TermVectorCell(
                         term=term,
@@ -50,10 +48,7 @@ def create_receiver_vectors():
                 term_vector_cell.count += frequency_item[1]
                 term_vector_cell.save()
 
-        TermVectorCell.objects.filter(receiver = receiver) \
-                                               .filter(count = 0) \
-                                               .delete()
-        describe_receiver(receiver)
+    transaction.commit()
 
 def describe_receiver(receiver):
     print u'describing ' + receiver.user.username
@@ -65,7 +60,15 @@ def describe_receiver(receiver):
 
     print '-------------------------------------------'
 
+@transaction.commit_manually
+def transaction_test():
+    for receiver in Receiver.objects.all():
+        old_terms = TermVectorCell.objects.filter(receiver = receiver).delete()
+
+        transaction.commit()
+        describe_receiver(receiver)
 
 if __name__ == '__main__':
     print u'Updating receiver term vectors...'
     create_receiver_vectors()
+    #transaction_test()

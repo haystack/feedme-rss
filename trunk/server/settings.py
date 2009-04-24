@@ -60,6 +60,11 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.middleware.transaction.TransactionMiddleware',
+    # Order is important here
+    # TransactionMiddleware cascades transaction support to all middleware 
+    # below it on this list
+    # (http://docs.djangoproject.com/en/dev/topics/db/transactions/)
 )
 
 ROOT_URLCONF = 'server.urls'

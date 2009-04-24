@@ -37,8 +37,9 @@ class Post(models.Model):
         return TermVectorCell.objects.filter(post=self);
 
     def tokenize(self):
-        "Returns a tokenized frequency distribution of the post contents"
-        print 'tokenizing'
+        """Returns a tokenized frequency distribution of the post contents
+        Each item in the list has [0] = the string, and [1] = the count
+        """
         text = nltk.clean_html(self.title) + ' ' + \
                    nltk.clean_html(self.contents)
         tokens = nltk.word_tokenize(text)
