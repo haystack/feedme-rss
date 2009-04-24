@@ -55,9 +55,9 @@ def get_post_objects(feed_url, post_url, post_title, post_contents, \
     post = Post(url=post_url, feed=feed, title=post_title,
                 contents=post_contents)
     post.save()
-    print 'creating term vector'
-    create_term_vector(post)
-    print 'created term vector'
+    #print 'creating term vector'
+    #create_term_vector(post)
+    #print 'created term vector'
   try:
     sharer = Sharer.objects.get(user=sharer_user)
   except Sharer.DoesNotExist:
@@ -104,8 +104,13 @@ def create_term_vector(post):
 
         
 def n_best_friends(post, sharer):
+  friends = Receiver.objects.filter(
+    sharedpostreceiver__shared_post__sharer=sharer).distinct()
+  return map(lambda friend:friend.user, friends)
+
+def n_best_friends_old(post, sharer):
   post_vector = TermVectorCell.objects.filter(
-    post=post).select_related()
+    post=post)
   post_norm = vector_norm(post_vector)
   print post_norm
   if post_norm == 0:

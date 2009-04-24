@@ -6,7 +6,7 @@ DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
 ADMINS = (
-    ('Fwd team', 'fwd@csail.mit.edu'),
+    ('FeedMe Team', 'feedme@csail.mit.edu'),
 )
 
 MANAGERS = ADMINS
@@ -73,7 +73,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     #'django.contrib.admindocs',
-    'server.fwd',
+    'server.feedme',
     'registration',
     'email_usernames'
 )

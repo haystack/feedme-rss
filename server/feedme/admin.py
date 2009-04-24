@@ -1,4 +1,4 @@
-from server.fwd.models import *
+from server.feedme.models import *
 from django.contrib import admin
 
 # user gets registered by models.py because of the ForeignKey relation
