@@ -33,7 +33,7 @@
 	THE SOFTWARE.
 */
 
-var port = 8001;
+var port = 8000;
 var autocompleteData = null;
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -212,7 +212,7 @@ function autocompleteWait() {
 function populateAutocomplete() {
 	console.log("populating.");
 	$(".fwd-autocomplete").autocomplete(autocompleteData, {
-		width: 150,
+		width: 300,
 		max: 6,
 		highlight: false,
 		multiple: false,
