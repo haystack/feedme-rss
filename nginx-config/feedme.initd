@@ -17,9 +17,9 @@
 ### END INIT INFO
 
 #### SERVER SPECIFIC CONFIGURATION
-LOG_PATH=/var/virtualhost/sites/fwd/prod/log
-NGINX_CONF_PATH=/var/virtualhost/sites/fwd/prod/nginx-config
-DJANGO_PATH=/var/virtualhost/sites/fwd/prod/server
+LOG_PATH=/var/virtualhost/sites/feedme/prod/log
+NGINX_CONF_PATH=/var/virtualhost/sites/feedme/prod/nginx-config
+DJANGO_PATH=/var/virtualhost/sites/feedme/prod/server
 RUN_AS=www-data
 #### DO NOT CHANGE ANYTHING AFTER THIS LINE!
 
