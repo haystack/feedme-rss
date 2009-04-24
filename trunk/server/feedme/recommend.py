@@ -87,25 +87,24 @@ def get_post_objects(feed_url, post_url, post_title, post_contents, \
   return post_objects
 
 
-def create_term_vector(post):
-  "Creates objects for the term vector for the post"
-  frequency_distribution = post.tokenize()
-  print 'tokenized'
-  for frequency_item in frequency_distribution.items():
-    try:
-      term = Term.objects.get(term=frequency_item[0])
-    except Term.DoesNotExist:
-      term = Term(term=frequency_item[0])
-      term.save()
-
-    term_vector_cell = TermVectorCell(term=term, count=frequency_item[1],
-                                      post=post)
-    term_vector_cell.save()
-
-        
 def n_best_friends(post, sharer):
   friends = Receiver.objects.filter(
     sharedpostreceiver__shared_post__sharer=sharer).distinct()
+
+  #pseudocode
+  # get freqdist (not term vector) for post
+  #for each friend
+  #get their term vector ordered by term
+  # do 'merge-dot' on vectors:
+
+  # keep post_counter and person_counter
+  # increment whichever one has the strcmp lesser
+  # if they match, multiply (for dotting) and increment both
+
+  # at the end divide sum of dots by norm of person vector
+  # (norm of post vector is constant across all people, so we can ignore term)
+  
+  
   return map(lambda friend:friend.user, friends)
 
 def n_best_friends_old(post, sharer):
