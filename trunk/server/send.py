@@ -3,7 +3,7 @@ from django.contrib.auth.models import User
 from models import *
 from django.contrib.auth.decorators import login_required
 import datetime
-from server.fwd.models import *
+from server.feedme.models import *
 
 def start_email_daemon():
     """Creates a daemon to send emails every 20 seconds.  Uses daemon.py
