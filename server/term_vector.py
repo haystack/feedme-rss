@@ -24,31 +24,36 @@ def create_receiver_vectors():
         received_posts = Post.objects.filter(
             sharedpost__sharedpostreceiver__receiver = receiver)
         for received_post in received_posts:
-            frequency_distribution = received_post.tokenize()
-
-            for frequency_item in frequency_distribution.items():
-                # get or create the Term and the TermVectorCell
-                try:
-                    term = Term.objects.get(term=frequency_item[0])
-                except Term.DoesNotExist:
-                    term = Term(term=frequency_item[0])
-                    term.save()
-
-                try:
-                    term_vector_cell = TermVectorCell.objects \
-                                       .filter(receiver = receiver) \
-                                       .get(term = term)
-                except TermVectorCell.DoesNotExist:
-                    term_vector_cell = TermVectorCell(
-                        term=term,
-                        count=0,
-                        receiver = receiver)
-
-                # increment the cell due to this new term
-                term_vector_cell.count += frequency_item[1]
-                term_vector_cell.save()
+            add_profile_terms(received_post, receiver)
 
     transaction.commit()
+
+def add_profile_terms(received_post, receiver):
+    """Adds the post's terms to the person's profile"""
+    frequency_distribution = received_post.tokenize()
+    
+    for frequency_item in frequency_distribution.items():
+        # get or create the Term and the TermVectorCell
+        try:
+            term = Term.objects.get(term=frequency_item[0])
+        except Term.DoesNotExist:
+            term = Term(term=frequency_item[0])
+            term.save()
+            
+        try:
+            term_vector_cell = TermVectorCell.objects \
+                               .filter(receiver = receiver) \
+                               .get(term = term)
+        except TermVectorCell.DoesNotExist:
+            term_vector_cell = TermVectorCell(
+                term=term,
+                count=0,
+                receiver = receiver)
+
+        # increment the cell due to this new term
+        term_vector_cell.count += frequency_item[1]
+        term_vector_cell.save()
+    
 
 def describe_receiver(receiver):
     print u'describing ' + receiver.user.username
