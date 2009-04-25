@@ -8,6 +8,7 @@ from models import *
 import re
 import nltk
 import codecs, sys
+import term_vector
 
 # set stdout to Unicode so we can write Unicode strings to stdout
 # todo: create some sort of startup script which calls this
@@ -29,6 +30,12 @@ def share(request):
   shared_post = create_shared_post(request.user, \
                                    post_url, recipient_emails, comment)
   send_post(shared_post)
+
+  # do online updating of profiles of people who received the post
+  receivers = Receiver.objects.filter( \
+    sharedpostreceiver__shared_post = shared_post)
+  for receiver in receivers:
+    term_vector.add_profile_terms(shared_post.post, receiver)
 
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
