@@ -33,7 +33,7 @@
 	THE SOFTWARE.
 */
 
-var port = 8000;
+var port = 8001;
 var autocompleteData = null;
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -173,11 +173,11 @@ function populateSuggestions(json) {
 	$("#feedme-people-placeholder").remove();
 	var header = $(".feedme-suggestions");
 	for (var i=0; i<people.length; i++) {
-		var person = people[i]['fields'];
+		var person = people[i];
 		addFriend(person['email'], person['email'], header);		
 	}
 	for (var j=0; j<previously_shared.length; j++) {
-		var person = previously_shared[j]['fields'];
+		var person = previously_shared[j];
 		$('[email="' + person['email'] + '"]').toggleClass("feedme-toggle");
 	}
 	
