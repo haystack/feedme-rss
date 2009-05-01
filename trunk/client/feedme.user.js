@@ -82,9 +82,8 @@ function suggest_people() {
 	var body = $(".entry-body");
 	
 	var defaultAutocompleteText = "Type a name";
-	body.before('<div class="feedme-suggestion-container">Recommend to:&nbsp;<div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
-	$(".feedme-suggestion-container").append('<input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input>')
-	.append('<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img>')
+	body.before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header" id="recommend-header"><div>Recommend to:&nbsp;</div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
+	$(".feedme-suggestion-container").append('<div id="feedme-autocomplete-container" style="display: inline; vertical-align: top;"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
 	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea><a id="send-button" href="javascript:{}">Send</a></div>');
 	
 	// Clear the autocomplete when they start typing
@@ -174,7 +173,7 @@ function populateSuggestions(json) {
 	var header = $(".feedme-suggestions");
 	for (var i=0; i<people.length; i++) {
 		var person = people[i];
-		addFriend(person['email'], person['email'], header);		
+		addFriend(person['email'], person['email'], person['shared_today'], header);		
 	}
 	for (var j=0; j<previously_shared.length; j++) {
 		var person = previously_shared[j];
@@ -189,9 +188,8 @@ function populateSuggestions(json) {
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
-function addFriend(name, email, header) {
-	$('<div class="feedme-person" email="' + email + '"><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div>').appendTo(header);
-	//header.append("<img src='" + person['photo'] + "' style='height: 50px;'>");
+function addFriend(name, email, shared_today, header) {
+	$('<div class="feedme-person" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">' + shared_today + ' today</div></div>').appendTo(header);
 }
 
 /*
@@ -231,7 +229,7 @@ function populateAutocomplete() {
 		}
 	}).result(function(event, item) {
 		$(this).val('');
-		addFriend(item.to, item.to, $(".feedme-suggestions"));		// add the newly suggested friend to the list
+		addFriend(item.to, item.to, 0, $(".feedme-suggestions"));		// add the newly suggested friend to the list
 		var newFriend = $(".feedme-person:last");		// find the new guy
 		newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
 	});
@@ -413,6 +411,10 @@ function setupStyles() {
 	GM_addStyle(expandContainerStyle);
 	var commentStyle = '.comment-textarea { height: 42px; width: 415px; margin-top: 10px; margin-right: 20px; }';
 	GM_addStyle(commentStyle);
+	var numSharedStyle = '.feedme-num-shared { font-size: 7pt; text-align: right; }';
+	GM_addStyle(numSharedStyle);
+	var recommendHeaderStyle = '.feedme-recommend-header { display: inline-block; }';
+	GM_addStyle(recommendHeaderStyle);
 }
 
 function log_in() {
