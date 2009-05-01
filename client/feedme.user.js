@@ -231,7 +231,7 @@ function populateAutocomplete() {
 		}
 	}).result(function(event, item) {
 		$(this).val('');
-		addFriend(item.name, item.to, $(".feedme-suggestions"));		// add the newly suggested friend to the list
+		addFriend(item.to, item.to, $(".feedme-suggestions"));		// add the newly suggested friend to the list
 		var newFriend = $(".feedme-person:last");		// find the new guy
 		newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
 	});
