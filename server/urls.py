@@ -18,5 +18,6 @@ urlpatterns = patterns('',
     url(r'^accounts/', include('registration.urls')),
     url(r'^recommend/', 'server.feedme.recommend.recommend', name='recommend'),
     url(r'^loggedin/', 'server.feedme.loggedin.logged_in', name='logged in'),
-    url(r'^share/', 'server.feedme.share.share', name='share'),
+    url(r'^check_logged_in/', 'server.feedme.check_logged_in.check_logged_in', name='check login'),
+    url(r'^share/', 'server.feedme.share.share', name='share')
 )
