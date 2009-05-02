@@ -83,8 +83,10 @@ function suggest_people() {
 	
 	var defaultAutocompleteText = "Type a name";
 	body.before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header" id="recommend-header"><div>Recommend to:&nbsp;</div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
-	$(".feedme-suggestion-container").append('<div id="feedme-autocomplete-container" style="display: inline; vertical-align: top;"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
-	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea><a id="send-button" href="javascript:{}">Send</a></div>');
+	$(".feedme-suggestion-container").append('<div id="feedme-autocomplete-container" class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
+	.append('<div id="send" class="feedme-button feedme-toggle feedme-send wait-for-suggestions"><a id="send-button" href="javascript:{}">Send</a></div>')
+	.append('<div id="comment-button" class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')
+	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea></div>');
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete();
@@ -100,6 +102,7 @@ function suggest_people() {
 	});
 	//$('#comments').blur(add_comment);
 	$('#send-button').click(share_post);
+	$('#comment-button').click(function() { $('#expand-container').toggleClass('expand-container') });
 	
 	server_recommend();
 }
@@ -177,7 +180,7 @@ function populateSuggestions(json) {
 	}
 	for (var j=0; j<previously_shared.length; j++) {
 		var person = previously_shared[j];
-		$('[email="' + person['email'] + '"]').toggleClass("feedme-toggle");
+		$('[email="' + person['email'] + '"]').addClass("feedme-toggle").addClass("feedme-sent");
 	}
 	
 	// Make the elements interactive
@@ -189,7 +192,7 @@ function populateSuggestions(json) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, shared_today, header) {
-	$('<div class="feedme-person" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">' + shared_today + ' today</div></div>').appendTo(header);
+	$('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">' + shared_today + ' today</div></div>').appendTo(header);
 }
 
 /*
@@ -265,18 +268,20 @@ function toggleSuggestion(event) {
 	console.log(data);
 	ajax_post(url, data, handle_ajax_response);
 	*/
-	
-	if ($(".feedme-toggle").length > 0) {
-		$('#expand-container').removeClass('expand-container');
-	} else
-	{
-		$('#expand-container').addClass('expand-container');
-	}
 }
 
 function share_post(event) 
 {
-	var recipientDivs = $(".feedme-toggle");
+	var recipientDivs = $(".feedme-person.feedme-toggle");
+	if (recipientDivs.length == 0) {
+		console.log("nobody to share with.");
+		return;
+	}
+	
+	// remove comment box
+	$('#expand-container').addClass('expand-container');
+	$(".feedme-toggle.feedme-person").animate( { backgroundColor: '#fffde1' }, 750).addClass("feedme-sent");
+	
 	var recipients = new Array();
 	for (var i=0; i < recipientDivs.length; i++)
 	{
@@ -395,12 +400,16 @@ function initAutocomplete() {
 function setupStyles() {
 	var suggestionStyle = '.feedme-suggestions { display: inline-block; }';
 	GM_addStyle(suggestionStyle);
-	var buttonStyle = '.feedme-person { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
+	var personStyle = '.feedme-person { /* used as selector */ }';
+	GM_addStyle(personStyle);
+	var buttonStyle = '.feedme-button { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
 	GM_addStyle(buttonStyle);
-	var toggleStyle = '.feedme-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; }';
+	var toggleStyle = '.feedme-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; -moz-border-radius: 5px; }';
 	GM_addStyle(toggleStyle);
 	var autocompleteStyle = '.feedme-autocomplete { width: 150px; }';
 	GM_addStyle(autocompleteStyle);
+	var autocompleteContainerStyle = '.feedme-autocomplete-container { display: inline; vertical-align: top; margin-right: 10px; }';
+	GM_addStyle(autocompleteContainerStyle);
 	var autocompleteToggleStyle = '.feedme-autocompleteToggle { color: gray; }';
 	GM_addStyle(autocompleteToggleStyle);
 	var addImgStyle= '.feedme-addImg { margin-left: 5px; }';
@@ -415,6 +424,12 @@ function setupStyles() {
 	GM_addStyle(numSharedStyle);
 	var recommendHeaderStyle = '.feedme-recommend-header { display: inline-block; }';
 	GM_addStyle(recommendHeaderStyle);
+	var sentButtonStyle = '.feedme-send { vertical-align: top; margin-right: 2px; }';
+	GM_addStyle(sentButtonStyle);
+	var commentButtonStyle = '.feedme-comment-button { vertical-align: top; }';
+	GM_addStyle(commentButtonStyle);
+	var sentStyle = '.feedme-sent { background-color: #fffde1; }';
+	GM_addStyle(sentStyle);
 }
 
 function log_in() {
@@ -449,9 +464,16 @@ function log_in() {
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
     
+// Add jQuery-color animation
+    var JQ_color = document.createElement('script');
+    JQ_color.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.color.js';
+    JQ_color.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(JQ_color);
+    
     // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
-	// wait if jQuery, jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
+	// wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
+	// TODO: can't figure out how to wait for jQuery Color Animation
         if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
 		window.setTimeout(GM_wait,100);
 	}
