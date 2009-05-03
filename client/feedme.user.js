@@ -82,10 +82,10 @@ function suggest_people() {
 	var body = $(".entry-body");
 	
 	var defaultAutocompleteText = "Type a name";
-	body.before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header" id="recommend-header"><div>Recommend to:&nbsp;</div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
+	body.before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header" id="recommend-header"><div>Recommend to:</div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
 	$(".feedme-suggestion-container").append('<div id="feedme-autocomplete-container" class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
-	.append('<div id="send" class="feedme-button feedme-toggle feedme-send wait-for-suggestions"><a id="send-button" href="javascript:{}">Send</a></div>')
 	.append('<div id="comment-button" class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')
+	.append('<div id="send" class="feedme-button feedme-toggle feedme-send wait-for-suggestions"><a id="send-button" href="javascript:{}">Send</a></div>')
 	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea></div>');
 	
 	// Clear the autocomplete when they start typing
@@ -275,12 +275,15 @@ function share_post(event)
 	var recipientDivs = $(".feedme-person.feedme-toggle");
 	if (recipientDivs.length == 0) {
 		console.log("nobody to share with.");
+		alert("Please select a contact to share the article with.");
+		$('#dialog').dialog();
+
 		return;
 	}
 	
 	// remove comment box
 	$('#expand-container').addClass('expand-container');
-	$(".feedme-toggle.feedme-person").animate( { backgroundColor: '#fffde1' }, 750).addClass("feedme-sent");
+	$(".feedme-toggle.feedme-person").animate( { backgroundColor: '#edd163', borderColor: '#9b9b9b' }, 750).addClass("feedme-sent");
 	
 	var recipients = new Array();
 	for (var i=0; i < recipientDivs.length; i++)
@@ -428,7 +431,7 @@ function setupStyles() {
 	GM_addStyle(sentButtonStyle);
 	var commentButtonStyle = '.feedme-comment-button { vertical-align: top; }';
 	GM_addStyle(commentButtonStyle);
-	var sentStyle = '.feedme-sent { background-color: #fffde1; }';
+	var sentStyle = '.feedme-sent { background-color: #edd163; border-color: #9b9b9b; }';
 	GM_addStyle(sentStyle);
 }
 
