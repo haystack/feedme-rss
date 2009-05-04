@@ -126,13 +126,21 @@ function server_recommend() {
 	ajax_post(theurl, data, populateSuggestions);
 }
 
+function ajax_post(url, data, callback) {
+    ajax_req(url, data, callback, 'POST');
+}
+
+function ajax_get(url, data, callback) {
+    ajax_req(url, data, callback, 'GET');
+}
+
 // gives Greasemonkey control so we can call the XMLhttprequest. This is a security risk.
-function ajax_post(url, data, callback)
+function ajax_req(url, data, callback, method)
 {
 	url = 'http://feedme.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
 	window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
 		GM_xmlhttpRequest({
-		method: 'POST',
+		method: method,
 		url: url,
 		data: $.param(data),
 		headers: {
@@ -146,7 +154,7 @@ function ajax_post(url, data, callback)
 				callback(eval("(" + responseDetails.responseText + ")"));
 			}
 			else {
-				console.log('AJAX error: ' + responseDetails.statusText);
+				console.log('AJAX error: "' + responseDetails.statusText + '" for URL: ' + url);
 			}
 		},
 		onerror: function(responseDetails) {
@@ -436,15 +444,21 @@ function setupStyles() {
 }
 
 function log_in() {
-	$("body").append('<iframe id="login-iframe" src="http://feedme.csail.mit.edu:' + port + '/loggedin" width="400px" height="400px" marginwidth="0" marginheight="0" hspace="0" vspace="0" frameborder="1" style="position: absolute; left: 50px; top: 50px; z-index: 999; background-color: white;"></iframe>');
-	$('#login-iframe').ready(function() {
-		if ($('#login-iframe').attr('src') == 'http://feedme.csail.mit.edu:' + port + '/loggedin') {
-			// they have a session
-			$('#login-iframe').remove();
-		}
-	});
+    console.log('about to check login');
+	ajax_get('check_logged_in', {}, verify_login);
 }
 
+function verify_login(json) {
+    console.log('verified');
+    if (json.logged_in == false) {
+        console.log('logged out');
+        $("body").append('<a id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
+        $("a#login-iframe").fancybox({
+            frameHeight: 200,
+        });
+        $("a#login-iframe").click();
+    }
+}
 
 // This is called on startup -- initializes jQuery etc.
 
@@ -467,6 +481,16 @@ function log_in() {
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
     
+    var JQ_fancybox = document.createElement('script');
+    JQ_fancybox.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.fancybox/jquery.fancybox-1.2.1.js';
+    JQ_fancybox.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(JQ_fancybox);    
+    link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery.fancybox/jquery.fancybox.css';
+    link.type = 'text/css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+    
 // Add jQuery-color animation
     var JQ_color = document.createElement('script');
     JQ_color.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.color.js';
@@ -477,7 +501,7 @@ function log_in() {
     function GM_wait() {
 	// wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
 	// TODO: can't figure out how to wait for jQuery Color Animation
-        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
+        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
 		window.setTimeout(GM_wait,100);
 	}
 	else {
