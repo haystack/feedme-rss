@@ -223,12 +223,11 @@ function populateAutocomplete() {
 	$(".feedme-autocomplete").autocomplete(autocompleteData, {
 		width: 300,
 		max: 6,
-		highlight: false,
 		multiple: false,
 		scroll: true,
 		scrollHeight: 300,
 		matchContains: true,
-		autoFill: false,
+		mustMatch: false,
 		formatItem: function(row, i, max) {
 			return row.name + " [" + row.to + "]";
 		},
@@ -239,13 +238,28 @@ function populateAutocomplete() {
 			return row.to;
 		}
 	}).result(function(event, item) {
-		$(this).val('');
-		addFriend(item.to, item.to, 0, $(".feedme-suggestions"));		// add the newly suggested friend to the list
-		var newFriend = $(".feedme-person:last");		// find the new guy
-		newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
+        added = false;
+		if (item) {
+	    	addFriend(item.to, item.to, 0, $(".feedme-suggestions"));		// add the newly suggested friend to the list
+	    	added = true;
+		} else if ($(this).val() != '') {
+            addFriend($(this).val(), $(this).val(), 0, $(".feedme-suggestions"));
+            added = true;
+		}
+		
+		if (added == true) {
+    		$(this).val('');
+	    	var newFriend = $(".feedme-person:last");		// find the new person
+	        newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
+	    }
 	});
 	
 	$('.feedme-addImg').click(function(event) { $('.feedme-autocomplete').search() });
+	$('.feedme-autocomplete').keydown(function(event) {
+	    if (event.which == 13) { // user pushed enter
+	        $('.feedme-autocomplete').search();
+	    }
+	});
 	console.log('population complete');
 }
 
