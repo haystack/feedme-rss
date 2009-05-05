@@ -469,7 +469,8 @@ function verify_login(json) {
         $("body").append('<a id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
         $("a#login-iframe").fancybox({
             frameHeight: 200,
-        });
+            hideOnContentClick: false,
+        }); 
         $("a#login-iframe").click();
     }
 }
