@@ -33,7 +33,7 @@
 	THE SOFTWARE.
 */
 
-var port = 8000;
+var port = 8001;
 var autocompleteData = null;
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -82,16 +82,18 @@ function suggest_people() {
 	var body = $(".entry-body");
 	
 	var defaultAutocompleteText = "Type a name";
-	body.before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header" id="recommend-header"><div>Recommend to:</div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person">&nbsp;</div></div></div></div>');
-	$(".feedme-suggestion-container").append('<div id="feedme-autocomplete-container" class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
+	body.before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header" id="recommend-header"><div>Recommend to:</div><div class="feedme-num-shared">&nbsp;</div></div><div id="feedme-suggestions" class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person feedme-button">&nbsp;<div class="feedme-num-shared">&nbsp;</div></div></div></div></div>');
+	$(".feedme-suggestion-container").append('<div id="feedme-options-container" class="wait-for-suggestions" style="display: inline;"><div id="feedme-autocomplete-container" class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
 	.append('<div id="comment-button" class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')
 	.append('<div id="send" class="feedme-button feedme-toggle feedme-send wait-for-suggestions"><a id="send-button" href="javascript:{}">Send</a></div>')
-	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea></div>');
+	.append('<div id="expand-container" class="expand-container"><textarea id="comments" class="comment-textarea"></textarea></div></div>');
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete();
 	$('.feedme-autocomplete').focus(function() {
-		$(this).val('');
+		if ($(this).val() == defaultAutocompleteText) {
+			$(this).val('');
+		}
 		$(this).toggleClass('feedme-autocompleteToggle');
 	});
 	$('.feedme-autocomplete').blur(function() { 
@@ -99,6 +101,7 @@ function suggest_people() {
 			$(this).val(defaultAutocompleteText);
 		}
 		$(this).toggleClass('feedme-autocompleteToggle');
+		return true;
 	});
 	//$('#comments').blur(add_comment);
 	$('#send-button').click(share_post);
@@ -252,6 +255,15 @@ function populateAutocomplete() {
 	    	var newFriend = $(".feedme-person:last");		// find the new person
 	        newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
 	    }
+	});
+	
+	console.log("FOOOOO" + $('.ac_results').length);
+	$('.ac_results').blur(function() {
+		var selected = $('.ac_over');
+		console.log(selected);
+		// store the last remembered highlighted person so that if they click '+', we know what they were pointing at
+		$(this).data('last_selected_entry', selected);
+		return true;
 	});
 	
 	$('.feedme-addImg').click(function(event) { $('.feedme-autocomplete').search() });
@@ -423,11 +435,11 @@ function initAutocomplete() {
  * Adds feedme:'s CSS styles to the page.
  */
 function setupStyles() {
-	var suggestionStyle = '.feedme-suggestions { display: inline-block; }';
+	var suggestionStyle = '.feedme-suggestions { display: inline; }';
 	GM_addStyle(suggestionStyle);
-	var personStyle = '.feedme-person { /* used as selector */ }';
+	var personStyle = '.feedme-person { display: inline; }';
 	GM_addStyle(personStyle);
-	var buttonStyle = '.feedme-button { display: inline-block; padding: 3px 6px; margin-right: 10px; cursor: pointer; border: 1px solid white;}';
+	var buttonStyle = '.feedme-button { display: inline-block; padding: 3px 6px; margin: 0px 10px 5px 0px; cursor: pointer; border: 1px solid white;}';
 	GM_addStyle(buttonStyle);
 	var toggleStyle = '.feedme-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; -moz-border-radius: 5px; }';
 	GM_addStyle(toggleStyle);
@@ -437,7 +449,7 @@ function setupStyles() {
 	GM_addStyle(autocompleteContainerStyle);
 	var autocompleteToggleStyle = '.feedme-autocompleteToggle { color: gray; }';
 	GM_addStyle(autocompleteToggleStyle);
-	var addImgStyle= '.feedme-addImg { margin-left: 5px; }';
+	var addImgStyle= '.feedme-addImg { margin-left: 5px; cursor: pointer; }';
 	GM_addStyle(addImgStyle);
 	var waitForSuggestionStyle= '.wait-for-suggestions { visibility: hidden; }';
 	GM_addStyle(waitForSuggestionStyle);
@@ -466,11 +478,11 @@ function verify_login(json) {
     console.log('verified');
     if (json.logged_in == false) {
         console.log('logged out');
-        $("body").append('<a id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
+        $("body").append('<a style="display: none;" id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
         $("a#login-iframe").fancybox({
             frameHeight: 200,
-            hideOnContentClick: false,
-        }); 
+	    hideOnContentClick: false,
+        });
         $("a#login-iframe").click();
     }
 }
