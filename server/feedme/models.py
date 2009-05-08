@@ -21,13 +21,13 @@ class Receiver(models.Model):
         return unicode(self.user)
 
 class Feed(models.Model):
-    rss_url = models.URLField() # the rss feed url
+    rss_url = models.URLField(unique=True) # the rss feed url
     
     def __unicode__(self):
         return self.rss_url;
 
 class Post(models.Model):
-    url = models.URLField()
+    url = models.URLField(unique=True)
     feed = models.ForeignKey(Feed)
     title = models.TextField()
     contents = models.TextField()
