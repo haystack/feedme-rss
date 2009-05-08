@@ -296,7 +296,7 @@ function populateAutocomplete(context) {
 	}).result(function(event, item) {
         added = false;
 		if (item) {
-	    	addFriend(item.to, item.to, 0, $("feedme-suggestions", context));		// add the newly suggested friend to the list
+	    	addFriend(item.to, item.to, 0, $(".feedme-suggestions", context));		// add the newly suggested friend to the list
 	    	added = true;
 		} else if ($(this).val() != '') {
             addFriend($(this).val(), $(this).val(), 0, $(".feedme-suggestions", context));
@@ -368,7 +368,7 @@ function share_post(event)
 	
 	// remove comment box
 	$('.feedme-toggle-hidden', context).addClass('expand-container');
-	$(".feedme-toggle.feedme-person", context).animate( { backgroundColor: '#edd163', borderColor: '#9b9b9b' }, 750).addClass("feedme-sent");
+	$(".feedme-toggle.feedme-person", context).animate( { backgroundColor: '#F7EBBB', borderColor: '#9b9b9b' }, 750).addClass("feedme-sent");
 	
 	var recipients = new Array();
 	for (var i=0; i < recipientDivs.length; i++)
@@ -510,13 +510,13 @@ function setupStyles() {
 	GM_addStyle(commentStyle);
 	var numSharedStyle = '.feedme-num-shared { font-size: 7pt; text-align: right; }';
 	GM_addStyle(numSharedStyle);
-	var recommendHeaderStyle = '.feedme-recommend-header { display: inline-block; }';
+	var recommendHeaderStyle = '.feedme-recommend-header { display: inline-block; margin-right: 5px; }';
 	GM_addStyle(recommendHeaderStyle);
 	var sentButtonStyle = '.feedme-send { vertical-align: top; margin-right: 2px; }';
 	GM_addStyle(sentButtonStyle);
 	var commentButtonStyle = '.feedme-comment-button { vertical-align: top; }';
 	GM_addStyle(commentButtonStyle);
-	var sentStyle = '.feedme-sent { background-color: #edd163; border-color: #9b9b9b; }';
+	var sentStyle = '.feedme-sent { background-color: #F7EBBB; border-color: #9b9b9b; }';
 	GM_addStyle(sentStyle);
 }
 
