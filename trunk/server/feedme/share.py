@@ -118,6 +118,7 @@ def send_post_email(shared_post, receivers):
                  u"<br />\n<br />\n "
   html_content += u"<b><a href='" + post.url + \
                   u"'>" + post.title + u"</a></b> \n<br />"
+  html_content += u"<a href='" + post.feed.rss_url + "'>blog name</a><br />"
   html_content += post.contents
   html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\
                   u"a (very) alpha tool at MIT. Have comments, or are your " +\

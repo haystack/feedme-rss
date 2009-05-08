@@ -72,14 +72,11 @@ def get_post_objects(feed_url, post_url, post_title, post_contents, \
     feed = Feed(rss_url=feed_url)
     feed.save()
   try:
-    post = Post.objects.get(url=post_url)
+    post = Post.objects.filter(feed = feed).get(url=post_url)
   except Post.DoesNotExist:
     post = Post(url=post_url, feed=feed, title=post_title,
                 contents=post_contents)
     post.save()
-    #print 'creating term vector'
-    #create_term_vector(post)
-    #print 'created term vector'
   try:
     sharer = Sharer.objects.get(user=sharer_user)
   except Sharer.DoesNotExist:
@@ -110,8 +107,6 @@ def get_post_objects(feed_url, post_url, post_title, post_contents, \
 
 
 def n_best_friends(post, sharer):
-  #import pdb
-  #pdb.set_trace()
   friends = Receiver.objects.filter(
     sharedpostreceiver__shared_post__sharer=sharer).distinct()
 
