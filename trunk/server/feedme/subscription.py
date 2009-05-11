@@ -46,12 +46,12 @@ def email_unsubscriber(receiver, receiver_email):
 
   If you change your mind and want to resubscribe, go here:
 
-  http://feedme.csail.mit.edu:8000/%s/%d/
+  http://feedme.csail.mit.edu:8000/resubscribe/%s/%d/
 
   Keep in mind that if a friend chooses to share an article with
   you directly, we can't stop them from doing this.  We're just
   not going to recommend you as a potential recipient of
-  future recommendations.
+  future emails.
 
   Feel free to email us at feedme@csail.mit.edu with any comments.
   """ % (receiver_email, receiver.resubscribe_val)
