@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{{ message }}
+
+<form method="post" action=".">
+Email: <input type="text" name="email" />
+
+<input type="submit" value="unsubscribe" />
+</form>
+
+{% endblock %}
