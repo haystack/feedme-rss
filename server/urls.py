@@ -19,5 +19,7 @@ urlpatterns = patterns('',
     url(r'^recommend/', 'server.feedme.recommend.recommend', name='recommend'),
     url(r'^loggedin/', 'server.feedme.loggedin.logged_in', name='logged in'),
     url(r'^check_logged_in/', 'server.feedme.check_logged_in.check_logged_in', name='check login'),
-    url(r'^share/', 'server.feedme.share.share', name='share')
+    url(r'^share/', 'server.feedme.share.share', name='share'),
+    url(r'^unsubscribe/', 'server.feedme.subscription.unsubscribe', name='unsubscribe'),
+    url(r'^resubscribe/(?P<user_email>\S+)/(?P<resubscribe_val>\d+)/$', 'server.feedme.subscription.resubscribe', name='resubscribe'),
 )
