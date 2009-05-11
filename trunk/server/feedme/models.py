@@ -16,7 +16,9 @@ class Sharer(models.Model):
     
 class Receiver(models.Model):
     user = models.ForeignKey(User, unique=True)
-    
+    subscribed = models.BooleanField()
+    resubscribe_val = models.IntegerField()
+
     def __unicode__(self):
         return unicode(self.user)
 
