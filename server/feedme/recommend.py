@@ -126,6 +126,8 @@ def n_best_friends(post, sharer):
   freq_dist_counts = post.tokenize()
   freq_dist = sorted(freq_dist_counts)
   for receiver in friends:
+    if not receiver.subscribed:
+      continue
     print 'reviewing friend: ' + receiver.user.username
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
                   .order_by('term__term')
