@@ -35,7 +35,7 @@ def share(request):
   receivers = Receiver.objects.filter( \
     sharedpostreceiver__shared_post = shared_post)
   for receiver in receivers:
-    term_vector.add_profile_terms(shared_post.post, receiver)
+    term_vector.create_profile_terms(receiver)
 
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
@@ -116,8 +116,8 @@ def send_post_email(shared_post, receivers):
                  u"at MIT, so please feel free to <a href='mailto:feedme@" +\
                  u"csail.mit.edu'>email us</a> with comments</a>." +\
                  u"<br />\n<br />\n "
-  html_content += u"<b><a href='" + post.url + \
-                  u"'>" + post.title + u"</a></b> \n<br />"
+#  html_content += u"<b><a href='" + post.url + \
+#                  u"'>" + post.title + u"</a></b> \n<br />"
   html_content += u"<a href='" + post.feed.rss_url + "'>blog name</a><br />"
   html_content += post.contents
   html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\

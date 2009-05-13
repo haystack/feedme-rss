@@ -4,11 +4,13 @@ setup_environ(settings)
 from django.contrib.auth.models import User
 from server.feedme.models import *
 from django.db import transaction
+import math
 
 @transaction.commit_manually
 def create_receiver_vectors():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
+    print 'WARNING NO TRANSACTIONS'
 
     # todo: could eventually timestamp the last time we updated this
     # person's counts, then just add in the posts shared with them
@@ -16,21 +18,25 @@ def create_receiver_vectors():
 
     # clear old vectors
     TermVectorCell.objects.all().delete()
-      
-    for receiver in Receiver.objects.all():
-        print u'updating terms for: ' + receiver.user.username
 
-        # add new vectors
-        received_posts = Post.objects.filter(
-            sharedpost__sharedpostreceiver__receiver = receiver)
-        for received_post in received_posts:
-            add_profile_terms(received_post, receiver)
+    print 'populating terms the first time'
+    for receiver in Receiver.objects.all():
+        print u'1x: updating terms for: ' + receiver.user.username
+        create_profile_terms(receiver)
+
+    print 'repeating so that the idf terms are correct'
+    for receiver in Receiver.objects.all():
+        print u'2x: updating terms for: ' + receiver.user.username
+        create_profile_terms(receiver)    
 
     transaction.commit()
 
-def add_profile_terms(received_post, receiver):
-    """Adds the post's terms to the person's profile"""
-    frequency_distribution = received_post.tokenize()
+
+def create_profile_terms(receiver):
+    """creates profile terms and initializes tf-idf"""
+    frequency_distribution = receiver.tokenize()
+    print str(len(frequency_distribution.samples())) + ' words'
+    num_people = Receiver.objects.count() * 1.0 # we need a double
     
     for frequency_item in frequency_distribution.items():
         # get or create the Term and the TermVectorCell
@@ -50,8 +56,12 @@ def add_profile_terms(received_post, receiver):
                 count=0,
                 receiver = receiver)
 
-        # increment the cell due to this new term
-        term_vector_cell.count += frequency_item[1]
+        tf = frequency_distribution.freq(frequency_item[0])
+        num_receivers_with_term_shared = Receiver.objects.filter(termvectorcell__term = term).count()
+        idf = math.log(num_people / (1 + num_receivers_with_term_shared))
+        
+        tf_idf = tf*idf
+        term_vector_cell.count = tf_idf
         term_vector_cell.save()
     
 

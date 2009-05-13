@@ -19,6 +19,30 @@ class Receiver(models.Model):
     subscribed = models.BooleanField(default = True)
     resubscribe_val = models.IntegerField(default = 0)
 
+    def tokenize(self):
+        """Creates a FreqDist representing all the posts shared
+        with this person"""
+        text = u''
+        received_posts = Post.objects.filter( \
+            sharedpost__sharedpostreceiver__receiver = self)
+        for received_post in received_posts:
+            post_text = nltk.clean_html(received_post.title) + u' ' + \
+                        nltk.clean_html(received_post.contents)
+            text = text + post_text
+        
+        tokens = nltk.word_tokenize(text)
+        
+        porter = nltk.PorterStemmer()
+        stopwords = nltk.corpus.stopwords.words('english')
+        words = []
+        for w in tokens:
+            w = w.lower()
+            if w not in stopwords and w.isalpha():
+                words.append(porter.stem(w))
+        frequency_dist = nltk.FreqDist(words)
+        return frequency_dist
+        
+
     def __unicode__(self):
         return unicode(self.user)
 
@@ -29,7 +53,7 @@ class Feed(models.Model):
         return self.rss_url;
 
 class Post(models.Model):
-    url = models.URLField(unique=True)
+    url = models.URLField()
     feed = models.ForeignKey(Feed)
     title = models.TextField()
     contents = models.TextField()
@@ -58,6 +82,9 @@ class Post(models.Model):
     
     def __unicode__(self):
         return self.title + ": " + self.url;
+
+    class Meta:
+        unique_together = ("url", "feed")
    
 
 class SharedPost(models.Model):
@@ -85,7 +112,7 @@ class Term(models.Model):
 
 class TermVectorCell(models.Model):
     term = models.ForeignKey(Term)
-    count = models.IntegerField()
+    count = models.FloatField()
     receiver = models.ForeignKey(Receiver)
 
     def __unicode__(self):
