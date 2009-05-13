@@ -130,7 +130,8 @@ def n_best_friends(post, sharer):
       continue
     print 'reviewing friend: ' + receiver.user.username
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
-                  .order_by('term__term')
+                  .order_by('term__term').select_related('term')
+    
     friend_vector_norm = 0
     dot_product = 0
     freq_dist_i = 0 # start looking at the first alphabetical entry
@@ -138,7 +139,7 @@ def n_best_friends(post, sharer):
     if len(term_vector) == 0:
       continue
     
-    # do the merge-dot-product
+    # do the merge-dot-product    
     for term_cell in term_vector:
       # summing squared values for the norm
       friend_vector_norm += math.pow(term_cell.count, 2)
@@ -166,6 +167,7 @@ def n_best_friends(post, sharer):
     score['receiver'] = receiver
     score['score'] = cosine_distance
     scores.append(score)
+    end_friend = time.clock()
 
   # now find the top 3
   sorted_friends = sorted(
