@@ -167,7 +167,6 @@ def n_best_friends(post, sharer):
     score['receiver'] = receiver
     score['score'] = cosine_distance
     scores.append(score)
-    end_friend = time.clock()
 
   # now find the top 3
   sorted_friends = sorted(
