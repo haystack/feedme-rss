@@ -158,8 +158,8 @@ function suggest_people(context) {
 	$('.feedme-send-button', context).click(share_post);
 	$('.feedme-comment-button', context).click(function() {
 		console.log("comment button clicked");
-		console.log(context);
-		$('.feedme-toggle-hidden', context).toggleClass('expand-container') 
+		var comment_btn = $('.feedme-toggle-hidden', context);
+		comment_btn.slideToggle("normal");
 	});
 	
 	server_recommend(context);
@@ -370,7 +370,7 @@ function share_post(event)
 	}
 	
 	// remove comment box
-	$('.feedme-toggle-hidden', context).addClass('expand-container');
+	$('.feedme-toggle-hidden', context).slideUp("normal");
 	$(".feedme-toggle.feedme-person", context).animate( { backgroundColor: '#F7EBBB', borderColor: '#9b9b9b' }, 750).addClass("feedme-sent");
 	
 	var recipients = new Array();
