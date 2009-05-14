@@ -33,7 +33,7 @@
 	THE SOFTWARE.
 */
 
-var port = 8000;
+var port = 8001;
 var autocompleteData = null;
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
@@ -167,13 +167,16 @@ function suggest_people(context) {
 
 function server_recommend(context) {
 	var post_url = $('.entry-title a', context).attr('href');
-	var feed_url_loc = location.href.indexOf('feed%2F');
-	var feed_url = location.href.substring(feed_url_loc + 'feed%2F'.length);
+	var feed_title = $('a.entry-source-title', context).text()
+	var feed_url = unescape($('a.entry-source-title', context).attr('href'));
+	var feed_url_loc = feed_url.indexOf('feed/');
+	feed_url = feed_url.substring(feed_url_loc + 'feed/'.length);
 	var post_title = $('.entry-container .entry-title', context).text();
 	var post_contents = $('.entry-body', context).html();
 	
 	var theurl = "recommend/";
 	var data = {
+		feed_title: feed_title,
 		feed_url: feed_url,
 		post_url: post_url,
 		post_title: post_title,
