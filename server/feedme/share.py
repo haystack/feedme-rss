@@ -16,7 +16,9 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 @login_required
 def share(request):
+  feed_url = request.POST['feed_url']
   post_url = request.POST['post_url']
+
   recipient_emails = request.POST.getlist('recipients')
 
   # Escape any HTML in the comment, turn \n's into <br>'s, and autolink
@@ -28,7 +30,8 @@ def share(request):
     comment = html.urlize(comment)
 
   shared_post = create_shared_post(request.user, \
-                                   post_url, recipient_emails, comment)
+                                   post_url, feed_url, \
+                                   recipient_emails, comment)
   send_post(shared_post)
 
   # do online updating of profiles of people who received the post
@@ -40,7 +43,8 @@ def share(request):
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
 
-def create_shared_post(user_sharer, post_url, recipient_emails, comment):
+def create_shared_post(user_sharer, post_url, feed_url, \
+                       recipient_emails, comment):
   """Create all necessary objects to perform the sharing action"""
   # get the recipients, creating Users if necessary
   try:
@@ -50,7 +54,7 @@ def create_shared_post(user_sharer, post_url, recipient_emails, comment):
     sharer.save()
 
   # get the post
-  post = Post.objects.get(url=post_url)
+  post = Post.objects.filter(feed__rss_url = feed_url).get(url=post_url)
   try:
     shared_post = SharedPost.objects.get(post=post, sharer=sharer)
   except SharedPost.DoesNotExist:
