@@ -33,7 +33,7 @@
 	THE SOFTWARE.
 */
 
-var port = 8001;
+var port = 8000;
 var autocompleteData = null;
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
