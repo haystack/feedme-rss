@@ -48,6 +48,7 @@ class Receiver(models.Model):
 
 class Feed(models.Model):
     rss_url = models.URLField(unique=True) # the rss feed url
+    title = models.TextField()
     
     def __unicode__(self):
         return self.rss_url;

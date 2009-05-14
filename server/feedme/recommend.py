@@ -8,11 +8,13 @@ import nltk
 import math
 import operator
 import datetime
+import time
 
 @login_required
 def recommend(request):
   sharer_user = request.user
 
+  feed_title = request.POST['feed_title']
   feed_url = request.POST['feed_url']
   post_url = request.POST['post_url']
   post_title = request.POST['post_title']
@@ -21,7 +23,8 @@ def recommend(request):
   post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
                                   post_title=post_title, \
                                   post_contents=post_contents, \
-                                  sharer_user = sharer_user)
+                                  sharer_user = sharer_user, \
+                                  feed_title = feed_title)
   feed = post_objects['feed']
   post = post_objects['post']
   sharer = post_objects['sharer']
@@ -63,13 +66,16 @@ def create_user_json(recommendations):
   return rec_list
 
 
-def get_post_objects(feed_url, post_url, post_title, post_contents, \
-                     sharer_user):
+def get_post_objects(feed_title, feed_url, post_url, post_title, \
+                     post_contents, sharer_user):
   # create objects if we need to
   try:
     feed = Feed.objects.get(rss_url=feed_url)
+    if feed.title != feed_title:
+      feed.title = feed_title
+      feed.save()
   except Feed.DoesNotExist:
-    feed = Feed(rss_url=feed_url)
+    feed = Feed(rss_url=feed_url, title = feed_title)
     feed.save()
   try:
     post = Post.objects.filter(feed = feed).get(url=post_url)
@@ -107,6 +113,7 @@ def get_post_objects(feed_url, post_url, post_title, post_contents, \
 
 
 def n_best_friends(post, sharer):
+  begin_time = time.clock()
   friends = Receiver.objects.filter(
     sharedpostreceiver__shared_post__sharer=sharer).distinct()
 
@@ -174,6 +181,8 @@ def n_best_friends(post, sharer):
   if len(sorted_friends) > 3:
     sorted_friends = sorted_friends[0:3]
   print sorted_friends
+
+  print "time for recommendation: " + str(time.clock() - begin_time)
   return map(lambda friend:friend['receiver'].user, sorted_friends)
   
 
