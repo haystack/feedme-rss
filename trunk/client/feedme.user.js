@@ -166,6 +166,23 @@ function suggest_people(context) {
 }
 
 function server_recommend(context) {
+	server_vars = get_post_variables(context);
+	
+	var theurl = "recommend/";
+	var data = {
+		feed_title: server_vars["feed_title"],
+		feed_url: server_vars["feed_url"],
+		post_url: server_vars["post_url"],
+		post_title: server_vars["post_title"],
+		post_contents: server_vars["post_contents"]
+	}
+	
+	console.log(data)
+	ajax_post(theurl, data, populateSuggestions);
+}
+
+function get_post_variables(context)
+{
 	var post_url = $('.entry-title a', context).attr('href');
 	var feed_title = $('a.entry-source-title', context).text()
 	var feed_url = unescape($('a.entry-source-title', context).attr('href'));
@@ -174,17 +191,13 @@ function server_recommend(context) {
 	var post_title = $('.entry-container .entry-title', context).text();
 	var post_contents = $('.entry-body', context).html();
 	
-	var theurl = "recommend/";
-	var data = {
-		feed_title: feed_title,
-		feed_url: feed_url,
-		post_url: post_url,
-		post_title: post_title,
-		post_contents: post_contents
-	}
-	
-	console.log(data)
-	ajax_post(theurl, data, populateSuggestions);
+	var post_vars = new Array();
+	post_vars["post_url"] = post_url;
+	post_vars["feed_title"] = feed_title;
+	post_vars["feed_url"] = feed_url;
+	post_vars["post_title"] = post_title;
+	post_vars["post_contents"] = post_contents;
+	return post_vars;
 }
 
 function ajax_post(url, data, callback) {
@@ -379,10 +392,13 @@ function share_post(event)
 		recipients[i] = recipientDivs[i].getAttribute("email");
 	}
 	
+	server_vars = get_post_variables(context);
+	
 	var url = "share/";
 	console.log("Sharing post with: " + recipients);
 	var data = {
-		post_url: $('.entry-title a', context).attr('href'),
+		post_url: server_vars["post_url"],
+		feed_url: server_vars["feed_url"],
 		recipients: recipients,
 		comment: $('.comment-textarea', context).val()
 	}
