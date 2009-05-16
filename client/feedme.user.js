@@ -133,11 +133,13 @@ function suggest_people(context) {
 	console.log("suggesting people");
 	
 	var defaultAutocompleteText = "Type a name";
-	$(".entry-body", context).before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header"><div>Recommend to:</div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person feedme-button">&nbsp;<div class="feedme-num-shared">&nbsp;</div></div></div></div></div>');
-	$(".feedme-suggestion-container", context).append('<div class="wait-for-suggestions" style="display: inline;"><div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
+	$(".entry-body", context).before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header"><div>Recommend to: </div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person feedme-button">&nbsp;<div class="feedme-num-shared">&nbsp;</div></div></div></div></div>');
+	$(".feedme-suggestion-container", context)
+	.append('<div class="wait-for-suggestions" style="display: inline;"><div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
 	.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')
+	.append('<div class="feedme-button feedme-suggest wait-for-suggestions"><a class="feedme-suggest-button" href="javascript:{}">Like</a><a class="feedme-suggest-button" href="javascript:{}"><img src="http://groups.csail.mit.edu/haystack/feedme/like.png" style="position: relative; height: 10px; top: -4px; left: -4px; border: none;"/></a></div>')
 	.append('<div class="feedme-button feedme-toggle feedme-send wait-for-suggestions"><a class="feedme-send-button" href="javascript:{}">Send</a></div>')
-	.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div></div>');
+	.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div></div>')
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete(context);
@@ -154,7 +156,10 @@ function suggest_people(context) {
 		$(this).toggleClass('feedme-autocompleteToggle');
 		return true;
 	});
-	//$('#comments').blur(add_comment);
+	$('.feedme-suggest-button', context).click(function() {
+		console.log('suggest');
+		$('.feedme-suggest').toggleClass('feedme-toggle');
+	});
 	$('.feedme-send-button', context).click(share_post);
 	$('.feedme-comment-button', context).click(function() {
 		console.log("comment button clicked");
@@ -189,7 +194,7 @@ function get_post_variables(context)
 	var feed_url_loc = feed_url.indexOf('feed/');
 	feed_url = feed_url.substring(feed_url_loc + 'feed/'.length);
 	var post_title = $('.entry-container .entry-title', context).text();
-	var post_contents = $('.entry-body', context).html();
+	var post_contents = $('.entry-body', context).html();	
 	
 	var post_vars = new Array();
 	post_vars["post_url"] = post_url;
@@ -276,73 +281,6 @@ function addFriend(name, email, shared_today, header) {
 	$('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">' + shared_today + ' today</div></div>').appendTo(header);
 }
 
-/*
- * Adds a jQuery autocomplete element to the suggestion div.  Hooks up listeners to the new friends that get added.
- */
-function suggest_autocomplete(context) {
-	autocompleteWait(context);
-}
-
-function autocompleteWait(context) {
-	if(autocompleteData == null) {
-		window.setTimeout(autocompleteWait, 100, context);
-	} else {         
-		populateAutocomplete(context);
-	}
-}
-
-function populateAutocomplete(context) {
-	$(".feedme-autocomplete", context).autocomplete(autocompleteData, {
-		width: 300,
-		max: 6,
-		multiple: false,
-		scroll: true,
-		scrollHeight: 300,
-		matchContains: true,
-		mustMatch: false,
-		formatItem: function(row, i, max) {
-			return row.name + " [" + row.to + "]";
-		},
-		formatMatch: function(row, i, max) {
-			return row.name + " " + row.to;
-		},
-		formatResult: function(row) {
-			return row.to;
-		}
-	}).result(function(event, item) {
-        added = false;
-		if (item) {
-	    	addFriend(item.to, item.to, 0, $(".feedme-suggestions", context));		// add the newly suggested friend to the list
-	    	added = true;
-		} else if ($(this).val() != '') {
-            addFriend($(this).val(), $(this).val(), 0, $(".feedme-suggestions", context));
-            added = true;
-		}
-		
-		if (added == true) {
-    		$(this).val('');
-	    	var newFriend = $(".feedme-person:last", context);		// find the new person
-	        newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
-	    }
-	});
-	
-	$('.ac_results', context).blur(function() {
-		var selected = $('.ac_over', context);
-		console.log(selected);
-		// store the last remembered highlighted person so that if they click '+', we know what they were pointing at
-		$(this).data('last_selected_entry', selected);
-		return true;
-	});
-	
-	$('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).search() });
-	$('.feedme-autocomplete', context).keydown(function(event) {
-	    if (event.which == 13) { // user pushed enter
-	        $('.feedme-autocomplete', context).search();
-	    }
-	});
-}
-
-
 function handle_ajax_response(data)
 {
 	console.log(data);
@@ -353,38 +291,23 @@ function handle_ajax_response(data)
  */
 function toggleSuggestion(event) {
 	$(this).toggleClass("feedme-toggle");
-	var share = $(this).hasClass("feedme-toggle");	// are we sharing or canceling?
-	
-	/*
-	var recipientEmail = $(this).attr('email');
-	var url = "share/email/" + recipientEmail;
-	url += "/toggle/" + (share ? 1 : 0);
-	console.log(url);
-	
-	console.log("AJAX: sharing post with " + recipientEmail);
-	var data = {
-		post_url: $('#current-entry .entry-title a').attr('href'),
-	}
-	
-	console.log(data);
-	ajax_post(url, data, handle_ajax_response);
-	*/
 }
 
 function share_post(event) 
 {
 	console.log("sharing post.");
-	context = $(this).parents('.entry')
+	context = $(this).parents('.entry');
+	// remove comment box
+	$('.feedme-toggle-hidden', context).slideUp("normal");
+	$(".feedme-toggle", context).animate( { backgroundColor: '#F7EBBB', borderColor: '#9b9b9b' }, 750).addClass("feedme-sent");	
+	
+	var broadcast = ($('.feedme-suggest.feedme-toggle', context).length == 1);
 	var recipientDivs = $(".feedme-person.feedme-toggle", context);
-	if (recipientDivs.length == 0) {
+	if (recipientDivs.length == 0 && !broadcast) {
 		console.log("nobody to share with.");
 		alert("Please select a contact to share the article with.");
 		return;
 	}
-	
-	// remove comment box
-	$('.feedme-toggle-hidden', context).slideUp("normal");
-	$(".feedme-toggle.feedme-person", context).animate( { backgroundColor: '#F7EBBB', borderColor: '#9b9b9b' }, 750).addClass("feedme-sent");
 	
 	var recipients = new Array();
 	for (var i=0; i < recipientDivs.length; i++)
@@ -400,36 +323,12 @@ function share_post(event)
 		post_url: server_vars["post_url"],
 		feed_url: server_vars["feed_url"],
 		recipients: recipients,
-		comment: $('.comment-textarea', context).val()
+		comment: $('.comment-textarea', context).val(),
+		broadcast: broadcast
 	}
 	console.log(data);
 	ajax_post(url, data, handle_ajax_response);
 }
-
-/*
-function add_comment(event) {
-	var data = {
-		post_url: $('#current-entry .entry-title a').attr('href'),
-		comment: $(this).val()
-	}
-	var url = "comment/";
-	
-	console.log(data)
-	ajax_post(url, data, handle_ajax_response);
-}
-
-function send_mail(event) {
-	$('#expand-container').addClass('expand-container');
-	
-	var data = {
-		post_url: $('#current-entry .entry-title a').attr('href'),
-	}
-	var url = "send/";
-	
-	console.log(data)
-	ajax_post(url, data, handle_ajax_response);
-}
-*/
 
 // Original author mattkolb
 // http://userscripts.org/scripts/show/29604
@@ -502,6 +401,72 @@ function initAutocomplete() {
 }
 
 /*
+ * Adds a jQuery autocomplete element to the suggestion div.  Hooks up listeners to the new friends that get added.
+ */
+function suggest_autocomplete(context) {
+	autocompleteWait(context);
+}
+
+function autocompleteWait(context) {
+	if(autocompleteData == null) {
+		window.setTimeout(autocompleteWait, 100, context);
+	} else {         
+		populateAutocomplete(context);
+	}
+}
+
+function populateAutocomplete(context) {
+	$(".feedme-autocomplete", context).autocomplete(autocompleteData, {
+		width: 300,
+		max: 6,
+		multiple: false,
+		scroll: true,
+		scrollHeight: 300,
+		matchContains: true,
+		mustMatch: false,
+		formatItem: function(row, i, max) {
+			return row.name + " [" + row.to + "]";
+		},
+		formatMatch: function(row, i, max) {
+			return row.name + " " + row.to;
+		},
+		formatResult: function(row) {
+			return row.to;
+		}
+	}).result(function(event, item) {
+        added = false;
+		if (item) {
+	    	addFriend(item.to, item.to, 0, $(".feedme-suggestions", context));		// add the newly suggested friend to the list
+	    	added = true;
+		} else if ($(this).val() != '') {
+            addFriend($(this).val(), $(this).val(), 0, $(".feedme-suggestions", context));
+            added = true;
+		}
+		
+		if (added == true) {
+    		$(this).val('');
+	    	var newFriend = $(".feedme-person:last", context);		// find the new person
+	        newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
+	    }
+	});
+	
+	$('.ac_results', context).blur(function() {
+		var selected = $('.ac_over', context);
+		console.log(selected);
+		// store the last remembered highlighted person so that if they click '+', we know what they were pointing at
+		$(this).data('last_selected_entry', selected);
+		return true;
+	});
+	
+	$('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).search() });
+	$('.feedme-autocomplete', context).keydown(function(event) {
+	    if (event.which == 13) { // user pushed enter
+	        $('.feedme-autocomplete', context).search();
+	    }
+	});
+}
+
+/*
  * Adds feedme:'s CSS styles to the page.
  */
 function setupStyles() {
@@ -533,6 +498,8 @@ function setupStyles() {
 	GM_addStyle(recommendHeaderStyle);
 	var sentButtonStyle = '.feedme-send { vertical-align: top; margin-right: 2px; }';
 	GM_addStyle(sentButtonStyle);
+	var suggestButtonStyle = '.feedme-suggest { vertical-align: top; }';
+	GM_addStyle(suggestButtonStyle);
 	var commentButtonStyle = '.feedme-comment-button { vertical-align: top; }';
 	GM_addStyle(commentButtonStyle);
 	var sentStyle = '.feedme-sent { background-color: #F7EBBB; border-color: #9b9b9b; }';
