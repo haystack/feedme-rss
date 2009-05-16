@@ -27,7 +27,8 @@ class Receiver(models.Model):
             sharedpost__sharedpostreceiver__receiver = self)
         for received_post in received_posts:
             post_text = nltk.clean_html(received_post.title) + u' ' + \
-                        nltk.clean_html(received_post.contents)
+                        nltk.clean_html(received_post.contents) + u' ' + \
+                        nltk.clean_html(received_post.feed.title)
             text = text + post_text
         
         tokens = nltk.word_tokenize(text)
@@ -68,7 +69,8 @@ class Post(models.Model):
         Each item in the list has [0] = the string, and [1] = the count
         """
         text = nltk.clean_html(self.title) + ' ' + \
-                   nltk.clean_html(self.contents)
+                   nltk.clean_html(self.contents) + \
+                   nltk.clean_html(self.feed.title)
         tokens = nltk.word_tokenize(text)
 
         porter = nltk.PorterStemmer()
@@ -92,6 +94,7 @@ class SharedPost(models.Model):
     post = models.ForeignKey(Post)
     sharer = models.ForeignKey(Sharer)
     comment = models.TextField()
+    broadcast = models.BooleanField(default = False)
     
     def __unicode__(self):
         return unicode(self.sharer) + u' post: ' + unicode(self.post);

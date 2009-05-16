@@ -135,45 +135,16 @@ def n_best_friends(post, sharer):
   for receiver in friends:
     if not receiver.subscribed:
       continue
+
     print 'reviewing friend: ' + receiver.user.username
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
                   .order_by('term__term').select_related('term')
-    
-    friend_vector_norm = 0
-    dot_product = 0
-    freq_dist_i = 0 # start looking at the first alphabetical entry
-
-    if len(term_vector) == 0:
-      continue
-    
-    # do the merge-dot-product    
-    for term_cell in term_vector:
-      # summing squared values for the norm
-      friend_vector_norm += math.pow(term_cell.count, 2)
-
-      # move the counter forward until we catch up alphabetwise
-      while freq_dist_i < len(freq_dist) and \
-                freq_dist[freq_dist_i] < term_cell.term.term:
-        freq_dist_i += 1
-
-      # now, if we're not past the edge, check to see if we have a matching
-      # term
-      if freq_dist_i >= len(freq_dist):
-        break
-      else:
-        term = freq_dist[freq_dist_i]
-        if term == term_cell.term.term:
-          # dot product -- multiply counts together
-          dot_product += freq_dist_counts[term] * term_cell.count
-
-    # now normalize the dot product by the norm of the friend's vector
-    friend_vector_norm = math.sqrt(friend_vector_norm)
-    cosine_distance = dot_product / friend_vector_norm
-
-    score = {}
-    score['receiver'] = receiver
-    score['score'] = cosine_distance
-    scores.append(score)
+    if len(term_vector) > 0:
+      post_cosine_distance = cosine_distance(term_vector, freq_dist, freq_dist_counts)
+      score = {}
+      score['receiver'] = receiver
+      score['score'] = post_cosine_distance
+      scores.append(score)
 
   # now find the top 3
   sorted_friends = sorted(
@@ -184,6 +155,37 @@ def n_best_friends(post, sharer):
 
   print "time for recommendation: " + str(time.clock() - begin_time)
   return map(lambda friend:friend['receiver'].user, sorted_friends)
+  
+
+def cosine_distance(term_vector, freq_dist, freq_dist_counts):
+  friend_vector_norm = 0.0
+  dot_product = 0.0
+  freq_dist_i = 0 # start looking at the first alphabetical entry
+  
+  # do the merge-dot-product    
+  for term_cell in term_vector:
+    # summing squared values for the norm
+    friend_vector_norm += math.pow(term_cell.count, 2)
+
+    # move the counter forward until we catch up alphabetwise
+    while freq_dist_i < len(freq_dist) and \
+              freq_dist[freq_dist_i] < term_cell.term.term:
+      freq_dist_i += 1
+
+    # now, if we're not past the edge, check to see if we have a matching
+    # term
+    if freq_dist_i >= len(freq_dist):
+      break
+    else:
+      term = freq_dist[freq_dist_i]
+      if term == term_cell.term.term:
+        # dot product -- multiply counts together
+        dot_product += freq_dist_counts[term] * term_cell.count
+
+  # now normalize the dot product by the norm of the friend's vector
+  friend_vector_norm = math.sqrt(friend_vector_norm)
+  cosine_distance = dot_product / friend_vector_norm
+  return cosine_distance
   
 
 def vector_norm(term_vectors):
