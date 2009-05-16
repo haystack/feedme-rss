@@ -4,3 +4,8 @@ FeedMe requires the following Python dependencies:
   - Numpy
   - Matplotlib
   - Prover9
+
+Also set your python's sitecustomize default encoding in
+/usr/lib/python2.5/site-packages/sitecustomize.py to be:
+import sys
+sys.setdefaultencoding('utf-8')

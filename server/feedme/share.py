@@ -18,6 +18,7 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 def share(request):
   feed_url = request.POST['feed_url']
   post_url = request.POST['post_url']
+  broadcast = (request.POST['broadcast'] == 'true')
 
   recipient_emails = request.POST.getlist('recipients')
 
@@ -31,7 +32,7 @@ def share(request):
 
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
-                                   recipient_emails, comment)
+                                   recipient_emails, comment, broadcast)
   send_post(shared_post)
 
   # do online updating of profiles of people who received the post
@@ -44,7 +45,7 @@ def share(request):
   return HttpResponse(script_output, mimetype='application/json')
 
 def create_shared_post(user_sharer, post_url, feed_url, \
-                       recipient_emails, comment):
+                       recipient_emails, comment, broadcast):
   """Create all necessary objects to perform the sharing action"""
   # get the recipients, creating Users if necessary
   try:
@@ -56,10 +57,11 @@ def create_shared_post(user_sharer, post_url, feed_url, \
   # get the post
   post = Post.objects.filter(feed__rss_url = feed_url).get(url=post_url)
   try:
-    shared_post = SharedPost.objects.get(post=post, sharer=sharer)
+    shared_post = SharedPost.objects.get(post = post, sharer = sharer)
   except SharedPost.DoesNotExist:
-    shared_post = SharedPost(post=post, sharer=sharer)
+    shared_post = SharedPost(post = post, sharer = sharer)
   shared_post.comment = comment
+  shared_post.broadcast = broadcast
   shared_post.save()
 
   # get or create the recipients' User, Recipient and SharedPostRecipient
@@ -94,6 +96,9 @@ def send_post(post_to_send):
                 .filter(shared_post = post_to_send) \
                 .filter(sent__exact = False)
 
+    if len(receivers) == 0:
+      return
+    
     send_post_email(post_to_send, receivers)
 
     receivers.sent = True
@@ -122,8 +127,8 @@ def send_post_email(shared_post, receivers):
                  u"<br />\n<br />\n "
   html_content += u"<b><a href='" + post.url + \
                   u"'>" + post.title + u"</a></b> \n<br />"
-  html_content += u"<a href='" + post.feed.rss_url + "'>" + \
-                  post.feed.title + "</a><br />"
+  html_content += u"<a href='" + post.feed.rss_url + u"'>" + \
+                  post.feed.title + u"</a><br />"
   html_content += post.contents
   html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\
                   u"a (very) alpha tool at MIT. Have comments, or are your " +\
