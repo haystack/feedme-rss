@@ -12,9 +12,9 @@
 <li> FeedMe allows you to receive recommendations immediately as your friends
 recommend them, or as a digest of several recommendations that are sent
 periodically.  <b>How would you like to receive your recommendations?</b> <br />
-<input type="radio" name="digest" value="True" {% if digest %}checked="checked"{% endif %}> 
-Immediately, unless my friends wish to send the emails in digest form<br />
 <input type="radio" name="digest" value="False" {% if not digest %}checked="checked"{% endif %}> 
+Immediately, unless my friends wish to send the emails in digest form<br />
+<input type="radio" name="digest" value="True" {% if digest %}checked="checked"{% endif %}> 
 Only as a digest, regardless of how my friends wish to send the emails
 <br />
 <br />

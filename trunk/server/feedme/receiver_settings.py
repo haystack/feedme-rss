@@ -55,7 +55,7 @@ def change_receiver_settings(request, user_email, settings_seed):
   (error, message, receiver) = \
     settings_access_allowed(request, user_email, settings_seed)
 
-  if request.POST:
+  if (not error) and request.POST:
     receiver.recommend = (request.POST['recommend'] == u'True')
     receiver.digest = (request.POST['digest'] == u'True')
     reset_seed(receiver)
