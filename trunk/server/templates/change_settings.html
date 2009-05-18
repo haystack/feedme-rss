@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block body %}
+
+{% firstof message %}
+
+{% if not error %}
+<br />
+
+<form method="post" action=".">
+<ul>
+<li> FeedMe allows you to receive recommendations immediately as your friends
+recommend them, or as a digest of several recommendations that are sent
+periodically.  <b>How would you like to receive your recommendations?</b> <br />
+<input type="radio" name="digest" value="True" {% if digest %}checked="checked"{% endif %}> 
+Immediately, unless my friends wish to send the emails in digest form<br />
+<input type="radio" name="digest" value="False" {% if not digest %}checked="checked"{% endif %}> 
+Only as a digest, regardless of how my friends wish to send the emails
+<br />
+<br />
+
+<li> FeedMe learns what your interests are from what your friends recommend
+to you.  With this information, we can recommend that your friend send you
+future messages that appear to be related to your topics of interest.
+<b>Would you like FeedMe to recommend you for receipt of articles related
+to your interests?</b><br />
+<input type="radio" name="recommend" value="True" {% if recommend %}checked="checked"{% endif %}> Yes<br />
+<input type="radio" name="recommend" value="False" {% if not recommend %}checked="checked"{% endif %}> No
+<br />
+</ul>
+<input type="submit" value="Save">
+
+</form>
+
+{% endif %}
+
+{% endblock %}

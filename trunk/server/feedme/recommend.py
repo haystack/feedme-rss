@@ -133,7 +133,7 @@ def n_best_friends(post, sharer):
   freq_dist_counts = post.tokenize()
   freq_dist = sorted(freq_dist_counts)
   for receiver in friends:
-    if not receiver.subscribed:
+    if not receiver.recommend:
       continue
 
     print 'reviewing friend: ' + receiver.user.username

@@ -134,7 +134,7 @@ def send_post_email(shared_post, receivers):
                   u"a (very) alpha tool at MIT. Have comments, or are your " +\
                   u"friends spamming you? Email us at feedme@csail.mit.edu." +\
                   u"<br /><br /><a href='http://feedme.csail.mit.edu:8000" +\
-                  u"/unsubscribe/'>Change your e-mail receiving settings" +\
+                  u"/receiver/settings/'>Change your e-mail receiving settings" +\
                   u"</a> to get only a digest, or never be recommended posts."
 
   print html_content
