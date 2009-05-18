@@ -16,8 +16,9 @@ class Sharer(models.Model):
     
 class Receiver(models.Model):
     user = models.ForeignKey(User, unique=True)
-    subscribed = models.BooleanField(default = True)
-    resubscribe_val = models.IntegerField(default = 0)
+    digest = models.BooleanField(default = False)
+    recommend = models.BooleanField(default = True)
+    settings_seed = models.IntegerField(default = 0)
 
     def tokenize(self):
         """Creates a FreqDist representing all the posts shared
