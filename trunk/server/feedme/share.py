@@ -114,7 +114,7 @@ def send_post_email(shared_post, receivers):
   to_emails = [receiver.receiver.user.email for receiver in receivers]
   comment = shared_post.comment
 
-  print u'sending ' + subject + u' to ' + unicode(to_emails)
+  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
   
   html_content = u''
   if comment is not u'':
@@ -137,7 +137,7 @@ def send_post_email(shared_post, receivers):
                   u"/receiver/settings/'>Change your e-mail receiving settings" +\
                   u"</a> to get only a digest, or never be recommended posts."
 
-  print html_content
+  print html_content.encode('utf-8')
   text_content = nltk.clean_html(html_content)
   email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
   email.attach_alternative(html_content, "text/html")

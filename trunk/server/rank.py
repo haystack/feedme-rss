@@ -13,7 +13,7 @@ from django.core.mail import EmailMultiAlternatives
 
 def rank_posts():
     week_ago = datetime.datetime.now() - datetime.timedelta(days = 7)
-    for receiver in Receiver.objects.all():
+    for receiver in Receiver.objects.filter(recommend = True):
         if SharedPostReceiver.objects.filter(receiver = receiver).filter( \
             time__gte = week_ago).count() > 0:
             
