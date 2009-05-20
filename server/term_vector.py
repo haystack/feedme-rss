@@ -10,12 +10,7 @@ import math
 def create_receiver_vectors():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
-    print 'WARNING NO TRANSACTIONS'
-
-    # todo: could eventually timestamp the last time we updated this
-    # person's counts, then just add in the posts shared with them
-    # since then instead of recomputing from scratch
-
+    
     # clear old vectors
     TermVectorCell.objects.all().delete()
 
@@ -37,8 +32,16 @@ def create_profile_terms(receiver):
     frequency_distribution = receiver.tokenize()
     print str(len(frequency_distribution.samples())) + ' words'
     num_people = Receiver.objects.count() * 1.0 # we need a double
-    
+
+    MAX_TERMS = 100
+    cur_terms = 0
     for frequency_item in frequency_distribution.items():
+        cur_terms += 1
+        # the FreqDist iterates in decreasing order of counts, so we can
+        # cut off after 100 and get just the top 100 posts
+        if cur_terms > MAX_TERMS:
+            break
+        
         # get or create the Term and the TermVectorCell
         try:
             term = Term.objects.get(term=frequency_item[0])
