@@ -16,32 +16,26 @@ def create_receiver_vectors():
 
     print 'populating terms the first time'
     for receiver in Receiver.objects.all():
-        print u'1x: updating terms for: ' + receiver.user.username
-        create_profile_terms(receiver)
+        print u'creating terms for: ' + receiver.user.username
+        create_profile_terms(receiver = receiver, frequency_distribution = receiver.tokenize())
+
+    for receiver in Receiver.objects.all():
+        print u'creating preliminary tf*idf values for: ' + receiver.user.username
+        update_tf_idf(receiver = receiver, frequency_distribution = receiver.tokenize())
 
     print 'repeating so that the idf terms are correct'
     for receiver in Receiver.objects.all():
-        print u'2x: updating terms for: ' + receiver.user.username
-        create_profile_terms(receiver)    
+        print u'trimming tf*idf values terms for: ' + receiver.user.username
+        trim_profile_terms(receiver = receiver)    
 
     transaction.commit()
 
 
-def create_profile_terms(receiver):
-    """creates profile terms and initializes tf-idf"""
-    frequency_distribution = receiver.tokenize()
+def create_profile_terms(receiver, frequency_distribution):
+    """creates profile terms for this user -- does not set tf-idf"""
     print str(len(frequency_distribution.samples())) + ' words'
-    num_people = Receiver.objects.count() * 1.0 # we need a double
 
-    MAX_TERMS = 100
-    cur_terms = 0
     for frequency_item in frequency_distribution.items():
-        cur_terms += 1
-        # the FreqDist iterates in decreasing order of counts, so we can
-        # cut off after 100 and get just the top 100 posts
-        if cur_terms > MAX_TERMS:
-            break
-        
         # get or create the Term and the TermVectorCell
         try:
             term = Term.objects.get(term=frequency_item[0])
@@ -58,23 +52,43 @@ def create_profile_terms(receiver):
                 term=term,
                 count=0,
                 receiver = receiver)
+            term_vector_cell.save()
 
-        tf = frequency_distribution.freq(frequency_item[0])
+
+def update_tf_idf(receiver, frequency_distribution):
+    """assumes that all terms have been updated for all users. updates tf*idf scores."""
+    num_people = Receiver.objects.count() * 1.0 # we need a double
+
+    for term_vector_cell in TermVectorCell.objects.filter(receiver = receiver):
+        term = term_vector_cell.term
+        tf = frequency_distribution.freq(term.term)
         num_receivers_with_term_shared = Receiver.objects.filter(termvectorcell__term = term).count()
         idf = math.log(num_people / (1 + num_receivers_with_term_shared))
-        
+    
         tf_idf = tf*idf
         term_vector_cell.count = tf_idf
         term_vector_cell.save()
-    
+
+
+def trim_profile_terms(receiver):
+    """trims a person's term vector to just the top 100 terms by tf*idf score"""
+    cur_terms = 0
+    MAX_TERMS = 100
+
+    for term_cell in TermVectorCell.objects.filter(receiver = receiver).order_by('-count'):
+        cur_terms += 1
+        if cur_terms > MAX_TERMS:
+            term_cell.delete()
+            
 
 def describe_receiver(receiver):
     print u'describing ' + receiver.user.username
     vector = TermVectorCell.objects.filter(receiver = receiver) \
              .order_by('-count')
     for term_vector_cell in vector:
-        print term_vector_cell.term.term + \
+        output = term_vector_cell.term.term + \
               u': ' + unicode(term_vector_cell.count)
+        print output.encode('utf-8')
 
     print '-------------------------------------------'
 
@@ -89,4 +103,5 @@ def transaction_test():
 if __name__ == '__main__':
     print u'Updating receiver term vectors...'
     create_receiver_vectors()
-    #transaction_test()
+    for receiver in Receiver.objects.all():
+        describe_receiver(receiver)

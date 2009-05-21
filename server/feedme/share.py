@@ -36,10 +36,22 @@ def share(request):
   send_post(shared_post)
 
   # do online updating of profiles of people who received the post
+  # it is very inefficient to loop through three times, but this
+  # guarantees that all the terms are added to all people
+  # before tf*idf is calculated and before vectors are trimmed.
   receivers = Receiver.objects.filter( \
     sharedpostreceiver__shared_post = shared_post)
+  token_dict = dict()
+  # first cache all the tokens
   for receiver in receivers:
-    term_vector.create_profile_terms(receiver)
+    token_dict[receiver.user.username] = receiver.tokenize()
+    
+  for receiver in receivers:
+    term_vector.create_profile_terms(receiver, token_dict[receiver.user.username])
+  for receiver in receivers:
+    term_vector.update_tf_idf(receiver, token_dict[receiver.user.username])
+  for receiver in receivers:
+    term_vector.trim_profile_terms(receiver)
 
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
