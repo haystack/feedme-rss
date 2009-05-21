@@ -145,7 +145,7 @@ def n_best_friends(post, sharer):
       score['receiver'] = receiver
       score['score'] = post_cosine_distance
       scores.append(score)
-
+   
   # now find the top 3
   sorted_friends = sorted(
     scores, key=operator.itemgetter('score'), reverse=True)
@@ -183,6 +183,8 @@ def cosine_distance(term_vector, freq_dist, freq_dist_counts):
         dot_product += freq_dist_counts[term] * term_cell.count
 
   # now normalize the dot product by the norm of the friend's vector
+  if friend_vector_norm == 0:
+    return 0
   friend_vector_norm = math.sqrt(friend_vector_norm)
   cosine_distance = dot_product / friend_vector_norm
   return cosine_distance
