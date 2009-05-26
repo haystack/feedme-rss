@@ -6,7 +6,7 @@ from server.feedme.models import *
 from django.db import transaction
 import math
 
-#@transaction.commit_manually
+@transaction.commit_manually
 def create_receiver_vectors():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
@@ -28,7 +28,7 @@ def create_receiver_vectors():
         print u'trimming tf*idf values terms for: ' + receiver.user.username
         trim_profile_terms(receiver = receiver)    
 
-#    transaction.commit()
+    transaction.commit()
 
 
 def create_profile_terms(receiver, frequency_distribution):
