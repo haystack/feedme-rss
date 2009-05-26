@@ -9,6 +9,7 @@ import re
 import nltk
 import codecs, sys
 import term_vector
+import time
 
 # set stdout to Unicode so we can write Unicode strings to stdout
 # todo: create some sort of startup script which calls this
@@ -39,19 +40,27 @@ def share(request):
   # it is very inefficient to loop through three times, but this
   # guarantees that all the terms are added to all people
   # before tf*idf is calculated and before vectors are trimmed.
+  begin_time = time.clock()
   receivers = Receiver.objects.filter( \
     sharedpostreceiver__shared_post = shared_post)
   token_dict = dict()
   # first cache all the tokens
   for receiver in receivers:
     token_dict[receiver.user.username] = receiver.tokenize()
-    
+
+  print 'tokenized: %f' % (time.clock() - begin_time)
+  begin_time = time.clock()
   for receiver in receivers:
     term_vector.create_profile_terms(receiver, token_dict[receiver.user.username])
+  print 'created terms: %f' % (time.clock() - begin_time)
+  begin_time = time.clock()
   for receiver in receivers:
     term_vector.update_tf_idf(receiver, token_dict[receiver.user.username])
+  print 'tf-idfed: %f' % (time.clock() - begin_time)
+  begin_time = time.clock()    
   for receiver in receivers:
     term_vector.trim_profile_terms(receiver)
+  print 'trimmed: %f' % (time.clock() - begin_time)
 
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
@@ -149,7 +158,7 @@ def send_post_email(shared_post, receivers):
                   u"/receiver/settings/'>Change your e-mail receiving settings" +\
                   u"</a> to get only a digest, or never be recommended posts."
 
-  print html_content.encode('utf-8')
+  #print html_content.encode('utf-8')
   text_content = nltk.clean_html(html_content)
   email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
   email.attach_alternative(html_content, "text/html")

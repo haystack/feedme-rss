@@ -6,7 +6,7 @@ from server.feedme.models import *
 from django.db import transaction
 import math
 
-@transaction.commit_manually
+#@transaction.commit_manually
 def create_receiver_vectors():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
@@ -28,7 +28,7 @@ def create_receiver_vectors():
         print u'trimming tf*idf values terms for: ' + receiver.user.username
         trim_profile_terms(receiver = receiver)    
 
-    transaction.commit()
+#    transaction.commit()
 
 
 def create_profile_terms(receiver, frequency_distribution):
@@ -59,7 +59,7 @@ def update_tf_idf(receiver, frequency_distribution):
     """assumes that all terms have been updated for all users. updates tf*idf scores."""
     num_people = Receiver.objects.count() * 1.0 # we need a double
 
-    for term_vector_cell in TermVectorCell.objects.filter(receiver = receiver):
+    for term_vector_cell in TermVectorCell.objects.filter(receiver = receiver).select_related('term'):
         term = term_vector_cell.term
         tf = frequency_distribution.freq(term.term)
         num_receivers_with_term_shared = Receiver.objects.filter(termvectorcell__term = term).count()
@@ -72,13 +72,11 @@ def update_tf_idf(receiver, frequency_distribution):
 
 def trim_profile_terms(receiver):
     """trims a person's term vector to just the top 100 terms by tf*idf score"""
-    cur_terms = 0
     MAX_TERMS = 100
 
-    for term_cell in TermVectorCell.objects.filter(receiver = receiver).order_by('-count'):
-        cur_terms += 1
-        if cur_terms > MAX_TERMS:
-            term_cell.delete()
+    query = TermVectorCell.objects.filter(receiver = receiver).order_by('-count')
+    cutoff = query[min(len(query), MAX_TERMS)-1].count
+    TermVectorCell.objects.filter(receiver = receiver).filter(count__lt = cutoff).delete()
             
 
 def describe_receiver(receiver):
