@@ -133,6 +133,7 @@ def send_post_email(shared_post, receivers):
   subject = post.title
   from_email = shared_post.sharer.user.email
   to_emails = [receiver.receiver.user.email for receiver in receivers]
+  to_emails.append(from_email)
   comment = shared_post.comment
 
   print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
