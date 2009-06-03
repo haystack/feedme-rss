@@ -4,4 +4,4 @@
 # once the cron job is installed, edit it with 'crontab -u username -e'
 #
 # m h  dom mon dow   command
-0 4 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py
+0 4 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py | mail feedme@csail.mit.edu -s "Nightly Term Vector Script"
