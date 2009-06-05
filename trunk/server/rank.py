@@ -53,7 +53,7 @@ def send_digest_posts(posts, receiver):
   """Sends the list of posts in an email to the recipient"""
   subject = u"FeedMe Personalized Newspaper: " + posts[0][0].title
   from_email = 'FeedMe <feedme@csail.mit.edu>'
-  to_emails = ['msbernst@mit.edu']
+  to_emails = [receiver.user.email]
 
   print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
   
@@ -61,7 +61,8 @@ def send_digest_posts(posts, receiver):
   html_content += u'Your friends on FeedMe thought that these posts ' +\
                   u'might be interesting. We\'ve selected just the ones ' +\
                   u'you\'re most likely to be interested in, and we\'ll ' +\
-                  u'send them to you weekly. <br />'
+                  u'send them to you weekly. (Though we have another design' +\
+                  u' building on this in the works.)<br />'
 
   for post_array in posts:
       post = post_array[0]

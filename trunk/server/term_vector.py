@@ -101,5 +101,6 @@ def transaction_test():
 if __name__ == '__main__':
     print u'Updating receiver term vectors...'
     create_receiver_vectors()
-    for receiver in Receiver.objects.all():
-        describe_receiver(receiver)
+    print u'term vectors updated!'
+#    for receiver in Receiver.objects.all():
+#        describe_receiver(receiver)
