@@ -109,6 +109,9 @@ def create_shared_post(user_sharer, post_url, feed_url, \
     shared_post_receiver = SharedPostReceiver( \
         shared_post=shared_post, receiver=receiver, digest = digest, \
         sent = False)
+    # if the receiver has elected to only receive digests...
+    if receiver.digest is True:
+      shared_post_receiver.digest = True
     shared_post_receiver.save()
 
   return shared_post
