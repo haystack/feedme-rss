@@ -5,6 +5,7 @@ from django.contrib.auth.models import User
 from server.feedme.models import *
 from django.db import transaction
 import math
+import datetime
 
 @transaction.commit_manually
 def create_receiver_vectors():
@@ -99,8 +100,11 @@ def transaction_test():
         describe_receiver(receiver)
 
 if __name__ == '__main__':
+    yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
+    newposts = SharedPost.objects \
+               .filter(sharedpostreceiver__time__gte = yesterday)
+    print str(newposts.count()) + ' shared posts since yesterday'
+
     print u'Updating receiver term vectors...'
     create_receiver_vectors()
     print u'term vectors updated!'
-#    for receiver in Receiver.objects.all():
-#        describe_receiver(receiver)

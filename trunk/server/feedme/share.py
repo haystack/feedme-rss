@@ -19,7 +19,7 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 def share(request):
   feed_url = request.POST['feed_url']
   post_url = request.POST['post_url']
-  broadcast = (request.POST['broadcast'] == 'true')
+  digest = (request.POST['digest'] == 'true')
 
   recipient_emails = request.POST.getlist('recipients')
 
@@ -33,16 +33,19 @@ def share(request):
 
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
-                                   recipient_emails, comment, broadcast)
+                                   recipient_emails, comment, digest)
+
+  receivers = Receiver.objects.filter( \
+    sharedpostreceiver__shared_post = shared_post) \
+    .filter(sharedpostreceiver__sent = False).distinct()
   send_post(shared_post)
 
   # do online updating of profiles of people who received the post
   # it is very inefficient to loop through three times, but this
   # guarantees that all the terms are added to all people
   # before tf*idf is calculated and before vectors are trimmed.
-  begin_time = time.clock()
-  receivers = Receiver.objects.filter( \
-    sharedpostreceiver__shared_post = shared_post)
+  print "beginning recalculation of tf-idf scores"
+  begin_time = time.clock()  
   token_dict = dict()
   # first cache all the tokens
   for receiver in receivers:
@@ -66,7 +69,7 @@ def share(request):
   return HttpResponse(script_output, mimetype='application/json')
 
 def create_shared_post(user_sharer, post_url, feed_url, \
-                       recipient_emails, comment, broadcast):
+                       recipient_emails, comment, digest):
   """Create all necessary objects to perform the sharing action"""
   # get the recipients, creating Users if necessary
   try:
@@ -82,7 +85,6 @@ def create_shared_post(user_sharer, post_url, feed_url, \
   except SharedPost.DoesNotExist:
     shared_post = SharedPost(post = post, sharer = sharer)
   shared_post.comment = comment
-  shared_post.broadcast = broadcast
   shared_post.save()
 
   # get or create the recipients' User, Recipient and SharedPostRecipient
@@ -100,14 +102,14 @@ def create_shared_post(user_sharer, post_url, feed_url, \
       receiver = Receiver.objects.get(user=user_receiver)
     except Receiver.DoesNotExist:
       receiver = Receiver(user=user_receiver)
-      receiver.save()      
-    try:
-      shared_post_receiver = SharedPostReceiver.objects.get( \
-        shared_post=shared_post, receiver=receiver)
-    except SharedPostReceiver.DoesNotExist:
-      shared_post_receiver = SharedPostReceiver( \
-        shared_post=shared_post, receiver=receiver)
-      shared_post_receiver.save()
+      receiver.save()
+
+    # always create a new SharedPostReceiver, because we always
+    # treat this as a new action and send a new email
+    shared_post_receiver = SharedPostReceiver( \
+        shared_post=shared_post, receiver=receiver, digest = digest, \
+        sent = False)
+    shared_post_receiver.save()
 
   return shared_post
 
@@ -115,16 +117,17 @@ def create_shared_post(user_sharer, post_url, feed_url, \
 def send_post(post_to_send):
     receivers = SharedPostReceiver.objects \
                 .filter(shared_post = post_to_send) \
-                .filter(sent__exact = False)
+                .filter(digest = False) \
+                .filter(sent = False)
 
     if len(receivers) == 0:
       return
     
     send_post_email(post_to_send, receivers)
 
-    receivers.sent = True
     for receiver in receivers:
-        receiver.save()
+      receiver.sent = True
+      receiver.save()
 
 
 def send_post_email(shared_post, receivers):
