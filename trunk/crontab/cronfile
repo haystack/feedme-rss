@@ -5,3 +5,4 @@
 #
 # m h  dom mon dow   command
 0 4 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py | mail feedme@csail.mit.edu -s "Nightly Term Vector Script"
+0 15 */3 * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/digest.py | mail feedme@csail.mit.edu -s "Digest output (debugging for now)"
