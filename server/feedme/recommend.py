@@ -4,7 +4,6 @@ from django.utils import simplejson
 from django.contrib.auth.models import User 
 from models import *
 from django.contrib.auth.decorators import login_required
-import nltk
 import math
 import operator
 import datetime
@@ -12,6 +11,10 @@ import time
 
 @login_required
 def recommend(request):
+  return HttpResponse(get_recommendation_json(request), \
+                      mimetype='application/json')
+
+def get_recommendation_json(request):
   sharer_user = request.user
 
   feed_title = request.POST['feed_title']
@@ -43,7 +46,7 @@ def recommend(request):
   response_json = simplejson.dumps(response)
   print response_json
   
-  return HttpResponse(response_json, mimetype='application/json')
+  return response_json
 
 
 def create_user_json(recommendations):
