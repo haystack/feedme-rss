@@ -2,9 +2,6 @@
 import os.path
 from private_settings import *
 
-DEBUG = True
-TEMPLATE_DEBUG = DEBUG
-
 ADMINS = (
     ('FeedMe Team', 'feedme@csail.mit.edu'),
 )
