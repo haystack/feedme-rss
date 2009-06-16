@@ -9,6 +9,8 @@ import operator
 import datetime
 import time
 
+NUM_RECOMMENDATIONS = 21
+
 @login_required
 def recommend(request):
   return HttpResponse(get_recommendation_json(request), \
@@ -149,11 +151,11 @@ def n_best_friends(post, sharer):
       score['score'] = post_cosine_distance
       scores.append(score)
    
-  # now find the top 3
+  # now find the top NUM_RECOMMENDATIONS
   sorted_friends = sorted(
     scores, key=operator.itemgetter('score'), reverse=True)
-  if len(sorted_friends) > 3:
-    sorted_friends = sorted_friends[0:3]
+  if len(sorted_friends) > NUM_RECOMMENDATIONS:
+    sorted_friends = sorted_friends[0:NUM_RECOMMENDATIONS]
   print sorted_friends
 
   print "time for recommendation: " + str(time.clock() - begin_time)
