@@ -14,3 +14,6 @@ EMAIL_PORT = 25
 SECRET_KEY = ''
 
 TEMPLATE_DIRS = ()
+
+DEBUG = # True or False
+TEMPLATE_DEBUG = DEBUG # Or override this
