@@ -35,12 +35,15 @@
 
 var port = 8000;
 var autocompleteData = null;
+// number of recommendations to show when a person asks for more
+var moreRecommendations = 3;
+
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
  */
 function init() {
     // Fail gracefully if Firebug's not installed
-    try { console.log('init console... done'); } catch(e) { console = { log: function() {} } }
+    try { console.log('init console... done'); } catch(e) { console = { log: function() {} }; }
     console.log("Libraries loaded.");
     
     setupStyles();
@@ -123,7 +126,7 @@ function register_entry_click(context) {
 		}
 		suggest_people($(context));
 	} catch (e) { 
-		console.log(e) 
+		console.log(e);
 	}
 }
 
@@ -134,15 +137,27 @@ function register_entry_click(context) {
 function suggest_people(context) {
 	console.log("suggesting people");
 	
-	var defaultAutocompleteText = "Type a name";
-	$(".entry-body", context).before('<div class="feedme-suggestion-container"><div class="feedme-recommend-header"><div>Recommend to: </div><div class="feedme-num-shared">&nbsp;</div></div><div class="feedme-suggestions wait-for-suggestions"><div id="feedme-people-placeholder" class="feedme-person feedme-button">&nbsp;<div class="feedme-num-shared">&nbsp;</div></div></div></div></div>');
+	var defaultAutocompleteText = "type a name";
+
+	$(".entry-body", context).before('<div class="feedme-suggestion-container"></div>');
+
 	$(".feedme-suggestion-container", context)
-	.append('<div class="wait-for-suggestions" style="display: inline;"><div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>')
-	.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')
-	//.append('<div class="feedme-button feedme-suggest wait-for-suggestions"><a class="feedme-suggest-button" href="javascript:{}">Like</a><a class="feedme-suggest-button" href="javascript:{}"><img src="http://groups.csail.mit.edu/haystack/feedme/like.png" style="position: relative; height: 10px; top: -4px; left: -4px; border: none;"/></a></div>')
+	.append('<div class="feedme-suggestions wait-for-suggestions"></div>')
+	.append('<div class="feedme-autocomplete-added wait-for-suggestions"></div>')
+    .append('<div id="feedme-more-recommendations" class="wait-for-suggestions" style="display: inline;"></div>')
+	.append('<div id="feedme-controls" class="wait-for-suggestions expand-container"></div>');
+	
+    $("#feedme-more-recommendations", context)
+	.append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><a class="" href="javascript:{}">(more...)</a></div>')
+	.append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><!--<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png">--></img></div>');
+
+    $("#feedme-controls", context)
+	/*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
+	.append('<textarea class="comment-textarea"></textarea></div>')
 	.append('<div class="feedme-now-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
-	.append('<div class="feedme-later-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>')
-	.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div></div>')
+	.append('<div class="feedme-later-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
+	//.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
+
 	
 	// Clear the autocomplete when they start typing
 	suggest_autocomplete(context);
@@ -159,12 +174,11 @@ function suggest_people(context) {
 		$(this).toggleClass('feedme-autocompleteToggle');
 		return true;
 	});
-	$('.feedme-suggest-button', context).click(function() {
-		console.log('suggest');
-		$('.feedme-suggest').toggleClass('feedme-toggle');
-	});
 	$('.feedme-now-button', context).click(share_post);
 	$('.feedme-later-button', context).click(share_post);
+	$('.feedme-more-recommendations-button', context).click(function() {
+    	recommendMorePeople(context);
+	});
 	$('.feedme-comment-button', context).click(function() {
 		console.log("comment button clicked");
 		var comment_btn = $('.feedme-toggle-hidden', context);
@@ -261,40 +275,64 @@ function populateSuggestions(json) {
 	{
 		return;
 	}
-		
-	$("#feedme-people-placeholder", postToPopulate).remove();
+
+	$(postToPopulate).data('people', people);
+    $(postToPopulate).data('previously_shared', previously_shared);
+	$(postToPopulate).data('start_person', 0);
+	recommendMorePeople(postToPopulate);
+}
+
+/*
+ * Adds the next set of people to the list of people that can be recommended
+ */
+function recommendMorePeople(postToPopulate) {
+    var people = $(postToPopulate).data('people');
+    var start_person = $(postToPopulate).data('start_person');
+    var previously_shared = $(postToPopulate).data('previously_shared');
 	var header = $(".feedme-suggestions", postToPopulate);
-	for (var i=0; i<people.length; i++) {
-		var person = people[i];
-		addFriend(person['email'], person['email'], person['shared_today'], header);		
-	}
-	for (var j=0; j<previously_shared.length; j++) {
-		var person = previously_shared[j];
-		$('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-toggle").addClass("feedme-sent");
-	}
+	var div_id = 'feedme-recommendation-group-' + start_person;
 	
-	// Make the elements interactive
-	$(".feedme-person", postToPopulate).click(toggleSuggestion);
-	$(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
+	var min_length =  start_person + moreRecommendations < people.length ?
+	                 start_person + moreRecommendations : people.length;
+    var expanded_div = null;
+	if (start_person < min_length) {
+	    header.append('<div id="' + div_id + '" class="expand-container"></div>');
+	    expanded_div = $('#' + div_id, postToPopulate);
+	    for (var i = start_person; i < min_length; i++) {
+		    var person = people[i];
+		    addFriend(person['email'], person['email'], person['shared_today'], expanded_div, postToPopulate);
+	    }
+     
+        expanded_div.slideToggle("normal");
+        expanded_div.append($("#feedme-more-recommendations", postToPopulate));
+
+        // Commented out until we decide what to do with previously shared
+        // folks
+	    /*for (var j=0; j<previously_shared.length; j++) {
+		    var person = previously_shared[j];
+		    $('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-toggle").addClass("feedme-sent");
+	    }*/
+	
+	    $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
+        $(postToPopulate).data('start_person', min_length);
+	}
 }
 
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
-function addFriend(name, email, shared_today, header) {
-	$('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">' + shared_today + ' today</div></div>').appendTo(header);
+function addFriend(name, email, shared_today, header, context) {
+	header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">Received ' + shared_today + ' today</div></div>');
+    // Make the elements interactive
+    $(".feedme-person:last", header).click(function(event) {
+      $(this).toggleClass("feedme-toggle");
+      $("#feedme-controls", context).slideDown("normal");
+    });
 }
 
 function handle_ajax_response(data)
 {
 	console.log(data);
-}
-
-/*
- * Callback when somebody is recommended a post.
- */
-function toggleSuggestion(event) {
-	$(this).toggleClass("feedme-toggle");
 }
 
 function share_post(event) 
@@ -476,17 +514,18 @@ function populateAutocomplete(context) {
 	}).result(function(event, item) {
         added = false;
 		if (item) {
-	    	addFriend(item.to, item.to, 0, $(".feedme-suggestions", context));		// add the newly suggested friend to the list
+    		// add the newly suggested friend to the list
+            addFriend(item.to, item.to, 0, $(".feedme-autocomplete-added", context), context);
 	    	added = true;
 		} else if ($(this).val() != '') {
-            addFriend($(this).val(), $(this).val(), 0, $(".feedme-suggestions", context));
+            addFriend($(this).val(), $(this).val(), 0, $(".feedme-autocomplete-added", context), context);
             added = true;
 		}
 		
 		if (added == true) {
     		$(this).val('');
-	    	var newFriend = $(".feedme-person:last", context);		// find the new person
-	        newFriend.click(toggleSuggestion).click();	// add the click listener, and then trigger it to select
+	    	var newFriend = $(".feedme-person:last", context); // find the new person
+	        newFriend.click();	// trigger click to select
 	    }
 	});
 	
@@ -510,44 +549,34 @@ function populateAutocomplete(context) {
  * Adds feedme:'s CSS styles to the page.
  */
 function setupStyles() {
-	var suggestionStyle = '.feedme-suggestions { display: inline; }';
-	GM_addStyle(suggestionStyle);
-	var personStyle = '.feedme-person { display: inline; }';
-	GM_addStyle(personStyle);
-	var buttonStyle = '.feedme-button { display: inline-block; padding: 3px 6px; margin: 0px 10px 5px 0px; cursor: pointer; border: 1px solid white; vertical-align: top; text-align: center;}';
-	GM_addStyle(buttonStyle);
-	var toggleStyle = '.feedme-toggle { background-color: #f3f5fc; border: 1px solid #d2d2d2; -moz-border-radius: 5px; }';
-	GM_addStyle(toggleStyle);
-	var autocompleteStyle = '.feedme-autocomplete { width: 150px; }';
-	GM_addStyle(autocompleteStyle);
-	var autocompleteContainerStyle = '.feedme-autocomplete-container { display: inline; vertical-align: top; margin-right: 10px; }';
-	GM_addStyle(autocompleteContainerStyle);
-	var autocompleteToggleStyle = '.feedme-autocompleteToggle { color: gray; }';
-	GM_addStyle(autocompleteToggleStyle);
-	var addImgStyle= '.feedme-addImg { margin-left: 5px; cursor: pointer; }';
-	GM_addStyle(addImgStyle);
-	var waitForSuggestionStyle= '.wait-for-suggestions { visibility: hidden; }';
-	GM_addStyle(waitForSuggestionStyle);
-	var expandContainerStyle = '.expand-container { display: none; }';
-	GM_addStyle(expandContainerStyle);
-	var commentStyle = '.comment-textarea { height: 42px; width: 415px; margin-top: 10px; margin-right: 20px; }';
-	GM_addStyle(commentStyle);
-	var numSharedStyle = '.feedme-num-shared { font-size: 7pt; text-align: right; }';
-	GM_addStyle(numSharedStyle);
-	var recommendHeaderStyle = '.feedme-recommend-header { display: inline-block; margin-right: 5px; }';
-	GM_addStyle(recommendHeaderStyle);
-	//var sentButtonStyle = '.feedme-send { vertical-align: top; margin-right: 2px; }';
-	//GM_addStyle(sentButtonStyle);
-	//var suggestButtonStyle = '.feedme-suggest { vertical-align: top; }';
-	//GM_addStyle(suggestButtonStyle);
-	//var commentButtonStyle = '.feedme-comment-button { vertical-align: top; }';
-	//GM_addStyle(commentButtonStyle);
-	//var sentStyle = '.feedme-sent { background-color: #F7EBBB; border-color: #9b9b9b; }';
-	//GM_addStyle(sentStyle);
-	var nowStyle = '.feedme-now-button { width: 30px; -moz-border-radius-topright: 0px; -moz-border-radius-bottomright: 0px; margin-right: 0px; border-right: 0px; }';
-	GM_addStyle(nowStyle);
-	var laterStyle = '.feedme-later-button { width: 30px; -moz-border-radius-topleft: 0px; -moz-border-radius-bottomleft: 0px; }';
-	GM_addStyle(laterStyle);
+    var styles = (<r><![CDATA[
+    
+   .feedme-suggestions { display: inline; }
+   .feedme-person { }
+   .feedme-toggle { background-color: #f3f5fc; border: 1px solid
+#d2d2d2; -moz-border-radius: 5px; }
+   .feedme-button { display: inline-block; padding: 3px 6px; margin: 0px
+10px 5px 0px; cursor: pointer; border: 1px solid white;
+vertical-align: top; text-align: center;}
+   .feedme-autocomplete { width: 100px; }
+   .feedme-autocomplete-container { display: inline; vertical-align:
+middle; margin-right: 10px; }
+   .feedme-autocompleteToggle { color: gray; }
+   .feedme-addImg { margin-left: 5px; cursor: pointer; }
+   .wait-for-suggestions { visibility: hidden; }
+   .expand-container { display: none; }
+   .comment-textarea { height: 42px; width: 415px; margin-top: 10px;
+margin-right: 20px; }
+   .feedme-num-shared { font-size: 7pt; text-align: right; }
+   .feedme-recommend-header { display: inline-block; margin-right: 5px; }
+   .feedme-now-button { width: 30px; -moz-border-radius-topright: 0px;
+-moz-border-radius-bottomright: 0px; margin-right: 0px; border-right:
+0px; vertical-align: bottom; }
+   .feedme-later-button { width: 30px; -moz-border-radius-topleft: 0px;
+-moz-border-radius-bottomleft: 0px; vertical-align: bottom; }
+    ]]></r>).toString();
+    
+    GM_addStyle(styles);
 }
 
 function log_in() {
