@@ -33,7 +33,7 @@
 	THE SOFTWARE.
 */
 
-var port = 8000;
+var port = 8001;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -316,6 +316,7 @@ function recommendMorePeople(postToPopulate) {
 	    $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
         $(postToPopulate).data('start_person', min_length);
 	}
+    $(postToPopulate).data('start_person', min_length);
 }
 
 /*
@@ -491,6 +492,15 @@ function autocompleteWait(context) {
 	} else {         
 		populateAutocomplete(context);
 	}
+}
+
+function addAutocompleteFriend(email, context) {
+    var div_id = "feedme-autocomplete-added-emails-" + $('.feedme-autocomplete-added-email', context).size();
+    context.append('<div id="' + div_id + '" class="feedme-autocomplete-added-email expand-container"></div>');
+    
+    var friend_div = $("#" + div_id, context);
+    addFriend(email, email, 0, friend_div);
+    friend_div.slideToggle("normal");
 }
 
 function populateAutocomplete(context) {
