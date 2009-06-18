@@ -10,27 +10,27 @@
 // ==/UserScript==
 
 /**
-	The MIT License
+    The MIT License
 
-	Copyright (c) 2009 Massachusetts Institute of Technology
+    Copyright (c) 2009 Massachusetts Institute of Technology
 
-	Permission is hereby granted, free of charge, to any person obtaining a copy
-	of this software and associated documentation files (the "Software"), to deal
-	in the Software without restriction, including without limitation the rights
-	to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-	copies of the Software, and to permit persons to whom the Software is
-	furnished to do so, subject to the following conditions:
+    Permission is hereby granted, free of charge, to any person obtaining a copy
+    of this software and associated documentation files (the "Software"), to deal
+    in the Software without restriction, including without limitation the rights
+    to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+    copies of the Software, and to permit persons to whom the Software is
+    furnished to do so, subject to the following conditions:
 
-	The above copyright notice and this permission notice shall be included in
-	all copies or substantial portions of the Software.
+    The above copyright notice and this permission notice shall be included in
+    all copies or substantial portions of the Software.
 
-	THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-	IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-	FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-	AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-	LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-	OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-	THE SOFTWARE.
+    THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+    IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+    FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+    AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+    LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+    OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+    THE SOFTWARE.
 */
 
 var port = 8000;
@@ -50,31 +50,31 @@ function init() {
     log_in();
     initAutocomplete();
     
-	// initialize with any posts that are open in expanded (cards) view when the page loads
-	//console.log($('#entries[class*="cards"] .entry'));
-	//$('#entries[class*="cards"] .entry').each(entry_class_modified);
-	
-	$("#entries").bind("DOMNodeInserted", expandListener);
+    // initialize with any posts that are open in expanded (cards) view when the page loads
+    //console.log($('#entries[class*="cards"] .entry'));
+    //$('#entries[class*="cards"] .entry').each(entry_class_modified);
+    
+    $("#entries").bind("DOMNodeInserted", expandListener);
 }
 
 function expandListener(event) {
-	if (!isEntry(event.target)) {
-		// we're not looking at a post
-		return;
-	}
-	
-	// if it's expanded view
-	if (isExpandedView(event.target))
-	{
-		// immediately send the query
-		$(event.target).each(entry_class_modified);
-	}
-	// if it's list view
-	else if (isListView(event.target))
-	{
-		// listen for when its class changes
-		$(event.target).bind("DOMAttrModified", entry_class_modified);
-	}
+    if (!isEntry(event.target)) {
+        // we're not looking at a post
+        return;
+    }
+    
+    // if it's expanded view
+    if (isExpandedView(event.target))
+    {
+        // immediately send the query
+        $(event.target).each(entry_class_modified);
+    }
+    // if it's list view
+    else if (isListView(event.target))
+    {
+        // listen for when its class changes
+        $(event.target).bind("DOMAttrModified", entry_class_modified);
+    }
 }
 
 /*
@@ -82,7 +82,7 @@ function expandListener(event) {
  */
 function isEntry(target)
 {
-	return $(target).attr("class").indexOf("entry") != -1;
+    return $(target).attr("class").indexOf("entry") != -1;
 }
 
 /*
@@ -90,7 +90,7 @@ function isEntry(target)
  */
 function isExpandedView(entryTarget)
 {
-	return $(entryTarget).parent().attr("class").indexOf("cards") != -1;
+    return $(entryTarget).parent().attr("class").indexOf("cards") != -1;
 }
 
 /*
@@ -98,7 +98,7 @@ function isExpandedView(entryTarget)
  */
 function isListView(entryTarget)
 {
-	return $(entryTarget).parent().attr("class").indexOf("list") != -1;
+    return $(entryTarget).parent().attr("class").indexOf("list") != -1;
 }
 
 /**
@@ -106,28 +106,28 @@ function isListView(entryTarget)
  * know if the user is looking at a new one
  */
 function entry_class_modified(event) {
-	var target = $(this);
-	if (isEntry(target)) {
-		// if it's expanded view or list view and that post has been expanded, fetch recommendations
-		if (isExpandedView(target) || target.attr("class").indexOf("expanded") != -1) {
-			register_entry_click(target);
-		}
-	}
+    var target = $(this);
+    if (isEntry(target)) {
+        // if it's expanded view or list view and that post has been expanded, fetch recommendations
+        if (isExpandedView(target) || target.attr("class").indexOf("expanded") != -1) {
+            register_entry_click(target);
+        }
+    }
 }
 
 /*
  * Callback when the user clicks to expand a GReader post.
  */
 function register_entry_click(context) {
-	try {
-		if($(".feedme-suggestions", $(context)).size() > 0) {
-			// if we're still looking at an item we've populated before
-			return;
-		}
-		suggest_people($(context));
-	} catch (e) { 
-		console.log(e);
-	}
+    try {
+        if($(".feedme-suggestions", $(context)).size() > 0) {
+            // if we're still looking at an item we've populated before
+            return;
+        }
+        suggest_people($(context));
+    } catch (e) { 
+        console.log(e);
+    }
 }
 
 
@@ -135,92 +135,93 @@ function register_entry_click(context) {
  * Adds the friend suggestions contained in array people to node body.
  */
 function suggest_people(context) {
-	console.log("suggesting people");
-	
-	var defaultAutocompleteText = "type a name";
+    console.log("suggesting people");
+    
+    var defaultAutocompleteText = "type a name";
 
-	$(".entry-body", context).before('<div class="feedme-suggestion-container"></div>');
+    $(".entry-body", context).before('<div class="feedme-suggestion-container"></div>');
 
-	$(".feedme-suggestion-container", context)
-	.append('<div class="feedme-suggestions wait-for-suggestions"></div>')
-	.append('<div class="feedme-autocomplete-added wait-for-suggestions"></div>')
+    $(".feedme-suggestion-container", context)
+    .append('<div class="feedme-suggestions wait-for-suggestions"></div>')
+    .append('<div id="feedme-spacing-placeholder" class="feedme-placeholder"><div class="feedme-person feedme-button"><div>&nbsp;</div><div class="feedme-num-shared">&nbsp;</div></div></div>')        
     .append('<div id="feedme-more-recommendations" class="wait-for-suggestions" style="display: inline;"></div>')
-	.append('<div id="feedme-controls" class="wait-for-suggestions expand-container"></div>');
-	
+    .append('<div class="feedme-autocomplete-added wait-for-suggestions"></div>')
+    .append('<div id="feedme-controls" class="wait-for-suggestions expand-container"></div>');
+    
     $("#feedme-more-recommendations", context)
-	.append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><a class="" href="javascript:{}">(more...)</a></div>')
-	.append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><!--<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png">--></img></div>');
+    .append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><div>&nbsp;</div><div class="feedme-num-shared"><a class="" href="javascript:{}">more...</div></a></div>')
+    .append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><!--<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png">--></img></div>');
 
     $("#feedme-controls", context)
-	/*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
-	.append('<textarea class="comment-textarea"></textarea></div>')
-	.append('<div class="feedme-now-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
-	.append('<div class="feedme-later-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
-	//.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
+    /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
+    .append('<textarea class="comment-textarea"></textarea></div>')
+    .append('<div class="feedme-now-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
+    .append('<div class="feedme-later-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
+    //.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
 
-	
-	// Clear the autocomplete when they start typing
-	suggest_autocomplete(context);
-	$('.feedme-autocomplete', context).focus(function() {
-		if ($(this).val() == defaultAutocompleteText) {
-			$(this).val('');
-		}
-		$(this).toggleClass('feedme-autocompleteToggle');
-	});
-	$('.feedme-autocomplete', context).blur(function() { 
-		if ($(this).val() == '') {
-			$(this).val(defaultAutocompleteText);
-		}
-		$(this).toggleClass('feedme-autocompleteToggle');
-		return true;
-	});
-	$('.feedme-now-button', context).click(share_post);
-	$('.feedme-later-button', context).click(share_post);
-	$('.feedme-more-recommendations-button', context).click(function() {
-    	recommendMorePeople(context);
-	});
-	$('.feedme-comment-button', context).click(function() {
-		console.log("comment button clicked");
-		var comment_btn = $('.feedme-toggle-hidden', context);
-		comment_btn.slideToggle("normal");
-	});
-	
-	server_recommend(context);
+    
+    // Clear the autocomplete when they start typing
+    suggest_autocomplete(context);
+    $('.feedme-autocomplete', context).focus(function() {
+        if ($(this).val() == defaultAutocompleteText) {
+            $(this).val('');
+        }
+        $(this).toggleClass('feedme-autocompleteToggle');
+    });
+    $('.feedme-autocomplete', context).blur(function() { 
+        if ($(this).val() == '') {
+            $(this).val(defaultAutocompleteText);
+        }
+        $(this).toggleClass('feedme-autocompleteToggle');
+        return true;
+    });
+    $('.feedme-now-button', context).click(share_post);
+    $('.feedme-later-button', context).click(share_post);
+    $('.feedme-more-recommendations-button', context).click(function() {
+        recommendMorePeople(context);
+    });
+    $('.feedme-comment-button', context).click(function() {
+        console.log("comment button clicked");
+        var comment_btn = $('.feedme-toggle-hidden', context);
+        comment_btn.slideToggle("normal");
+    });
+    
+    server_recommend(context);
 }
 
 function server_recommend(context) {
-	server_vars = get_post_variables(context);
-	
-	var theurl = "recommend/";
-	var data = {
-		feed_title: server_vars["feed_title"],
-		feed_url: server_vars["feed_url"],
-		post_url: server_vars["post_url"],
-		post_title: server_vars["post_title"],
-		post_contents: server_vars["post_contents"]
-	}
-	
-	console.log(data)
-	ajax_post(theurl, data, populateSuggestions);
+    server_vars = get_post_variables(context);
+    
+    var theurl = "recommend/";
+    var data = {
+        feed_title: server_vars["feed_title"],
+        feed_url: server_vars["feed_url"],
+        post_url: server_vars["post_url"],
+        post_title: server_vars["post_title"],
+        post_contents: server_vars["post_contents"]
+    }
+    
+    console.log(data)
+    ajax_post(theurl, data, populateSuggestions);
 }
 
 function get_post_variables(context)
 {
-	var post_url = $('.entry-title a', context).attr('href');
-	var feed_title = $('a.entry-source-title', context).text()
-	var feed_url = unescape($('a.entry-source-title', context).attr('href'));
-	var feed_url_loc = feed_url.indexOf('feed/');
-	feed_url = feed_url.substring(feed_url_loc + 'feed/'.length);
-	var post_title = $('.entry-container .entry-title', context).text();
-	var post_contents = $('.entry-body', context).html();	
-	
-	var post_vars = new Array();
-	post_vars["post_url"] = post_url;
-	post_vars["feed_title"] = feed_title;
-	post_vars["feed_url"] = feed_url;
-	post_vars["post_title"] = post_title;
-	post_vars["post_contents"] = post_contents;
-	return post_vars;
+    var post_url = $('.entry-title a', context).attr('href');
+    var feed_title = $('a.entry-source-title', context).text()
+    var feed_url = unescape($('a.entry-source-title', context).attr('href'));
+    var feed_url_loc = feed_url.indexOf('feed/');
+    feed_url = feed_url.substring(feed_url_loc + 'feed/'.length);
+    var post_title = $('.entry-container .entry-title', context).text();
+    var post_contents = $('.entry-body', context).html();	
+    
+    var post_vars = new Array();
+    post_vars["post_url"] = post_url;
+    post_vars["feed_title"] = feed_title;
+    post_vars["feed_url"] = feed_url;
+    post_vars["post_title"] = post_title;
+    post_vars["post_contents"] = post_contents;
+    return post_vars;
 }
 
 function ajax_post(url, data, callback) {
@@ -234,52 +235,52 @@ function ajax_get(url, data, callback) {
 // gives Greasemonkey control so we can call the XMLhttprequest. This is a security risk.
 function ajax_req(url, data, callback, method)
 {
-	url = 'http://feedme.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
-	window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
-		GM_xmlhttpRequest({
-		method: method,
-		url: url,
-		data: $.param(data),
-		headers: {
-			'User-Agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-			'Content-Type': 'application/x-www-form-urlencoded',
-			'Accept': 'application/json, text/javascript'
-		},
-		onload: function(responseDetails) {
-			if (responseDetails.status == 200) {
-				console.log('response received');
-				callback(eval("(" + responseDetails.responseText + ")"));
-			}
-			else {
-				console.log('AJAX error: "' + responseDetails.statusText + '" for URL: ' + url);
-			}
-		},
-		onerror: function(responseDetails) {
-			console.log('error');
-		}
-		});
-	}, 0);
+    url = 'http://feedme.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
+    window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
+        GM_xmlhttpRequest({
+        method: method,
+        url: url,
+        data: $.param(data),
+        headers: {
+            'User-Agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+            'Content-Type': 'application/x-www-form-urlencoded',
+            'Accept': 'application/json, text/javascript'
+        },
+        onload: function(responseDetails) {
+            if (responseDetails.status == 200) {
+                console.log('response received');
+                callback(eval("(" + responseDetails.responseText + ")"));
+            }
+            else {
+                console.log('AJAX error: "' + responseDetails.statusText + '" for URL: ' + url);
+            }
+        },
+        onerror: function(responseDetails) {
+            console.log('error');
+        }
+        });
+    }, 0);
 }
 
 function populateSuggestions(json) {
-	var people = json["users"];
-	var post_url = json["posturl"];
-	var previously_shared = json["shared"];
-	console.log(post_url);
-	console.log(people);
-	console.log(previously_shared);
-	
-	var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
-	// if we can't find the post, jettison
-	if (postToPopulate.size() == 0 || $('.entry-title-link', postToPopulate).attr('href').indexOf(post_url) == -1)
-	{
-		return;
-	}
+    var people = json["users"];
+    var post_url = json["posturl"];
+    var previously_shared = json["shared"];
+    console.log(post_url);
+    console.log(people);
+    console.log(previously_shared);
+    
+    var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
+    // if we can't find the post, jettison
+    if (postToPopulate.size() == 0 || $('.entry-title-link', postToPopulate).attr('href').indexOf(post_url) == -1)
+    {
+        return;
+    }
 
-	$(postToPopulate).data('people', people);
+    $(postToPopulate).data('people', people);
     $(postToPopulate).data('previously_shared', previously_shared);
-	$(postToPopulate).data('start_person', 0);
-	recommendMorePeople(postToPopulate);
+    $(postToPopulate).data('start_person', 0);
+    recommendMorePeople(postToPopulate);
 }
 
 /*
@@ -289,40 +290,48 @@ function recommendMorePeople(postToPopulate) {
     var people = $(postToPopulate).data('people');
     var start_person = $(postToPopulate).data('start_person');
     var previously_shared = $(postToPopulate).data('previously_shared');
-	var header = $(".feedme-suggestions", postToPopulate);
-	var div_id = 'feedme-recommendation-group-' + start_person;
-	
-	var min_length =  start_person + moreRecommendations < people.length ?
-	                 start_person + moreRecommendations : people.length;
+    var header = $(".feedme-suggestions", postToPopulate);
+    var div_id = 'feedme-recommendation-group-' + start_person;
+    
+    var min_length =  start_person + moreRecommendations < people.length ?
+                     start_person + moreRecommendations : people.length;
     var expanded_div = null;
-	if (start_person < min_length) {
-	    header.append('<div id="' + div_id + '" class="expand-container"></div>');
-	    expanded_div = $('#' + div_id, postToPopulate);
-	    for (var i = start_person; i < min_length; i++) {
-		    var person = people[i];
-		    addFriend(person['email'], person['email'], person['shared_today'], expanded_div, postToPopulate);
-	    }
+    
+    if (start_person < min_length) {
+        header.append('<div id="' + div_id + '" class="expand-container feedme-recommendations-group"></div>');
+        expanded_div = $('#' + div_id, postToPopulate);
+        for (var i = start_person; i < min_length; i++) {
+            var person = people[i];
+            addFriend(person['email'], person['email'], person['shared_today'], expanded_div, postToPopulate);
+        }
      
-        expanded_div.slideToggle("normal");
-        expanded_div.append($("#feedme-more-recommendations", postToPopulate));
+        if (start_person == 0) {
+            $('.feedme-placeholder').remove();
+            expanded_div.removeClass('expand-container');
+            expanded_div.css("display", "inline");  // so the placeholder flows with it in the same line
+        }
+        else {
+            expanded_div.slideToggle("normal");
+        }
+        $('#feedme-recommendation-group-0').append($("#feedme-more-recommendations", postToPopulate));
 
-        // Commented out until we decide what to do with previously shared
-        // folks
-	    /*for (var j=0; j<previously_shared.length; j++) {
-		    var person = previously_shared[j];
-		    $('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-toggle").addClass("feedme-sent");
-	    }*/
-	
-	    $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
+            // Commented out until we decide what to do with previously shared
+            // folks
+            /*for (var j=0; j<previously_shared.length; j++) {
+                var person = previously_shared[j];
+                $('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-toggle").addClass("feedme-sent");
+            }*/
+    
+        $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
         $(postToPopulate).data('start_person', min_length);
-	}
+    }
 }
 
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, shared_today, header, context) {
-	header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">Received ' + shared_today + ' today</div></div>');
+    header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">Received ' + shared_today + ' today</div></div>');
     // Make the elements interactive
     $(".feedme-person:last", header).click(function(event) {
       $(this).toggleClass("feedme-toggle");
@@ -332,217 +341,217 @@ function addFriend(name, email, shared_today, header, context) {
 
 function handle_ajax_response(data)
 {
-	console.log(data);
+    console.log(data);
 }
 
 function share_post(event) 
 {
-	console.log("sharing post.");
-	context = $(this).parents('.entry');
-	// remove comment box
-	$('.feedme-toggle-hidden', context).slideUp("normal");
-	
-	// Flash the selected elements
-	// Bottom____Color is necessary because jQuery color doesn't animate "borderColor"
-	var animateHighlight = { 
-		backgroundColor: '#F7EBBB', 
-		borderBottomColor: '#9b9b9b',
-		borderTopColor: '#9b9b9b',
-		borderLeftColor: '#9b9b9b',
-		borderRightColor: '#9b9b9b'		
-	};
-	var animateDefault = {
-		backgroundColor: '#FFFFFF',
-		borderBottomColor: '#FFFFFF',
-		borderTopColor: '#FFFFFF',
-		borderLeftColor: '#FFFFFF',
-		borderRightColor: '#FFFFFF'
-	};
-	var animateSelected = {
-		backgroundColor: '#f3f5fc',
-		borderBottomColor: '#d2d2d2',
-		borderTopColor: '#d2d2d2',
-		borderLeftColor: '#d2d2d2',
-		borderRightColor: '#d2d2d2'
-	};
-	$(".feedme-person.feedme-toggle", context)
-	.animate(animateHighlight, 750)
-	.animate(animateDefault, 750, function() {
-		// clean up
-		$(this).removeClass("feedme-toggle")
-		.css('background-color', '')
-		.css('border', '');
-	});
-	
-	$(this)
-	.animate(animateHighlight, 750)
-	.animate(animateSelected, 750);
-	
-	var digest = $(this).hasClass("feedme-later-button");
-	//var broadcast = ($('.feedme-suggest.feedme-toggle', context).length == 1);
-	var recipientDivs = $(".feedme-person.feedme-toggle", context);
-	if (recipientDivs.length == 0) {
-		console.log("nobody to share with.");
-		alert("Please select a contact to share the feed item with.");
-		return;
-	}
-	
-	var recipients = new Array();
-	for (var i=0; i < recipientDivs.length; i++)
-	{
-		recipients[i] = recipientDivs[i].getAttribute("email");
-	}
-	
-	server_vars = get_post_variables(context);
-	
-	var url = "share/";
-	console.log("Sharing post with: " + recipients);
-	var data = {
-		post_url: server_vars["post_url"],
-		feed_url: server_vars["feed_url"],
-		recipients: recipients,
-		comment: $('.comment-textarea', context).val(),
-		digest: digest
-	}
-	console.log(data);
-	ajax_post(url, data, handle_ajax_response);
+    console.log("sharing post.");
+    context = $(this).parents('.entry');
+    // remove comment box
+    $('.feedme-toggle-hidden', context).slideUp("normal");
+    
+    // Flash the selected elements
+    // Bottom____Color is necessary because jQuery color doesn't animate "borderColor"
+    var animateHighlight = { 
+        backgroundColor: '#F7EBBB', 
+        borderBottomColor: '#9b9b9b',
+        borderTopColor: '#9b9b9b',
+        borderLeftColor: '#9b9b9b',
+        borderRightColor: '#9b9b9b'		
+    };
+    var animateDefault = {
+        backgroundColor: '#FFFFFF',
+        borderBottomColor: '#FFFFFF',
+        borderTopColor: '#FFFFFF',
+        borderLeftColor: '#FFFFFF',
+        borderRightColor: '#FFFFFF'
+    };
+    var animateSelected = {
+        backgroundColor: '#f3f5fc',
+        borderBottomColor: '#d2d2d2',
+        borderTopColor: '#d2d2d2',
+        borderLeftColor: '#d2d2d2',
+        borderRightColor: '#d2d2d2'
+    };
+    $(".feedme-person.feedme-toggle", context)
+    .animate(animateHighlight, 750)
+    .animate(animateDefault, 750, function() {
+        // clean up
+        $(this).removeClass("feedme-toggle")
+        .css('background-color', '')
+        .css('border', '');
+    });
+    
+    $(this)
+    .animate(animateHighlight, 750)
+    .animate(animateSelected, 750);
+    
+    var digest = $(this).hasClass("feedme-later-button");
+    //var broadcast = ($('.feedme-suggest.feedme-toggle', context).length == 1);
+    var recipientDivs = $(".feedme-person.feedme-toggle", context);
+    if (recipientDivs.length == 0) {
+        console.log("nobody to share with.");
+        alert("Please select a contact to share the feed item with.");
+        return;
+    }
+    
+    var recipients = new Array();
+    for (var i=0; i < recipientDivs.length; i++)
+    {
+        recipients[i] = recipientDivs[i].getAttribute("email");
+    }
+    
+    server_vars = get_post_variables(context);
+    
+    var url = "share/";
+    console.log("Sharing post with: " + recipients);
+    var data = {
+        post_url: server_vars["post_url"],
+        feed_url: server_vars["feed_url"],
+        recipients: recipients,
+        comment: $('.comment-textarea', context).val(),
+        digest: digest
+    }
+    console.log(data);
+    ajax_post(url, data, handle_ajax_response);
 }
 
 // Original author mattkolb
 // http://userscripts.org/scripts/show/29604
 function initAutocomplete() {
-	console.log('initializing autocomplete');
-	// my email address
-	// add your email to have it display as the top result on all searches
-	// example: var my_email = ["me@myself.com", "my_other@address.com"];
-	var my_email = [];
-	var contacts_xml_url = "http://docs.google.com/c/data/contacts?max=1000";
-	// whether to add your gmail address to the list of suggestions
-	var add_gmail = true;
-	var contact_entries = [];
-	GM_xmlhttpRequest({
-	    method: 'GET',
-	    url: contacts_xml_url,
-	    headers: {
-		'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey/0.3',
-		'Accept': 'application/atom+xml,application/xml,text/xml'
-	    },
-	    onload: function(responseDetails) {
-		console.log('autocomplete data received');
-		var parser = new DOMParser();
-		var dom = parser.parseFromString(responseDetails.responseText,
-		    "application/xml");
-		if (add_gmail) {
-			var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
-			var email = dom.getElementsByTagName('Email')[0].textContent;
-			if (display_email != 'undefined') {
-				var found = false;
-				for (var i in my_email) {
-					if (my_email[i] == display_email) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					my_email.push(display_email);
-				}
-			}
-			if (email != 'undefined') {
-				found = false;
-				for (var i in my_email) {
-					if (my_email[i] == email) {
-						found = true;
-						break;
-					}
-				}
-				if (!found) {
-					my_email.push(email);
-				}
-			}
-		}
+    console.log('initializing autocomplete');
+    // my email address
+    // add your email to have it display as the top result on all searches
+    // example: var my_email = ["me@myself.com", "my_other@address.com"];
+    var my_email = [];
+    var contacts_xml_url = "http://docs.google.com/c/data/contacts?max=1000";
+    // whether to add your gmail address to the list of suggestions
+    var add_gmail = true;
+    var contact_entries = [];
+    GM_xmlhttpRequest({
+        method: 'GET',
+        url: contacts_xml_url,
+        headers: {
+        'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey/0.3',
+        'Accept': 'application/atom+xml,application/xml,text/xml'
+        },
+        onload: function(responseDetails) {
+        console.log('autocomplete data received');
+        var parser = new DOMParser();
+        var dom = parser.parseFromString(responseDetails.responseText,
+            "application/xml");
+        if (add_gmail) {
+            var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
+            var email = dom.getElementsByTagName('Email')[0].textContent;
+            if (display_email != 'undefined') {
+                var found = false;
+                for (var i in my_email) {
+                    if (my_email[i] == display_email) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    my_email.push(display_email);
+                }
+            }
+            if (email != 'undefined') {
+                found = false;
+                for (var i in my_email) {
+                    if (my_email[i] == email) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    my_email.push(email);
+                }
+            }
+        }
 
-		var xml_objects = dom.getElementsByTagName('Object');
-		for (var i = 0; i < xml_objects.length; i++) {
-			var display_names = xml_objects[i].getElementsByTagName('DisplayName');
-			if (display_names.length > 0) {
-				var xml_addresses = xml_objects[i].getElementsByTagName('Address');
-				for (var j = 0; j < xml_addresses.length; j++) {
-					contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
-				}
-			}
-		}
-		
-		autocompleteData = contact_entries;
-		console.log('autocomplete data set');
-	    }
-	});
+        var xml_objects = dom.getElementsByTagName('Object');
+        for (var i = 0; i < xml_objects.length; i++) {
+            var display_names = xml_objects[i].getElementsByTagName('DisplayName');
+            if (display_names.length > 0) {
+                var xml_addresses = xml_objects[i].getElementsByTagName('Address');
+                for (var j = 0; j < xml_addresses.length; j++) {
+                    contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
+                }
+            }
+        }
+        
+        autocompleteData = contact_entries;
+        console.log('autocomplete data set');
+        }
+    });
 }
 
 /*
  * Adds a jQuery autocomplete element to the suggestion div.  Hooks up listeners to the new friends that get added.
  */
 function suggest_autocomplete(context) {
-	autocompleteWait(context);
+    autocompleteWait(context);
 }
 
 function autocompleteWait(context) {
-	if(autocompleteData == null) {
-		window.setTimeout(autocompleteWait, 100, context);
-	} else {         
-		populateAutocomplete(context);
-	}
+    if(autocompleteData == null) {
+        window.setTimeout(autocompleteWait, 100, context);
+    } else {         
+        populateAutocomplete(context);
+    }
 }
 
 function populateAutocomplete(context) {
-	$(".feedme-autocomplete", context).autocomplete(autocompleteData, {
-		width: 300,
-		max: 6,
-		multiple: false,
-		scroll: true,
-		scrollHeight: 300,
-		matchContains: true,
-		mustMatch: false,
-		formatItem: function(row, i, max) {
-			return row.name + " [" + row.to + "]";
-		},
-		formatMatch: function(row, i, max) {
-			return row.name + " " + row.to;
-		},
-		formatResult: function(row) {
-			return row.to;
-		}
-	}).result(function(event, item) {
+    $(".feedme-autocomplete", context).autocomplete(autocompleteData, {
+        width: 300,
+        max: 6,
+        multiple: false,
+        scroll: true,
+        scrollHeight: 300,
+        matchContains: true,
+        mustMatch: false,
+        formatItem: function(row, i, max) {
+            return row.name + " [" + row.to + "]";
+        },
+        formatMatch: function(row, i, max) {
+            return row.name + " " + row.to;
+        },
+        formatResult: function(row) {
+            return row.to;
+        }
+    }).result(function(event, item) {
         added = false;
-		if (item) {
-    		// add the newly suggested friend to the list
+        if (item) {
+            // add the newly suggested friend to the list
             addFriend(item.to, item.to, 0, $(".feedme-autocomplete-added", context), context);
-	    	added = true;
-		} else if ($(this).val() != '') {
+            added = true;
+        } else if ($(this).val() != '') {
             addFriend($(this).val(), $(this).val(), 0, $(".feedme-autocomplete-added", context), context);
             added = true;
-		}
-		
-		if (added == true) {
-    		$(this).val('');
-	    	var newFriend = $(".feedme-person:last", context); // find the new person
-	        newFriend.click();	// trigger click to select
-	    }
-	});
-	
-	$('.ac_results', context).blur(function() {
-		var selected = $('.ac_over', context);
-		console.log(selected);
-		// store the last remembered highlighted person so that if they click '+', we know what they were pointing at
-		$(this).data('last_selected_entry', selected);
-		return true;
-	});
-	
-	$('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).search() });
-	$('.feedme-autocomplete', context).keydown(function(event) {
-	    if (event.which == 13) { // user pushed enter
-	        $('.feedme-autocomplete', context).search();
-	    }
-	});
+        }
+        
+        if (added == true) {
+            $(this).val('');
+            var newFriend = $(".feedme-person:last", context); // find the new person
+            newFriend.click();	// trigger click to select
+        }
+    });
+    
+    $('.ac_results', context).blur(function() {
+        var selected = $('.ac_over', context);
+        console.log(selected);
+        // store the last remembered highlighted person so that if they click '+', we know what they were pointing at
+        $(this).data('last_selected_entry', selected);
+        return true;
+    });
+    
+    $('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).search() });
+    $('.feedme-autocomplete', context).keydown(function(event) {
+        if (event.which == 13) { // user pushed enter
+            $('.feedme-autocomplete', context).search();
+        }
+    });
 }
 
 /*
@@ -551,29 +560,90 @@ function populateAutocomplete(context) {
 function setupStyles() {
     var styles = (<r><![CDATA[
     
-   .feedme-suggestions { display: inline; }
-   .feedme-person { }
-   .feedme-toggle { background-color: #f3f5fc; border: 1px solid
-#d2d2d2; -moz-border-radius: 5px; }
-   .feedme-button { display: inline-block; padding: 3px 6px; margin: 0px
-10px 5px 0px; cursor: pointer; border: 1px solid white;
-vertical-align: top; text-align: center;}
-   .feedme-autocomplete { width: 100px; }
-   .feedme-autocomplete-container { display: inline; vertical-align:
-middle; margin-right: 10px; }
-   .feedme-autocompleteToggle { color: gray; }
-   .feedme-addImg { margin-left: 5px; cursor: pointer; }
-   .wait-for-suggestions { visibility: hidden; }
-   .expand-container { display: none; }
-   .comment-textarea { height: 42px; width: 415px; margin-top: 10px;
-margin-right: 20px; }
-   .feedme-num-shared { font-size: 7pt; text-align: right; }
-   .feedme-recommend-header { display: inline-block; margin-right: 5px; }
-   .feedme-now-button { width: 30px; -moz-border-radius-topright: 0px;
--moz-border-radius-bottomright: 0px; margin-right: 0px; border-right:
-0px; vertical-align: bottom; }
-   .feedme-later-button { width: 30px; -moz-border-radius-topleft: 0px;
--moz-border-radius-bottomleft: 0px; vertical-align: bottom; }
+    .feedme-suggestions { 
+        display: inline; 
+    }
+    .feedme-person { }
+    .feedme-placeholder { 
+        display: inline;
+    }
+    .feedme-button { 
+        display: inline-block; 
+        padding: 3px 6px; 
+        margin: 0px 10px 5px 0px; 
+        cursor: pointer; 
+        border: 1px solid white;
+        vertical-align: top; 
+        text-align: center;
+    }    
+    .feedme-toggle { 
+        background-color: #f3f5fc;
+        border: 1px solid #d2d2d2;
+        -moz-border-radius: 5px; 
+    }
+    .feedme-autocomplete { 
+        width: 100px; 
+    }
+    .feedme-autocomplete-container { 
+        display: inline; 
+        vertical-align: middle;
+        margin-right: 10px; 
+    }
+    .feedme-autocomplete-added {
+    }
+    .feedme-autocompleteToggle { 
+        color: gray; 
+    }
+    .feedme-addImg { 
+        margin-left: 5px;
+        cursor: pointer;
+        }
+    .wait-for-suggestions { 
+        visibility: hidden;
+    }
+    .expand-container { 
+        display: none; 
+    }
+    .comment-textarea { 
+        height: 42px; 
+        width: 415px; 
+        margin-top: 10px;
+        margin-right: 20px; 
+    }
+    .feedme-num-shared { 
+        font-size: 7pt; 
+        text-align: right; 
+    }
+    .feedme-recommend-header { 
+        display: inline-block; 
+        margin-right: 5px; 
+    }
+    .feedme-now-button { 
+        width: 30px; 
+        -moz-border-radius-topright: 0px;
+        -moz-border-radius-bottomright: 0px;
+        margin-right: 0px; 
+        border-right: 0px; 
+        vertical-align: bottom; 
+    }
+    .feedme-later-button { 
+        width: 30px; 
+        -moz-border-radius-topleft: 0px;
+        -moz-border-radius-bottomleft: 0px; 
+        vertical-align: bottom; 
+    }
+    .feedme-recommendations-group {
+        position: relative;
+        right: 7px;
+    }
+    /* This is probably a bit dangerous, to be overriding GReader's own CSS.  But we want the 
+        buttons to align left, and the padding makes them push right.  So we need to let them
+        extend beyond the usual edge of the div
+    */
+    .entry .entry-main {
+        overflow: visible;
+    }
+    
     ]]></r>).toString();
     
     GM_addStyle(styles);
@@ -581,7 +651,7 @@ margin-right: 20px; }
 
 function log_in() {
     console.log('about to check login');
-	ajax_get('check_logged_in', {}, verify_login);
+    ajax_get('check_logged_in', {}, verify_login);
 }
 
 function verify_login(json) {
@@ -591,7 +661,7 @@ function verify_login(json) {
         $("body").append('<a style="display: none;" id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
         $("a#login-iframe").fancybox({
             frameHeight: 200,
-	    hideOnContentClick: false,
+        hideOnContentClick: false,
         });
         $("a#login-iframe").click();
     }
@@ -636,14 +706,14 @@ function verify_login(json) {
     
     // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
-	// wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
-	// TODO: can't figure out how to wait for jQuery Color Animation
+    // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
+    // TODO: can't figure out how to wait for jQuery Color Animation
         if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
-		window.setTimeout(GM_wait,100);
-	}
-	else {
-		$ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
-		init(); 
-	}
+        window.setTimeout(GM_wait,100);
+    }
+    else {
+        $ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
+        init(); 
+    }
     }
     GM_wait();
