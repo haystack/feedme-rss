@@ -136,7 +136,7 @@ def send_post(post_to_send):
 def send_post_email(shared_post, receivers):
   """Sends the post in an email to the recipient"""
   post = shared_post.post
-  subject = post.title
+  subject = post.title.strip()
   from_email = shared_post.sharer.user.email
   to_emails = [receiver.receiver.user.email for receiver in receivers]
   to_emails.append(from_email)
