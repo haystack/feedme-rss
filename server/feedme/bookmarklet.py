@@ -50,7 +50,6 @@ def bookmarklet(request):
              params.onload(request);
            }
          });
-         //$.post(params.url, params.data, params.onload);
     }
     
     </script>
