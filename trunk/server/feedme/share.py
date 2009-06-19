@@ -38,8 +38,10 @@ def share(request):
   receivers = Receiver.objects.filter( \
     sharedpostreceiver__shared_post = shared_post) \
     .filter(sharedpostreceiver__sent = False).distinct()
-  send_post(shared_post)
 
+  print "preparing to send post"
+  send_post(shared_post)
+  
   # do online updating of profiles of people who received the post
   # it is very inefficient to loop through three times, but this
   # guarantees that all the terms are added to all people
@@ -124,6 +126,7 @@ def send_post(post_to_send):
                 .filter(sent = False)
 
     if len(receivers) == 0:
+      print 'No receivers, escaping'
       return
     
     send_post_email(post_to_send, receivers)
@@ -139,10 +142,15 @@ def send_post_email(shared_post, receivers):
   subject = post.title.strip()
   from_email = shared_post.sharer.user.email
   to_emails = [receiver.receiver.user.email for receiver in receivers]
-  to_emails.append(from_email)
+  if from_email != u'karger@csail.mit.edu':
+    to_emails.append(from_email)
+  else:
+    print 'SPECIAL CASE KARGER NOT CC\'ED'
   comment = shared_post.comment
 
-  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
+  # this crashes on the test-runner
+  print subject.encode('utf-8')
+  print (unicode('sending ' + subject + ' to ' + str(to_emails))).encode('utf-8')
   
   html_content = u''
   if comment is not u'':
