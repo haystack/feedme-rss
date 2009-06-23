@@ -149,8 +149,7 @@ def send_post_email(shared_post, receivers):
   comment = shared_post.comment
 
   # this crashes on the test-runner
-  print subject.encode('utf-8')
-  print (unicode('sending ' + subject + ' to ' + str(to_emails))).encode('utf-8')
+  print u'sending ' + subject + u' to ' + unicode(to_emails)
   
   html_content = u''
   if comment is not u'':
