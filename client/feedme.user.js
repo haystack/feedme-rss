@@ -317,10 +317,10 @@ function recommendMorePeople(postToPopulate) {
 
             // Commented out until we decide what to do with previously shared
             // folks
-            /*for (var j=0; j<previously_shared.length; j++) {
-                var person = previously_shared[j];
-                $('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-toggle").addClass("feedme-sent");
-            }*/
+        for (var j=0; j<previously_shared.length; j++) {
+            var person = previously_shared[j];
+            $('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-sent");
+        }
     
         $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
         $(postToPopulate).data('start_person', min_length);
