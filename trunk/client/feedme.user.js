@@ -334,8 +334,9 @@ function addFriend(name, email, shared_today, header, context) {
     header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">Received ' + shared_today + ' today</div></div>');
     // Make the elements interactive
     $(".feedme-person:last", header).click(function(event) {
-      $(this).toggleClass("feedme-toggle");
-      $("#feedme-controls", context).slideDown("normal");
+        $(this).removeClass("feedme-sent");
+        $(this).toggleClass("feedme-toggle");
+        $("#feedme-controls", context).slideDown("normal");
     });
 }
 
@@ -374,13 +375,21 @@ function share_post(event)
         borderLeftColor: '#d2d2d2',
         borderRightColor: '#d2d2d2'
     };
+    var animateSent = {
+        backgroundColor: '#e0e0e0',
+        borderBottomColor: '#d2d2d2',
+        borderTopColor: '#d2d2d2',
+        borderLeftColor: '#d2d2d2',
+        borderRightColor: '#d2d2d2'	
+    };
     $(".feedme-person.feedme-toggle", context)
     .animate(animateHighlight, 750)
-    .animate(animateDefault, 750, function() {
+    .animate(animateSent, 750, function() {
         // clean up
         $(this).removeClass("feedme-toggle")
         .css('background-color', '')
-        .css('border', '');
+        .css('border', '')
+        .addClass("feedme-sent");
     });
     
     $(this)
@@ -575,11 +584,16 @@ function setupStyles() {
         border: 1px solid white;
         vertical-align: top; 
         text-align: center;
-    }    
+    }
     .feedme-toggle { 
         background-color: #f3f5fc;
         border: 1px solid #d2d2d2;
         -moz-border-radius: 5px; 
+    }
+    .feedme-sent {
+        background-color: #e0e0e0;
+        border: 1px solid #d2d2d2;
+        -moz-border-radius: 5px;         
     }
     .feedme-autocomplete { 
         width: 100px; 
