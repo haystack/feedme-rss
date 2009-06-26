@@ -1,12 +1,11 @@
 // ==UserScript==
-// @name          Feedme:
-// @namespace     http://feedme.csail.mit.edu
-// @description   A Greasemonkey script that adds sharing functionality to Google Reader
+// @name                FeedMe
+// @namespace         http://feedme.csail.mit.edu
+// @description       A Greasemonkey script that adds sharing functionality to Google Reader
 // @include             http://google.com/reader/*
 // @include             http://*.google.com/reader/*
 // @include             https://google.com/reader/*
 // @include             https://*.google.com/reader/*
-// @unwrap 
 // ==/UserScript==
 
 /**
@@ -34,6 +33,7 @@
 */
 
 var port = 8000;
+var script_version = 0.01;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -46,6 +46,7 @@ function init() {
     try { console.log('init console... done'); } catch(e) { console = { log: function() {} }; }
     console.log("Libraries loaded.");
     
+    checkVersion();
     setupStyles();
     log_in();
     initAutocomplete();
@@ -55,6 +56,39 @@ function init() {
     //$('#entries[class*="cards"] .entry').each(entry_class_modified);
     
     $("#entries").bind("DOMNodeInserted", expandListener);
+}
+
+/* Sees if there's a newer version of the script, and if so, prompts the user */
+function checkVersion()
+{
+    console.log("Checking version")
+    var urlToCheck = "http://groups.csail.mit.edu/haystack/feedme/current_version.js?" + new Date().getTime();  // date appending ensures that it doesn't cache
+    GM_xmlhttpRequest({
+        method: 'GET',
+        url: urlToCheck,
+        headers: {
+            'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey/0.3',
+            'Accept': 'application/atom+xml,application/xml,text/xml'
+        },
+        onload: function(responseDetails) {
+            console.log("Version data received.");
+            versionData = eval(responseDetails.responseText);
+            version_available = versionData['version'];
+            console.log("Current version: " + script_version + ".   Version available: " + version_available);
+            if (version_available > script_version) {
+                console.log("Upgrade available!");
+                upgrade(version_available, versionData['url'], versionData['whats-new']);
+            }
+        }
+    });
+}
+
+function upgrade(version, link, whats_new) {
+    $("body").append('<a style="display: none" id="upgrade" href="#upgrade-data"></a><div style="display: none; margin: 5px; background-color: white" id="upgrade-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" /><h2>FeedMe upgrade</h2><div>FeedMe has released a new version of the script; we recommend that you upgrade as soon as possible.  To upgrade, <a style="color: #FFFFFF" href="' + link + '">click this link</a> and agree to install the script.</div><div><div style="margin: 1em 0 0 0">What\'s new in version ' + version + ':</div>' + whats_new + '</div></div>');
+    $("a#upgrade").fancybox( {
+        hideOnContentClick: false
+    });
+    $("a#upgrade").click();
 }
 
 function expandListener(event) {
@@ -675,7 +709,7 @@ function verify_login(json) {
         $("body").append('<a style="display: none;" id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
         $("a#login-iframe").fancybox({
             frameHeight: 200,
-        hideOnContentClick: false,
+            hideOnContentClick: false,
         });
         $("a#login-iframe").click();
     }
@@ -720,14 +754,16 @@ function verify_login(json) {
     
     // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
-    // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
-    // TODO: can't figure out how to wait for jQuery Color Animation
+        // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
+        // TODO: can't figure out how to wait for jQuery Color Animation
         if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
-        window.setTimeout(GM_wait,100);
-    }
-    else {
-        $ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
-        init(); 
-    }
+            window.setTimeout(GM_wait,100);
+        }
+        else {
+            $ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
+            $(document).ready( function() {
+                window.setTimeout(init, 0);     // gives control back to greasemonkey window
+            });
+        }
     }
     GM_wait();
