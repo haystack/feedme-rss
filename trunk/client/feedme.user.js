@@ -32,6 +32,9 @@
     THE SOFTWARE.
 */
 
+// Fail gracefully if Firebug's not installed
+try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
+
 var port = 8000;
 var script_version = 0.01;
 var autocompleteData = null;
@@ -42,8 +45,6 @@ var moreRecommendations = 3;
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
  */
 function init() {
-    // Fail gracefully if Firebug's not installed
-    try { console.log('init console... done'); } catch(e) { console = { log: function() {} }; }
     console.log("Libraries loaded.");
     
     checkVersion();
