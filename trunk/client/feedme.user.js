@@ -117,7 +117,7 @@ function expandListener(event) {
  */
 function isEntry(target)
 {
-    return $(target).attr("class").indexOf("entry") != -1;
+    return $(target).hasClass("entry");
 }
 
 /*
@@ -125,7 +125,7 @@ function isEntry(target)
  */
 function isExpandedView(entryTarget)
 {
-    return $(entryTarget).parent().attr("class").indexOf("cards") != -1;
+    return $(entryTarget).parent().hasClass("cards");
 }
 
 /*
@@ -144,7 +144,7 @@ function entry_class_modified(event) {
     var target = $(this);
     if (isEntry(target)) {
         // if it's expanded view or list view and that post has been expanded, fetch recommendations
-        if (isExpandedView(target) || target.attr("class").indexOf("expanded") != -1) {
+        if (isExpandedView(target) || target.hasClass("expanded")) {
             register_entry_click(target);
         }
     }
@@ -158,8 +158,9 @@ function register_entry_click(context) {
         if($(".feedme-suggestions", $(context)).size() > 0) {
             // if we're still looking at an item we've populated before
             return;
+        } else {
+            suggest_people($(context));
         }
-        suggest_people($(context));
     } catch (e) { 
         console.log(e);
     }
@@ -173,7 +174,6 @@ function suggest_people(context) {
     console.log("suggesting people");
     
     var defaultAutocompleteText = "type a name";
-
     $(".entry-body", context).before('<div class="feedme-suggestion-container"></div>');
 
     $(".feedme-suggestion-container", context)
@@ -301,14 +301,16 @@ function populateSuggestions(json) {
     var people = json["users"];
     var post_url = json["posturl"];
     var previously_shared = json["shared"];
-    console.log(post_url);
-    console.log(people);
-    console.log(previously_shared);
     
     var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
     // if we can't find the post, jettison
     if (postToPopulate.size() == 0 || $('.entry-title-link', postToPopulate).attr('href').indexOf(post_url) == -1)
     {
+        return;
+    }
+    // if we've already suggested, exit
+    if ($('.feedme-suggestions.wait-for-suggestions', postToPopulate).size() == 0) {
+        console.log("aborting -- results have already been returned for this post.  Otherwise we start adding multiple copies of folks from different AJAX requests.");
         return;
     }
 
