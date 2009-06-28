@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.01;
+var script_version = 0.1;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -366,7 +366,15 @@ function recommendMorePeople(postToPopulate) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, shared_today, header, context) {
-    header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">Received ' + shared_today + ' today</div></div>');
+    header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared"></div></div>');
+
+    num_shared = $('[email="' + email + '"] .feedme-num-shared', context);
+    if (shared_today == null) {
+        num_shared.html('&nbsp;');
+    }
+    else {
+        num_shared.text('Received ' + shared_today + ' today');
+    }
     // Make the elements interactive
     $(".feedme-person:last", header).click(function(event) {
         $(this).removeClass("feedme-sent");
@@ -568,10 +576,10 @@ function populateAutocomplete(context) {
         added = false;
         if (item) {
             // add the newly suggested friend to the list
-            addFriend(item.to, item.to, 0, $(".feedme-autocomplete-added", context), context);
+            addFriend(item.to, item.to, null, $(".feedme-autocomplete-added", context), context);
             added = true;
         } else if ($(this).val() != '') {
-            addFriend($(this).val(), $(this).val(), 0, $(".feedme-autocomplete-added", context), context);
+            addFriend($(this).val(), $(this).val(), null, $(".feedme-autocomplete-added", context), context);
             added = true;
         }
         
