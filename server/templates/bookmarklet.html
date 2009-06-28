@@ -16,7 +16,9 @@ function GM_addStyle(css) {
 
 function GM_xmlhttpRequest(params) {
   if (params.url.indexOf('http://feedme.csail.mit.edu') != 0) {
-    console.log('cannot do cross-domain request! canceling.');
+    if (console != null) {
+        console.log('cannot do cross-domain request! canceling.');
+    }
     return;
   }
   $.ajax({

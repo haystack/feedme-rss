@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+
+{% block title %}
+404 Error -- Page Not Found
+{% endblock %}
+
+{% block body %}
+<h1>404 Error</h1>
+<h3>"Ceci n'est pas une web page" &mdash;Ren&eacute; Magritte</h3>
+<div>The requested page {{ request.path|escape }} does not exist.</div>
+<div>
+Contact <a href="feedme@csail.mit.edu">feedme@csail.mit.edu</a> if this seems like an error.
+</div>
+{% endblock %}
