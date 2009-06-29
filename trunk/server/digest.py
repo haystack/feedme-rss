@@ -4,6 +4,7 @@ setup_environ(settings)
 from django.contrib.auth.models import User
 from server.feedme.models import *
 from django.core.mail import EmailMultiAlternatives
+from django.template import Context, loader
 
 def digest_posts():
     for receiver in Receiver.objects.all():
@@ -44,41 +45,30 @@ def send_digest_posts(posts, receiver):
   from_email = 'FeedMe <feedme@csail.mit.edu>'
   to_emails = [receiver.user.email]
 
+  context = Context({"posts": posts})
+  template = loader.get_template("digest.html")
+  html_content = template.render(context)
   print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
   
-  html_content = u''
-  html_content += u'Your friends on FeedMe thought that these posts ' +\
-                  u'might be interesting, but didn\'t want to bother ' +\
-                  u'you with a separate email at the time. Here\'s your ' +\
-                  u'weekly newspaper, as authored by your friends!<br />'
-
-  for shared_post_receiver in posts:
-      post = shared_post_receiver.shared_post.post
-      html_content += u"<a href='" + post.url + \
-                      u"'>" + post.title + u"</a> " +\
-                      u"[<a href='" + post.feed.rss_url + u"'>" + \
-                      post.feed.title + u"</a>], " + \
-                      u'from ' + shared_post_receiver.shared_post \
-                      .sharer.user.email +\
-                      "<br />\n"
-
-  html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\
-                  u"a (very) alpha tool at MIT. Have comments, or are your " +\
-                  u"friends spamming you? Email us at feedme@csail.mit.edu." +\
-                  u"<br /><br /><a href='http://feedme.csail.mit.edu:8000" +\
-                  u"/unsubscribe/'>Change your e-mail receiving settings" +\
-                  u"</a> to get only a digest, or never be recommended posts."
-
-  print html_content.encode('utf-8')
-  text_content = nltk.clean_html(html_content)
+  template_plaintext = loader.get_template("digest_plaintext.html")
+  text_content = template_plaintext.render(context)
+  text_content = nltk.clean_html(text_content)
   email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
   email.attach_alternative(html_content, "text/html")
   email.send()
 
+def pluralize(count):
+    if count > 1 or count == 0:
+        return 's'
+    else:
+        return ''
+
+
 def send_digest_report(shared_posts, sharer):
     """Sends an email to the sharer letting him/her know that the digest went out"""
     subject = u"FeedMe Digest Report: " + \
-              unicode(shared_posts.count()) + u' posts shared'
+              unicode(shared_posts.count()) + u' post' + \
+              pluralize(shared_posts.count()) + ' shared'
     from_email = 'FeedMe <feedme@csail.mit.edu>'
     to_emails = [sharer.user.email]
   
