@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.core.mail import EmailMultiAlternatives
 from django.utils import html
+from django.template import Context, loader
 from models import *
 import re
 import nltk
@@ -148,32 +149,17 @@ def send_post_email(shared_post, receivers):
     print 'SPECIAL CASE KARGER NOT CC\'ED'
   comment = shared_post.comment
 
-  # this crashes on the test-runner
-  print u'sending ' + subject + u' to ' + unicode(to_emails)
-  
-  html_content = u''
-  if comment is not u'':
-      html_content += comment + '<br /><br />'
-  html_content += shared_post.sharer.user.email + u" thought you might " + \
-                 u"like this post. " +\
-                 u"They're beta testing FeedMe, a tool we're developing " +\
-                 u"at MIT, so please feel free to <a href='mailto:feedme@" +\
-                 u"csail.mit.edu'>email us</a> with comments</a>." +\
-                 u"<br />\n<br />\n "
-  html_content += u"<b><a href='" + post.url + \
-                  u"'>" + post.title + u"</a></b> \n<br />"
-  html_content += u"<a href='" + post.feed.rss_url + u"'>" + \
-                  post.feed.title + u"</a><br />"
-  html_content += post.contents
-  html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\
-                  u"a (very) alpha tool at MIT. Have comments, or are your " +\
-                  u"friends spamming you? Email us at feedme@csail.mit.edu." +\
-                  u"<br /><br /><a href='http://feedme.csail.mit.edu:8000" +\
-                  u"/receiver/settings/'>Change your e-mail receiving settings" +\
-                  u"</a> to get only a digest, or never be recommended posts."
+  context = Context({"shared_post": shared_post, "post": post})
+  template = loader.get_template("share_email.html")
+  html_content = template.render(context)
 
-  #print html_content.encode('utf-8')
-  text_content = nltk.clean_html(html_content)
+  print u'sending ' + subject + u' to ' + unicode(to_emails)
+
+
+  plaintext_template = loader.get_template("share_email_plaintext.html")
+  text_content = plaintext_template.render(context)
+  text_content = nltk.clean_html(text_content)
+  print text_content
   email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
   email.attach_alternative(html_content, "text/html")
   email.send()

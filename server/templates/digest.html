@@ -1,0 +1,11 @@
+<p style="margin-bottom: 1em;">Your friends using MIT's FeedMe tool thought that these posts might be interesting to you, but didn't want to bother you with a separate email at the time. Here's your weekly newspaper, as authored by your friends!</p>
+
+{% for shared_post_receiver in posts %}
+<p>{% block post_title %}<a href="{{ shared_post_receiver.shared_post.post.url }}">{{ shared_post_receiver.shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}<a href="{{ shared_post_receiver.shared_post.post.feed.rss_url }}">{{ shared_post_receiver.shared_post.post.feed.title }}</a>{% endblock %}<br />
+
+<span style="margin-left: 20px">from {{ shared_post_receiver.shared_post.sharer.user.email }}</span></p>
+{% endfor %}
+
+<p style="margin-top: 1em;">Your friends are beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.</p>
+
+<p style="margin-top: 1em;">{% block subscription %}<a href='http://feedme.csail.mit.edu:8000/receiver/settings/'>Change your e-mail receiving settings</a>{% endblock %} to get only a digest, or to never be recommended posts.</p>
