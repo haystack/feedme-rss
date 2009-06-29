@@ -64,6 +64,7 @@ def create_user_json(recommendations):
                                                datetime.time(0, 0))
     shared_today = SharedPostReceiver.objects \
                    .filter(receiver__user = recommendation) \
+                   .filter(digest = False) \
                    .filter(time__gte = midnight_today)
     person['shared_today'] = len(shared_today)
     
