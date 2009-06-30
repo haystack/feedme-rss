@@ -1,0 +1,10 @@
+{% extends "digest_report.html" %}
+
+{% block email %}email us at feedme@csail.mit.edu{% endblock %}
+
+{% block post_title %}{{ shared_post.post.title }} ({{ shared_post.post.url }}){% endblock %}
+
+{% block feed_title %}{{ shared_post.post.feed.title }} ({{ shared_post.post.feed.rss_url }}){% endblock %}
+
+{% block subscription %}Go to http://feedme.csail.mit.edu:8000/receiver/settings/ to change your e-mail receiving settings{% endblock %}
+
