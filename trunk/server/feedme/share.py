@@ -24,13 +24,7 @@ def share(request):
 
   recipient_emails = request.POST.getlist('recipients')
 
-  # Escape any HTML in the comment, turn \n's into <br>'s, and autolink
-  # any URLs in the text
   comment = request.POST['comment']
-  if comment != "":
-    comment = html.escape(comment)
-    comment = html.linebreaks(comment)
-    comment = html.urlize(comment)
 
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
