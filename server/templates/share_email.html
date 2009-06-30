@@ -1,5 +1,5 @@
 {% if comment %}
-<p>{{ comment|escape|linebreaks }}</p>
+<p>{{ comment|escape|urlize|linebreaksbr }}</p>
 {% endif %}
 <p>{{ shared_post.sharer.user.email }} thought you might like this post. They're beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.</p>
 

@@ -2,8 +2,7 @@
 
 {% for shared_post_receiver in posts %}
 <p>{% block post_title %}<a href="{{ shared_post_receiver.shared_post.post.url }}">{{ shared_post_receiver.shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}<a href="{{ shared_post_receiver.shared_post.post.feed.rss_url }}">{{ shared_post_receiver.shared_post.post.feed.title }}</a>{% endblock %}<br />
-
-<span style="margin-left: 20px">from {{ shared_post_receiver.shared_post.sharer.user.email }}</span></p>
+<span style="margin-left: 20px">from {{ shared_post_receiver.shared_post.sharer.user.email }}{% ifnotequal shared_post_receiver.shared_post.comment "" %}: {{ shared_post_receiver.shared_post.comment|escape|urlize|linebreaksbr }}{% endifnotequal %}</span></p>
 {% endfor %}
 
 <p style="margin-top: 1em;">Your friends are beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.</p>
