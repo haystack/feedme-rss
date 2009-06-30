@@ -72,37 +72,24 @@ def send_digest_report(shared_posts, sharer):
     from_email = 'FeedMe <feedme@csail.mit.edu>'
     to_emails = [sharer.user.email]
   
-    print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
-  
-    html_content = u''
-    html_content += u'FeedMe just shared these posts with your friends ' +\
-                    u'as part of their occasional FeedMe digest. Now you ' +\
-                    u'can talk to them about it, and you were nice enough ' +\
-                    u'not to clog their inboxes at the time. What a friend!' +\
-                    u'<br /><br />'
-    
+
     for shared_post in shared_posts:
-        post = shared_post.post
-        html_content += u"<a href='" + post.url + \
-                        u"'>" + post.title + u"</a> " +\
-                        u"[<a href='" + post.feed.rss_url + u"'>" + \
-                        post.feed.title + u"</a>], with "
+        shared_post.receivers = []
         for shared_post_receiver in SharedPostReceiver.objects \
-            .filter(shared_post = shared_post) \
-            .filter(sent = False) \
-            .filter(digest = True):
-            html_content += shared_post_receiver.receiver.user.email + u' '
-        html_content += u"<br />\n"
-      
-    html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\
-                    u"a (very) alpha tool at MIT. Have comments, or are your " +\
-                    u"friends spamming you? Email us at feedme@csail.mit.edu." +\
-                    u"<br /><br /><a href='http://feedme.csail.mit.edu:8000" +\
-                    u"/unsubscribe/'>Change your e-mail receiving settings" +\
-                    u"</a> to get only a digest, or never be recommended posts."
-      
-    print html_content.encode('utf-8')
-    text_content = nltk.clean_html(html_content)
+                .filter(shared_post = shared_post) \
+                .filter(sent = False) \
+                .filter(digest = True):
+            shared_post.receivers.append(shared_post_receiver)
+
+    context = Context({'shared_posts': shared_posts})
+    template = loader.get_template("digest_report.html")
+    html_content = template.render(context)
+
+    template_plaintext = loader.get_template("digest_report_plaintext.html")
+    text_content = template_plaintext.render(context)
+    text_content = nltk.clean_html(text_content)
+
+    print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')    
     email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
     email.attach_alternative(html_content, "text/html")
     email.send()
