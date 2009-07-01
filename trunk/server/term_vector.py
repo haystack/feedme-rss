@@ -16,20 +16,6 @@ def reindex_all():
     receivers = Receiver.objects.all()
     update_receivers(receivers)
 
-#    print 'populating terms the first time'
-#    for receiver in Receiver.objects.all():
-#        print u'creating terms for: ' + receiver.user.username
-#        create_profile_terms(receiver = receiver, frequency_distribution = receiver.tokenize())
-
-#    for receiver in Receiver.objects.all():
-#        print u'creating preliminary tf*idf values for: ' + receiver.user.username
-#        update_tf_idf(receiver = receiver, frequency_distribution = receiver.tokenize())
-
-#    print 'repeating so that the idf terms are correct'
-#    for receiver in Receiver.objects.all():
-#        print u'trimming tf*idf values terms for: ' + receiver.user.username
-#        trim_profile_terms(receiver = receiver)    
-
     transaction.commit()
 
 @transaction.commit_manually
