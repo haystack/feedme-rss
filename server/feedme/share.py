@@ -30,37 +30,15 @@ def share(request):
                                    post_url, feed_url, \
                                    recipient_emails, comment, digest)
 
-  receivers = Receiver.objects.filter( \
-    sharedpostreceiver__shared_post = shared_post) \
+  receivers = Receiver.objects \
+    .filter(sharedpostreceiver__shared_post = shared_post) \
     .filter(sharedpostreceiver__sent = False).distinct()
+  for receiver in receivers:
+    receiver.term_vector_dirty = True
+    receiver.save()
 
   print "preparing to send post"
   send_post(shared_post)
-  
-  # do online updating of profiles of people who received the post
-  # it is very inefficient to loop through three times, but this
-  # guarantees that all the terms are added to all people
-  # before tf*idf is calculated and before vectors are trimmed.
-  print "beginning recalculation of tf-idf scores"
-  begin_time = time.clock()  
-  token_dict = dict()
-  # first cache all the tokens
-  for receiver in receivers:
-    token_dict[receiver.user.username] = receiver.tokenize()
-
-  print 'tokenized: %f' % (time.clock() - begin_time)
-  begin_time = time.clock()
-  for receiver in receivers:
-    term_vector.create_profile_terms(receiver, token_dict[receiver.user.username])
-  print 'created terms: %f' % (time.clock() - begin_time)
-  begin_time = time.clock()
-  for receiver in receivers:
-    term_vector.update_tf_idf(receiver, token_dict[receiver.user.username])
-  print 'tf-idfed: %f' % (time.clock() - begin_time)
-  begin_time = time.clock()    
-  for receiver in receivers:
-    term_vector.trim_profile_terms(receiver)
-  print 'trimmed: %f' % (time.clock() - begin_time)
 
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')

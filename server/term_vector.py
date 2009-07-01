@@ -6,35 +6,78 @@ from server.feedme.models import *
 from django.db import transaction
 import math
 import datetime
+import sys
 
 @transaction.commit_manually
-def create_receiver_vectors():
+def reindex_all():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
     
-    # clear old vectors
-    TermVectorCell.objects.all().delete()
+    receivers = Receiver.objects.all()
+    update_receivers(receivers)
 
-    print 'populating terms the first time'
-    for receiver in Receiver.objects.all():
-        print u'creating terms for: ' + receiver.user.username
-        create_profile_terms(receiver = receiver, frequency_distribution = receiver.tokenize())
+#    print 'populating terms the first time'
+#    for receiver in Receiver.objects.all():
+#        print u'creating terms for: ' + receiver.user.username
+#        create_profile_terms(receiver = receiver, frequency_distribution = receiver.tokenize())
 
-    for receiver in Receiver.objects.all():
-        print u'creating preliminary tf*idf values for: ' + receiver.user.username
-        update_tf_idf(receiver = receiver, frequency_distribution = receiver.tokenize())
+#    for receiver in Receiver.objects.all():
+#        print u'creating preliminary tf*idf values for: ' + receiver.user.username
+#        update_tf_idf(receiver = receiver, frequency_distribution = receiver.tokenize())
 
-    print 'repeating so that the idf terms are correct'
-    for receiver in Receiver.objects.all():
-        print u'trimming tf*idf values terms for: ' + receiver.user.username
-        trim_profile_terms(receiver = receiver)    
+#    print 'repeating so that the idf terms are correct'
+#    for receiver in Receiver.objects.all():
+#        print u'trimming tf*idf values terms for: ' + receiver.user.username
+#        trim_profile_terms(receiver = receiver)    
 
     transaction.commit()
+
+@transaction.commit_manually
+def incremental_update():
+    """Updates the term vectors for anyone whose dirty bit is set"""
+    receivers = Receiver.objects.filter(term_vector_dirty = True)
+    print str(len(receivers)) + ' users to update incrementally'
+    update_receivers(receivers)
+
+    transaction.commit()
+    
+
+def update_receivers(receivers):
+    # clear old vectors
+    TermVectorCell.objects.filter(receiver__in = receivers).delete()
+    
+    # do online updating of profiles of people who received the post
+    # it is very inefficient to loop through three times, but this
+    # guarantees that all the terms are added to all people
+    # before tf*idf is calculated and before vectors are trimmed.
+    print "beginning recalculation of tf-idf scores"
+    token_dict = dict()
+    # first cache all the tokens
+    print "tokenizing"
+    for receiver in receivers:
+        print "  tokenizing " + receiver.user.username
+        token_dict[receiver.user.username] = receiver.tokenize()
+    print "creating terms in database"
+    for receiver in receivers:
+        print u'  creating terms for: ' + receiver.user.username
+        create_profile_terms(receiver, token_dict[receiver.user.username])
+    print "updating tf-idf"
+    for receiver in receivers:
+        print u'  preliminary tf*idf for: ' + receiver.user.username        
+        update_tf_idf(receiver, token_dict[receiver.user.username])
+    print "trimming to top terms"
+    for receiver in receivers:
+        print u'  trimming tf*idf for: ' + receiver.user.username
+        trim_profile_terms(receiver)
+
+    for receiver in receivers:
+        receiver.term_vector_dirty = False
+        receiver.save()
 
 
 def create_profile_terms(receiver, frequency_distribution):
     """creates profile terms for this user -- does not set tf-idf"""
-    print str(len(frequency_distribution.samples())) + ' words'
+    print '  ' + str(len(frequency_distribution.samples())) + ' words'
 
     for frequency_item in frequency_distribution.items():
         # get or create the Term and the TermVectorCell
@@ -91,20 +134,21 @@ def describe_receiver(receiver):
 
     print '-------------------------------------------'
 
-@transaction.commit_manually
-def transaction_test():
-    for receiver in Receiver.objects.all():
-        old_terms = TermVectorCell.objects.filter(receiver = receiver).delete()
-
-        transaction.commit()
-        describe_receiver(receiver)
 
 if __name__ == '__main__':
-    yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
-    newposts = SharedPost.objects \
-               .filter(sharedpostreceiver__time__gte = yesterday)
-    print str(newposts.count()) + ' shared posts since yesterday'
+    if len(sys.argv) == 2:
+        mode = str(sys.argv[1])
+        print mode
+        if mode == "incremental":
+            incremental_update()
+        elif mode == "reindex":
+            yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
+            newposts = SharedPost.objects \
+                       .filter(sharedpostreceiver__time__gte = yesterday)
+            print str(newposts.count()) + ' shared posts since yesterday'
 
-    print u'Updating receiver term vectors...'
-    create_receiver_vectors()
-    print u'term vectors updated!'
+            print u'Updating receiver term vectors...'
+            reindex_all()
+            print u'term vectors updated!'
+    else:
+        print 'Requires one argument: "incremental" or "reindex"'
