@@ -177,17 +177,21 @@ function suggest_people(context) {
     $(".entry-body", context).before('<div class="feedme-suggestion-container"></div>');
 
     $(".feedme-suggestion-container", context)
-    .append('<div class="feedme-suggestions wait-for-suggestions"></div>')
-    .append('<div id="feedme-spacing-placeholder" class="feedme-placeholder"><div class="feedme-person feedme-button"><div>&nbsp;</div><div class="feedme-num-shared">&nbsp;</div></div></div>')        
-    .append('<div id="feedme-more-recommendations" class="wait-for-suggestions" style="display: inline;"></div>')
-    .append('<div class="feedme-autocomplete-added wait-for-suggestions"></div>')
-    .append('<div id="feedme-controls" class="wait-for-suggestions expand-container"></div>');
+    .append('<div class="feedme-suggestions"> \
+                    <div class="feedme-placeholder"> \
+                        <div class="feedme-person feedme-button"><div>&nbsp;</div></div> \
+                        <div class="feedme-num-shared">&nbsp;</div> \
+                    </div> \
+                </div>')
+    .append('<div class="feedme-more-recommendations wait-for-suggestions" style="display: none;"></div>')
+    .append('<div class="feedme-autocomplete-added feedme-recommendations-group wait-for-suggestions"></div>')
+    .append('<div class="feedme-controls wait-for-suggestions expand-container"></div>');
     
-    $("#feedme-more-recommendations", context)
+    $(".feedme-more-recommendations", context)
     .append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><div>&nbsp;</div><div class="feedme-num-shared"><a class="" href="javascript:{}">more...</div></a></div>')
     .append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><!--<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png">--></img></div>');
 
-    $("#feedme-controls", context)
+    $(".feedme-controls", context)
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
     .append('<textarea class="comment-textarea"></textarea></div>')
     .append('<div class="feedme-now-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
@@ -213,7 +217,9 @@ function suggest_people(context) {
     $('.feedme-now-button', context).click(share_post);
     $('.feedme-later-button', context).click(share_post);
     $('.feedme-more-recommendations-button', context).click(function() {
-        recommendMorePeople(context);
+        var post_url = $('.entry-title a', context).attr('href');
+        var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
+        recommendMorePeople(postToPopulate);
     });
     $('.feedme-comment-button', context).click(function() {
         console.log("comment button clicked");
@@ -298,6 +304,7 @@ function ajax_req(url, data, callback, method)
 }
 
 function populateSuggestions(json) {
+    console.log('populating suggestions');
     var people = json["users"];
     var post_url = json["posturl"];
     var previously_shared = json["shared"];
@@ -306,14 +313,18 @@ function populateSuggestions(json) {
     // if we can't find the post, jettison
     if (postToPopulate.size() == 0 || $('.entry-title-link', postToPopulate).attr('href').indexOf(post_url) == -1)
     {
+        console.log("cannot find post -- aborting.");
         return;
     }
+    
     // if we've already suggested, exit
-    if ($('.feedme-suggestions.wait-for-suggestions', postToPopulate).size() == 0) {
+    if ($('.feedme-suggestions .feedme-placeholder', postToPopulate).size() == 0) {
         console.log("aborting -- results have already been returned for this post.  Otherwise we start adding multiple copies of folks from different AJAX requests.");
         return;
     }
-
+    $('.feedme-placeholder', postToPopulate).remove();
+    
+    console.log('setting jquery data');
     $(postToPopulate).data('people', people);
     $(postToPopulate).data('previously_shared', previously_shared);
     $(postToPopulate).data('start_person', 0);
@@ -324,33 +335,35 @@ function populateSuggestions(json) {
  * Adds the next set of people to the list of people that can be recommended
  */
 function recommendMorePeople(postToPopulate) {
+    console.log("recommending more people");
     var people = $(postToPopulate).data('people');
     var start_person = $(postToPopulate).data('start_person');
     var previously_shared = $(postToPopulate).data('previously_shared');
     var header = $(".feedme-suggestions", postToPopulate);
-    var div_id = 'feedme-recommendation-group-' + start_person;
+    var div_class = 'feedme-recommendation-group-' + start_person;
     
     var min_length =  start_person + moreRecommendations < people.length ?
                      start_person + moreRecommendations : people.length;
     var expanded_div = null;
     
     if (start_person < min_length) {
-        header.append('<div id="' + div_id + '" class="expand-container feedme-recommendations-group"></div>');
-        expanded_div = $('#' + div_id, postToPopulate);
+        header.append('<div class="expand-container feedme-recommendations-group ' + div_class + '"></div>');
+        expanded_div = $('.' + div_class, postToPopulate);
         for (var i = start_person; i < min_length; i++) {
             var person = people[i];
             addFriend(person['email'], person['email'], person['shared_today'], expanded_div, postToPopulate);
         }
      
         if (start_person == 0) {
-            $('.feedme-placeholder').remove();
             expanded_div.removeClass('expand-container');
             expanded_div.css("display", "inline");  // so the placeholder flows with it in the same line
+            
+            $('.feedme-recommendation-group-0', postToPopulate).append($(".feedme-more-recommendations", postToPopulate));
+            $(".feedme-more-recommendations", postToPopulate).css('display', '');
         }
         else {
             expanded_div.slideToggle("normal");
-        }
-        $('#feedme-recommendation-group-0').append($("#feedme-more-recommendations", postToPopulate));
+        }        
 
             // Commented out until we decide what to do with previously shared
             // folks
@@ -368,7 +381,8 @@ function recommendMorePeople(postToPopulate) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, shared_today, header, context) {
-    header.append('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared"></div></div>');
+    var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared"></div></div>');
+    header.append(newPerson);
 
     num_shared = $('[email="' + email + '"] .feedme-num-shared', context);
     if (shared_today == null) {
@@ -378,10 +392,11 @@ function addFriend(name, email, shared_today, header, context) {
         num_shared.text('Received ' + shared_today + ' today');
     }
     // Make the elements interactive
-    $(".feedme-person:last", header).click(function(event) {
+    newPerson.click(function(event) {
+        console.log("I AM CLIXORED.");
         $(this).removeClass("feedme-sent");
         $(this).toggleClass("feedme-toggle");
-        $("#feedme-controls", context).slideDown("normal");
+        $(".feedme-controls", context).slideDown("normal");
     });
 }
 
@@ -690,6 +705,9 @@ function setupStyles() {
         -moz-border-radius-topleft: 0px;
         -moz-border-radius-bottomleft: 0px; 
         vertical-align: bottom; 
+    }
+    .feedme-more-recommendations {
+        display: inline;
     }
     .feedme-recommendations-group {
         position: relative;
