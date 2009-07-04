@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.1;
+var script_version = 0.11;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -85,7 +85,7 @@ function checkVersion()
 }
 
 function upgrade(version, link, whats_new) {
-    $("body").append('<a style="display: none" id="upgrade" href="#upgrade-data"></a><div style="display: none; margin: 5px; background-color: white" id="upgrade-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" /><h2>FeedMe upgrade</h2><div>FeedMe has released a new version of the script; we recommend that you upgrade as soon as possible.  To upgrade, <a style="color: #FFFFFF" href="' + link + '">click this link</a> and agree to install the script.</div><div><div style="margin: 1em 0 0 0">What\'s new in version ' + version + ':</div>' + whats_new + '</div></div>');
+    $("body").append('<a style="display: none" id="upgrade" href="#upgrade-data"></a><div style="display: none; margin: 5px; background-color: white" id="upgrade-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" /><h2>FeedMe upgrade</h2><div>FeedMe has released a new version of the script; we recommend that you upgrade as soon as possible.  To upgrade, <a style="color: #FFFFFF" href="' + link + '">click this link</a> and agree to install the script. Then, refresh the page.</div><div><div style="margin: 1em 0 0 0">What\'s new in version ' + version + ':</div>' + whats_new + '</div></div>');
     $("a#upgrade").fancybox( {
         hideOnContentClick: false
     });
