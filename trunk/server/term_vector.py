@@ -22,10 +22,13 @@ def reindex_all():
 def incremental_update():
     """Updates the term vectors for anyone whose dirty bit is set"""
     receivers = Receiver.objects.filter(term_vector_dirty = True)
-    print str(len(receivers)) + ' users to update incrementally'
-    update_receivers(receivers)
 
-    transaction.commit()
+    print str(len(receivers)) + ' users to update incrementally'
+    for receiver in receivers:
+       # we do them individually to make any other blocking activity
+       # not need to wait quite as long
+       update_receivers([receiver])
+       transaction.commit()
     
 
 def update_receivers(receivers):
@@ -132,7 +135,15 @@ if __name__ == '__main__':
             newposts = SharedPost.objects \
                        .filter(sharedpostreceiver__time__gte = yesterday)
             print str(newposts.count()) + ' shared posts since yesterday'
+            print
 
+            sharers = Sharer.objects.filter(sharedpost__in = newposts).distinct()
+            for sharer in sharers:
+                shared_by_person = newposts.filter(sharer = sharer)
+                print sharer.user.email + ': ' + str(len(shared_by_person)) \
+                      + ' posts'
+            print
+                
             print u'Updating receiver term vectors...'
             reindex_all()
             print u'term vectors updated!'
