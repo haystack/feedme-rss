@@ -392,12 +392,16 @@ function addFriend(name, email, shared_today, header, context) {
         num_shared.text('Received ' + shared_today + ' today');
     }
     // Make the elements interactive
-    newPerson.click(function(event) {
-        console.log("I AM CLIXORED.");
-        $(this).removeClass("feedme-sent");
-        $(this).toggleClass("feedme-toggle");
-        $(".feedme-controls", context).slideDown("normal");
-    });
+    newPerson.click(toggle_friend);
+}
+
+/* Selects or deselects a friend */
+function toggle_friend(event)
+{
+    var context = $(this).parents('.entry');
+    $(this).removeClass("feedme-sent");
+    $(this).toggleClass("feedme-toggle");
+    $(".feedme-controls", context).slideDown("normal");
 }
 
 function handle_ajax_response(data)
@@ -408,7 +412,7 @@ function handle_ajax_response(data)
 function share_post(event) 
 {
     console.log("sharing post.");
-    context = $(this).parents('.entry');
+    var context = $(this).parents('.entry');
     // remove comment box
     $('.feedme-toggle-hidden', context).slideUp("normal");
     
@@ -602,8 +606,17 @@ function populateAutocomplete(context) {
         
         if (added == true) {
             $(this).val('');
-            var newFriend = $(".feedme-person:last", context); // find the new person
-            newFriend.click();	// trigger click to select
+            
+            // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
+            $(".feedme-person:last", context).toggleClass("feedme-toggle");
+            $(".feedme-controls", context).slideDown("normal");
+            
+            // Because the following call generates a "Component is not available" error when called!
+            // It's called out of the jQuery code, apparently because the elements in a GM script are
+            // in an XPCNativeWrapper, and jQuery doesn't deal with this.  A similar issue:
+            // http://stackoverflow.com/questions/564342/jquery-ui-dialog-throw-errors-when-invoked-from-greasemonkey
+            // This seemed to break in FF 3.5 for me.
+            //$(".feedme-person:last", context).click();
         }
     });
     
