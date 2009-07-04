@@ -1,3 +1,5 @@
+from __future__ import with_statement 
+
 from django.core.management import setup_environ
 import settings
 setup_environ(settings)
@@ -7,6 +9,7 @@ from django.db import transaction
 import math
 import datetime
 import sys
+from flock import flock
 
 @transaction.commit_manually
 def reindex_all():
@@ -129,23 +132,25 @@ if __name__ == '__main__':
         mode = str(sys.argv[1])
         print mode
         if mode == "incremental":
-            incremental_update()
+            with flock('.feedme-incremental-termvector'):
+                incremental_update()
         elif mode == "reindex":
-            yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
-            newposts = SharedPost.objects \
-                       .filter(sharedpostreceiver__time__gte = yesterday)
-            print str(newposts.count()) + ' shared posts since yesterday'
-            print
+            with flock('.feedme-reindex-termvector'):
+                yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
+                newposts = SharedPost.objects \
+                           .filter(sharedpostreceiver__time__gte = yesterday)
+                print str(newposts.count()) + ' shared posts since yesterday'
+                print
 
-            sharers = Sharer.objects.filter(sharedpost__in = newposts).distinct()
-            for sharer in sharers:
-                shared_by_person = newposts.filter(sharer = sharer)
-                print sharer.user.email + ': ' + str(len(shared_by_person)) \
-                      + ' posts'
-            print
+                sharers = Sharer.objects.filter(sharedpost__in = newposts).distinct()
+                for sharer in sharers:
+                    shared_by_person = newposts.filter(sharer = sharer)
+                    print sharer.user.email + ': ' \
+                          + str(len(shared_by_person)) + ' posts'
+                    print
                 
-            print u'Updating receiver term vectors...'
-            reindex_all()
-            print u'term vectors updated!'
+                print u'Updating receiver term vectors...'
+                reindex_all()
+                print u'term vectors updated!'
     else:
         print 'Requires one argument: "incremental" or "reindex"'
