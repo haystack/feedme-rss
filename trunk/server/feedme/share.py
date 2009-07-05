@@ -25,10 +25,15 @@ def share(request):
   recipient_emails = request.POST.getlist('recipients')
 
   comment = request.POST['comment']
+  if 'bookmarklet' in request.POST:
+    bookmarklet = request.POST['bookmarklet']
+  else:
+    bookmarklet = False
 
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
-                                   recipient_emails, comment, digest)
+                                   recipient_emails, comment, \
+                                   digest, bookmarklet)
 
   receivers = Receiver.objects \
     .filter(sharedpostreceiver__shared_post = shared_post) \
@@ -44,7 +49,7 @@ def share(request):
   return HttpResponse(script_output, mimetype='application/json')
 
 def create_shared_post(user_sharer, post_url, feed_url, \
-                       recipient_emails, comment, digest):
+                       recipient_emails, comment, digest, bookmarklet):
   """Create all necessary objects to perform the sharing action"""
   # get the recipients, creating Users if necessary
   try:
@@ -60,6 +65,7 @@ def create_shared_post(user_sharer, post_url, feed_url, \
   except SharedPost.DoesNotExist:
     shared_post = SharedPost(post = post, sharer = sharer)
   shared_post.comment = comment
+  shared_post.bookmarklet = bookmarklet
   shared_post.save()
 
   # get or create the recipients' User, Recipient and SharedPostRecipient
