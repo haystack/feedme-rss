@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.11;
+var script_version = 0.12;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -276,17 +276,23 @@ function ajax_get(url, data, callback) {
 // gives Greasemonkey control so we can call the XMLhttprequest. This is a security risk.
 function ajax_req(url, data, callback, method)
 {
+    var headers = {
+        'User-Agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+        'Accept': 'application/json, text/javascript'
+    }
+    var postData = null;
+    if (method == 'POST') {
+        headers['Content-Type'] = 'application/x-www-form-urlencoded';
+        postData = $.param(data)
+    }
+    
     url = 'http://feedme.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
     window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
         GM_xmlhttpRequest({
         method: method,
         url: url,
-        data: $.param(data),
-        headers: {
-            'User-Agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-            'Content-Type': 'application/x-www-form-urlencoded',
-            'Accept': 'application/json, text/javascript'
-        },
+        data: postData,
+        headers: headers,
         onload: function(responseDetails) {
             if (responseDetails.status == 200) {
                 console.log('response received');
@@ -484,6 +490,7 @@ function share_post(event)
         feed_url: server_vars["feed_url"],
         recipients: recipients,
         comment: $('.comment-textarea', context).val(),
+        bookmarklet: false,
         digest: digest
     }
     console.log(data);
@@ -741,7 +748,7 @@ function setupStyles() {
 
 function log_in() {
     console.log('about to check login');
-    ajax_get('check_logged_in', {}, verify_login);
+    ajax_get('check_logged_in/', {}, verify_login);
 }
 
 function verify_login(json) {
