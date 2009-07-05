@@ -130,12 +130,13 @@ def describe_receiver(receiver):
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         mode = str(sys.argv[1])
-        print mode
+        lock_directory = '/var/virtualhost/sites/feedme/prod/server/'
+        
         if mode == "incremental":
-            with flock('.feedme-incremental-termvector'):
+            with flock(lock_directory + '.feedme-incremental-termvector'):
                 incremental_update()
         elif mode == "reindex":
-            with flock('.feedme-reindex-termvector'):
+            with flock(lock_directory + '.feedme-reindex-termvector'):
                 yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
                 newposts = SharedPost.objects \
                            .filter(sharedpostreceiver__time__gte = yesterday)
