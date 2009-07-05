@@ -12,7 +12,11 @@ from BeautifulSoup import BeautifulSoup
 def bookmarklet(request):
     text = request.POST['post_contents']
     parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
-    text = parser.parse(text).prettify()
+    soup = parser.parse(text)
+    # kill all javascript
+    for script in soup("script"):
+        soup.script.extract()
+    text = soup.prettify()
 
     new_request = request.POST.copy() # because the request dict is immutable
     new_request['post_contents'] = text
