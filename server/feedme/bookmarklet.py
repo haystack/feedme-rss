@@ -20,6 +20,8 @@ def bookmarklet(request):
 
     new_request = request.POST.copy() # because the request dict is immutable
     new_request['post_contents'] = text
+
+    new_request['bookmarklet'] = True
     
     text = re.sub(r'class\s?=\s?".*?"', '', text)
     text = re.sub(r"class\s?=\s?'.*?'", '', text)
