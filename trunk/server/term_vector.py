@@ -130,7 +130,7 @@ def describe_receiver(receiver):
 if __name__ == '__main__':
     if len(sys.argv) == 2:
         mode = str(sys.argv[1])
-        lock_directory = '/var/virtualhost/sites/feedme/prod/server/'
+        lock_directory = '/tmp/'
         
         if mode == "incremental":
             with flock(lock_directory + '.feedme-incremental-termvector'):
