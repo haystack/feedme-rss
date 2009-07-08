@@ -189,7 +189,7 @@ function suggest_people(context) {
     
     $(".feedme-more-recommendations", context)
     .append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><div>&nbsp;</div><div class="feedme-num-shared"><a class="" href="javascript:{}">more...</div></a></div>')
-    .append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><!--<img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png">--></img></div>');
+    .append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>');
 
     $(".feedme-controls", context)
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
@@ -583,7 +583,9 @@ function autocompleteWait(context) {
 }
 
 function populateAutocomplete(context) {
-    $(".feedme-autocomplete", context).autocomplete(autocompleteData, {
+    try {
+    $(".feedme-autocomplete", context).autocomplete({
+        data: autocompleteData,
         width: 300,
         max: 6,
         multiple: false,
@@ -600,13 +602,20 @@ function populateAutocomplete(context) {
         formatResult: function(row) {
             return row.to;
         }
-    }).result(function(event, item) {
+    })
+    
+    $(".feedme-autocomplete", context).bind("result.autocomplete", function(data, value) {
+        console.log("testing result.autocomplete");
+        console.log(data);
+        console.log(value);
+    
         added = false;
-        if (item) {
+        if (value) {
             // add the newly suggested friend to the list
-            addFriend(item.to, item.to, null, $(".feedme-autocomplete-added", context), context);
+            addFriend(value.to, value.to, null, $(".feedme-autocomplete-added", context), context);
             added = true;
         } else if ($(this).val() != '') {
+            console.log('adding email address manually.');
             addFriend($(this).val(), $(this).val(), null, $(".feedme-autocomplete-added", context), context);
             added = true;
         }
@@ -626,6 +635,7 @@ function populateAutocomplete(context) {
             //$(".feedme-person:last", context).click();
         }
     });
+
     
     $('.ac_results', context).blur(function() {
         var selected = $('.ac_over', context);
@@ -635,12 +645,16 @@ function populateAutocomplete(context) {
         return true;
     });
     
-    $('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).search() });
+    $('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).trigger("result.autocomplete") });
     $('.feedme-autocomplete', context).keydown(function(event) {
         if (event.which == 13) { // user pushed enter
-            $('.feedme-autocomplete', context).search();
+            $('.feedme-autocomplete', context).trigger("result.autocomplete");
         }
     });
+    }
+    catch(err) {
+        console.log(err)
+    }
 }
 
 /*
@@ -773,7 +787,8 @@ function verify_login(json) {
     GM_JQ.src = 'http://code.jquery.com/jquery-latest.js';
     GM_JQ.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(GM_JQ);    
-    
+
+/*
 // Add jQuery-autocomplete
     var JQ_autocomplete = document.createElement('script');
     JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.autocomplete.js';
@@ -784,7 +799,27 @@ function verify_login(json) {
     link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery.autocomplete.css';
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
-    
+*/
+
+    var JQ_autocomplete_uicore = document.createElement('script');
+    JQ_autocomplete_uicore.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.core.js';
+    JQ_autocomplete_uicore.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete_uicore); 
+    var JQ_autocomplete = document.createElement('script');
+    JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.autocomplete.js';
+    JQ_autocomplete.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
+    var ui_css_base = document.createElement('link');
+    ui_css_base.rel = 'stylesheet';
+    ui_css_base.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.base.css';
+    ui_css_base.type = 'text/css';
+    document.getElementsByTagName('head')[0].appendChild(ui_css_base);
+    var link = document.createElement('link');
+    link.rel = 'stylesheet';
+    link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.autocomplete.css';
+    link.type = 'text/css';
+    document.getElementsByTagName('head')[0].appendChild(link);
+
     var JQ_fancybox = document.createElement('script');
     JQ_fancybox.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.fancybox/jquery.fancybox-1.2.1.js';
     JQ_fancybox.type = 'text/javascript';
@@ -803,11 +838,13 @@ function verify_login(json) {
     
     // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
+
         // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
         // TODO: can't figure out how to wait for jQuery Color Animation
-        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.Autocompleter == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
+        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.ui == 'undefined' || typeof unsafeWindow.jQuery.ui.autocomplete == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
             window.setTimeout(GM_wait,100);
         }
+        
         else {
             $ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
             $(document).ready( function() {
