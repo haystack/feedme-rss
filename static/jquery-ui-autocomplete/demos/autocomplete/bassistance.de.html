@@ -1,0 +1,124 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+	<title>jQuery UI Autocomplete - bassistance.de Demo Suite</title>
+
+	<link type="text/css" href="../../themes/base/ui.all.css" rel="stylesheet" />
+	<link type="text/css" href="../demos.css" rel="stylesheet" />
+			
+	<script type="text/javascript" src="../../jquery-1.3.2.js"></script>
+	<script type="text/javascript" src="../../ui/ui.core.js"></script>
+	<script type="text/javascript" src="../../ui/ui.autocomplete.js"></script>
+	<script type="text/javascript" src="demo.bassistance.js"></script>
+	<script type="text/javascript" src="demo.data.js"></script>
+
+	<style type="text/css">
+		body { font-size: 100%; }
+		label { float:left; width:12em; color: #444; font-weight: bold; }
+		p { padding-bottom: 14px; font-size: 12px; }
+		span { color: #777; }
+		form { padding: 0 10px; }
+		form p { padding: 4px 0; }
+	</style>
+</head>
+<body>
+
+	<div id="content">
+		<h4>This demo recreates the demos from <a href="http://jquery.bassistance.de/autocomplete/demo/">http://jquery.bassistance.de/autocomplete/demo/</a> with the new jQuery UI widget/plugin.</h4>
+		<form autocomplete="off">
+			<h5>Local Data Demos</h5>
+			<p>
+				<label>Single City:</label>
+				<input type="text" id="_TextSingleCity" />
+				<input type="button" value="Get Value" id="_ButtonSingleCity" />
+				<input type="button" value="Change Max Items" onclick="changeOptions();" />
+				<input type="button" value="Change to Month Data" onclick="changeToMonths();" />
+				<input type="button" value="Change scroll height" id="scrollChange" />
+			</p>
+			<p>
+				<label>Single City:</label>
+				<input type="text" id="_TextSingleCity2" />
+				<input type="button" value="Get Value" id="_ButtonSingleCity2" />
+				<span>({matchContains: true})</span>
+			</p>
+			
+			<p>
+				<label>Month:</label>
+				<input type="text" id="_TextMonth" />
+				<input type="button" value="Get Value" />
+				<span>(Current month is excluded from list)</span>
+			</p>
+			<p>
+				<label>E-Mail:</label>
+	
+				<input type="text" id="_TextEmail" />
+				<input type="button" value="Get Value" />
+			</p>
+			
+			<p>
+				<label>Multiple Cities:</label>
+				<textarea id="_TextMultipleCities" cols="40" rows="3"></textarea>
+				<input type="button" value="Get Value" id="_ButtonMultipleCities" />
+				<span>({multiple: true, mustMatch: true})</span>
+			</p>		
+	    <p>
+				<label>Tags:</label>
+				<input type="text" id="_TextTags" />
+				<input type="button" value="Get Value" id="_ButtonTags" />
+				<span>({multiple: true, multipleSeparator: " "})</span>
+			</p>		
+			
+			
+			<h5>Remote Data Demos</h5>
+			<h6>
+				Requires PHP; therefore won't work from local file system.
+			</h6>
+			
+			
+			<p>
+				<label>Single Bird:</label>
+				<input type="text" id="_TextSingleBird" />
+				<input type="button" value="Get Value" id="_ButtonSingleBird" />
+			</p>
+	
+			<p>
+				<label>Single Bird Output</label>
+				<input id="_OutputSingleBird" />
+			</p>
+			<p>
+				<label>Multiple Birds:</label>
+	
+				<textarea id="_TextMultipleBirds"></textarea>
+				<input type="button" value="Get Value" id="_ButtonMultipleBirds" />
+			</p>
+			<p>
+				<label>Multiple Birds Output</label>
+				<textarea id="_OutputMultipleBirds"></textarea>
+			</p>
+	
+	    <p>
+				<label>Image search:</label>
+				<input type="text" id="_TextImageSearch" />
+				<input type="button" value="Get Value" id="_ButtonImageSearch" />
+			</p>
+	
+			<p>
+				<label>Some dropdown (&lt;3 IE):</label>
+				<select>
+					<option value="">Item 12334455</option>
+					<option value="2">Item 2</option>
+	
+					<option value="3">Item 3</option>
+					<option value="4">Item 4</option>
+				</select>
+			</p>
+			
+			<h5>Misc Functionality</h5>
+			<p>
+				<button id="_ButtonRemove">Remove all autocompletes</button>
+			</p>
+		</form>
+	
+	</div>
+</body>
+</html>
