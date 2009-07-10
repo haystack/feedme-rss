@@ -46,13 +46,17 @@ function GM_xmlhttpRequest(params) {
   border-left: 0px;
 }
 #entries {
-height: inherit;
+  height: inherit;
 }
 body, html {
-overflow: auto;
+  overflow: auto;
 }
+
 #entries.list #current-entry.expanded {
   border-width: 0px;
+}
+#entries.list .entry {
+  overflow: visible;
 }
 #entries.list .entry .entry-container {
   padding-top: 0em;
@@ -61,18 +65,20 @@ overflow: auto;
   margin-left: 0px;
 }
 #entries, #viewer-page-container {
-overflow: auto;
+  /*overflow: auto;*/
+  overflow: visible;
+  margin: 10px 0px 0px 10px;
 }
 .entry-body {
-background:#FFFFFF none repeat scroll 0 0;
-border:1px solid #CCCCCC;
-overflow: auto;
-          overflow-x:hidden;
-          overflow-y:auto;
-/*height: 200px;*/
+  background:#FFFFFF none repeat scroll 0 0;
+  border:1px solid #CCCCCC;
+  overflow: auto;
+  overflow-x:hidden;
+  overflow-y:auto;
+  /*height: 200px;*/
 }
 #viewer-container {
-margin: 5px;
+  margin: 5px;
 }
 .entry-body img {
   max-height: 80px;
@@ -82,10 +88,7 @@ margin: 5px;
   max-width:317px;
   max-height:195px
 }
-.entry {
-  overflow: visible;
-  margin: 10px 0px 0px 10px;
-}
+
 </style>
 
 </head><body class='gecko loaded'>

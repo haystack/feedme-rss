@@ -29,7 +29,7 @@ def bookmarklet(request):
     text = re.sub(r"id\s?=\s?'.*?'", '', text)
     text = re.sub('style\s?=\s?".*?"', '', text)
     text = re.sub("style\s?=\s?'.*?'", '', text)    
-    
+
     return render_to_response('bookmarklet.html', \
                               {
                                 'post_url' : request.POST['post_url'],
