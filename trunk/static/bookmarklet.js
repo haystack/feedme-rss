@@ -35,13 +35,13 @@ if(!window.embedFeedMeIframe){
 	    feedmeContainer.style.border = "4px solid #FF9900";
 	    feedmeContainer.style.top = 6 + "px";
 	    feedmeContainer.style.right = 6 + "px";
-	    feedmeContainer.style.width = 650 + "px";
+	    feedmeContainer.style.width = 675 + "px";
 	    feedmeContainer.style.height = 350 + "px";
 	    feedmeContainer.style.zIndex = 100000;
 	    document.body.appendChild(feedmeContainer);
 
 	    var headerContainer = document.createElement('div');
-	    headerContainer.style.margin = "5px";
+	    headerContainer.style.margin = "5px 5px 5px 15px";
 	    feedmeContainer.appendChild(headerContainer);
 
 	    var closeBtn = document.createElement('img');
