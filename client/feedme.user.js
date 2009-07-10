@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.12;
+var script_version = 0.13;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -201,6 +201,8 @@ function suggest_people(context) {
     
     // Clear the autocomplete when they start typing
     suggest_autocomplete(context);
+    console.log("autocomplete shit is turned off.");
+
     $('.feedme-autocomplete', context).focus(function() {
         if ($(this).val() == defaultAutocompleteText) {
             $(this).val('');
@@ -214,6 +216,7 @@ function suggest_people(context) {
         $(this).toggleClass('feedme-autocompleteToggle');
         return true;
     });
+
     $('.feedme-now-button', context).click(share_post);
     $('.feedme-later-button', context).click(share_post);
     $('.feedme-more-recommendations-button', context).click(function() {
@@ -401,6 +404,23 @@ function addFriend(name, email, shared_today, header, context) {
     newPerson.click(toggle_friend);
 }
 
+function addFriendAndSelect(name, context) {
+    var header = $('.feedme-autocomplete-added', context);
+    addFriend(name, name, null, header, context);
+    // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
+    $(".feedme-person:last", context).toggleClass("feedme-toggle");
+    $(".feedme-controls", context).slideDown("normal");
+    
+    // Because the following call generates a "Component is not available" error when called!
+    // It's called out of the jQuery code, apparently because the elements in a GM script are
+    // in an XPCNativeWrapper, and jQuery doesn't deal with this.  A similar issue:
+    // http://stackoverflow.com/questions/564342/jquery-ui-dialog-throw-errors-when-invoked-from-greasemonkey
+    // This seemed to break in FF 3.5 for me.
+    //$(".feedme-person:last", context).click();
+    
+    $('.feedme-autocomplete').val('');
+}
+
 /* Selects or deselects a friend */
 function toggle_friend(event)
 {
@@ -584,73 +604,53 @@ function autocompleteWait(context) {
 
 function populateAutocomplete(context) {
     try {
-    $(".feedme-autocomplete", context).autocomplete({
-        data: autocompleteData,
-        width: 300,
-        max: 6,
-        multiple: false,
-        scroll: true,
-        scrollHeight: 300,
-        matchContains: true,
-        mustMatch: false,
-        formatItem: function(row, i, max) {
-            return row.name + " [" + row.to + "]";
-        },
-        formatMatch: function(row, i, max) {
-            return row.name + " " + row.to;
-        },
-        formatResult: function(row) {
-            return row.to;
-        }
-    })
-    
-    $(".feedme-autocomplete", context).bind("result.autocomplete", function(data, value) {
-        console.log("testing result.autocomplete");
-        console.log(data);
-        console.log(value);
-    
-        added = false;
-        if (value) {
-            // add the newly suggested friend to the list
-            addFriend(value.to, value.to, null, $(".feedme-autocomplete-added", context), context);
-            added = true;
-        } else if ($(this).val() != '') {
-            console.log('adding email address manually.');
-            addFriend($(this).val(), $(this).val(), null, $(".feedme-autocomplete-added", context), context);
-            added = true;
-        }
-        
-        if (added == true) {
-            $(this).val('');
-            
-            // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
-            $(".feedme-person:last", context).toggleClass("feedme-toggle");
-            $(".feedme-controls", context).slideDown("normal");
-            
-            // Because the following call generates a "Component is not available" error when called!
-            // It's called out of the jQuery code, apparently because the elements in a GM script are
-            // in an XPCNativeWrapper, and jQuery doesn't deal with this.  A similar issue:
-            // http://stackoverflow.com/questions/564342/jquery-ui-dialog-throw-errors-when-invoked-from-greasemonkey
-            // This seemed to break in FF 3.5 for me.
-            //$(".feedme-person:last", context).click();
-        }
-    });
+        $(".feedme-autocomplete", context).autocomplete({
+            data: autocompleteData,
+            width: 300,
+            max: 6,
+            multiple: false,
+            scroll: true,
+            scrollHeight: 300,
+            matchContains: true,
+            mustMatch: false,
+            formatItem: function(row, i, max) {
+                return row.name + " [" + row.to + "]";
+            },
+            formatMatch: function(row, i, max) {
+                return row.name + " " + row.to;
+            },
+            formatResult: function(row) {
+                return row.to;
+            },
+            result: function(data, value) {            
+                if (value) {
+                    // add the newly suggested friend to the list
+                    addFriendAndSelect(value.to, context);
+                }
+            }
+        });
 
-    
-    $('.ac_results', context).blur(function() {
-        var selected = $('.ac_over', context);
-        console.log(selected);
-        // store the last remembered highlighted person so that if they click '+', we know what they were pointing at
-        $(this).data('last_selected_entry', selected);
-        return true;
-    });
-    
-    $('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).trigger("result.autocomplete") });
-    $('.feedme-autocomplete', context).keydown(function(event) {
-        if (event.which == 13) { // user pushed enter
-            $('.feedme-autocomplete', context).trigger("result.autocomplete");
-        }
-    });
+        $('.ac_results', context).blur(function() {
+            var selected = $('.ac_over', context);
+            console.log(selected);
+            // store the last remembered highlighted person so that if they click '+', we know what they were pointing at
+            $(this).data('last_selected_entry', selected);
+            return true;
+        });
+        
+        $('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).trigger("result.autocomplete") });
+        //$('.feedme-autocomplete', context).bind('keydown.autocomplete', unsafeWindow.imported);
+        $('.feedme-autocomplete', context).bind('keydown.autocomplete', function(event) {
+            if (event.which == 13) { // user pushed enter
+                text = $('.feedme-autocomplete', context).val();
+                // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
+                //$(this).trigger("result.autocomplete", [text, text]);
+                
+                if (text != '') {
+                    addFriendAndSelect(text, context);
+                }
+            }
+        });
     }
     catch(err) {
         console.log(err)
@@ -784,7 +784,8 @@ function verify_login(json) {
 // http://groups.google.com/group/ubiquity-firefox/msg/c4d1336793e5d6ed
 // Add jQuery
     var GM_JQ = document.createElement('script');
-    GM_JQ.src = 'http://code.jquery.com/jquery-latest.js';
+    //GM_JQ.src = 'http://code.jquery.com/jquery-latest.js';
+    GM_JQ.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-1.3.2.js';
     GM_JQ.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(GM_JQ);    
 
@@ -801,6 +802,11 @@ function verify_login(json) {
     document.getElementsByTagName('head')[0].appendChild(link);
 */
 
+    var dammit = document.createElement('script');
+    dammit.src = 'http://groups.csail.mit.edu/haystack/feedme/imported.js';
+    dammit.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(dammit);
+
     var JQ_autocomplete_uicore = document.createElement('script');
     JQ_autocomplete_uicore.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.core.js';
     JQ_autocomplete_uicore.type = 'text/javascript';
@@ -811,7 +817,7 @@ function verify_login(json) {
     document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
     var ui_css_base = document.createElement('link');
     ui_css_base.rel = 'stylesheet';
-    ui_css_base.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.base.css';
+    ui_css_base.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.all.css';
     ui_css_base.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(ui_css_base);
     var link = document.createElement('link');
