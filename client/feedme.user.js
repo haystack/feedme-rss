@@ -254,8 +254,11 @@ function get_post_variables(context)
     var post_url = $('.entry-title a', context).attr('href');
     var feed_title = $('a.entry-source-title', context).text()
     var feed_url = unescape($('a.entry-source-title', context).attr('href'));
-    var feed_url_loc = feed_url.indexOf('feed/');
-    feed_url = feed_url.substring(feed_url_loc + 'feed/'.length);
+    gReaderString = '/reader/view/feed/';
+    var feed_url_loc = feed_url.indexOf(gReaderString);
+    if (feed_url_loc >= 0) {
+        feed_url = feed_url.substring(feed_url_loc + gReaderString.length);
+    }
     var post_title = $('.entry-container .entry-title', context).text();
     var post_contents = $('.entry-body', context).html();	
     
