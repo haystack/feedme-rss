@@ -19,6 +19,9 @@ if(!window.removeFeedMeIframe){
 
 if(!window.embedFeedMeIframe){
 	window.embedFeedMeIframe=function(){
+	    var port = 8000;
+	    var submitURL = 'http://feedme.csail.mit.edu:' + port + '/bookmarklet/'
+
 	    var feedMeHTML = document.body.innerHTML;
 	    var feedMeTitle = document.title;
 	    var feedMeURL = document.location.href;
@@ -32,7 +35,7 @@ if(!window.embedFeedMeIframe){
 	    feedmeContainer.style.border = "4px solid #FF9900";
 	    feedmeContainer.style.top = 6 + "px";
 	    feedmeContainer.style.right = 6 + "px";
-	    feedmeContainer.style.width = 600 + "px";
+	    feedmeContainer.style.width = 650 + "px";
 	    feedmeContainer.style.height = 350 + "px";
 	    feedmeContainer.style.zIndex = 100000;
 	    document.body.appendChild(feedmeContainer);
@@ -67,7 +70,7 @@ if(!window.embedFeedMeIframe){
 	    iframeDoc.open();
 	    iframeDoc.write("<html>"+"<head></head>"
 			    +"<body onload='submitForm();'>"
-			    +" <form id='feedmeForm' method='post' action='http://feedme.csail.mit.edu:8000/bookmarklet/'>"
+			    +" <form id='feedmeForm' method='post' action='" + submitURL + "'>"
 			    + '<input type="hidden" name="post_url" value="">'
 			    + '<input type="hidden" name="feed_url" value="">'
 			    + '<input type="hidden" name="feed_title" value="">'
@@ -87,6 +90,7 @@ if(!window.embedFeedMeIframe){
 			    +"</body>"
 			    +"</html>");
 	    iframeDoc.close();
+
 	}
 }
 

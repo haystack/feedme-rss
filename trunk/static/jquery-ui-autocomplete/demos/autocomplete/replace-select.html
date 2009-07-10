@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>jQuery UI Accordion - Fill space</title>
+	<link type="text/css" href="../../themes/base/ui.all.css" rel="stylesheet" />
+	<script type="text/javascript" src="../../jquery-1.3.2.js"></script>
+	<script type="text/javascript" src="../../ui/ui.core.js"></script>
+	<script type="text/javascript" src="../../ui/ui.autocomplete.js"></script>
+	<link type="text/css" href="../demos.css" rel="stylesheet" />
+	<script type="text/javascript">
+	$(function() {
+		var month = $("#month").hide();
+		$("<input/>").insertAfter(month).click(function() {
+			// trigger an additional focus event to display autocomplete on click
+			$(this).focus();
+		}).autocomplete({
+			data: month.children("option").map(function() {
+				return $(this).text();
+			}).get(),
+			minChars: 0
+		});
+	});
+	</script>
+</head>
+<body>
+
+<div class="demo">
+
+<label for="month">Select a month:</label>
+<select id="month" name="month">
+	<option>January</option>
+	<option>February</option>
+	<option>March</option>
+	<option>April</option>
+	<option>May</option>
+	<option>June</option>
+	<option>July</option>
+	<option>August</option>
+	<option>September</option>
+	<option>October</option>
+	<option>November</option>
+	<option>December</option>
+</select>
+
+</div><!-- End demo -->
+
+
+
+<div class="demo-description">
+
+<p>Replace a select element with an autocomplete input, using the select's options as input.</p>
+
+</div><!-- End demo-description -->
+
+
+</body>
+</html>
