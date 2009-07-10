@@ -35,8 +35,8 @@
 // Fail gracefully if Firebug's not installed
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
-var port = 8000;
-var script_version = 0.13;
+var port = 8001;
+var script_version = 0.12;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
