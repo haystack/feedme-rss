@@ -783,32 +783,14 @@ function verify_login(json) {
 
 // This is called on startup -- initializes jQuery etc.
 
-// from http://joanpiedra.com/jquery/greasemonkey/ and
-// http://groups.google.com/group/ubiquity-firefox/msg/c4d1336793e5d6ed
-// Add jQuery
+    // from http://joanpiedra.com/jquery/greasemonkey/ and
+    // http://groups.google.com/group/ubiquity-firefox/msg/c4d1336793e5d6ed
+    // Add jQuery
     var GM_JQ = document.createElement('script');
     //GM_JQ.src = 'http://code.jquery.com/jquery-latest.js';
     GM_JQ.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-1.3.2.js';
     GM_JQ.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(GM_JQ);    
-
-/*
-// Add jQuery-autocomplete
-    var JQ_autocomplete = document.createElement('script');
-    JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.autocomplete.js';
-    JQ_autocomplete.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
-    var link = document.createElement('link');
-    link.rel = 'stylesheet';
-    link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery.autocomplete.css';
-    link.type = 'text/css';
-    document.getElementsByTagName('head')[0].appendChild(link);
-*/
-
-    var dammit = document.createElement('script');
-    dammit.src = 'http://groups.csail.mit.edu/haystack/feedme/imported.js';
-    dammit.type = 'text/javascript';
-    document.getElementsByTagName('head')[0].appendChild(dammit);
 
     var JQ_autocomplete_uicore = document.createElement('script');
     JQ_autocomplete_uicore.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.core.js';
@@ -839,13 +821,12 @@ function verify_login(json) {
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
     
-// Add jQuery-color animation
+    // Add jQuery-color animation
     var JQ_color = document.createElement('script');
     JQ_color.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.color.js';
     JQ_color.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(JQ_color);
     
-    // Check if jQuery and jQuery-autocomplete are loaded
     function GM_wait() {
 
         // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
