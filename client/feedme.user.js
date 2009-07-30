@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.13;
+var script_version = 0.14;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -92,7 +92,7 @@ function upgrade(version, link, whats_new) {
     $("a#upgrade").click();
 }
 
-function expandListener(event) {
+function expandListener(event) {    
     if (!isEntry(event.target)) {
         // we're not looking at a post
         return;
@@ -155,7 +155,7 @@ function entry_class_modified(event) {
  */
 function register_entry_click(context) {
     try {
-        if($(".feedme-suggestions", $(context)).size() > 0) {
+        if($(context).find(".feedme-suggestions").size() > 0) {
             // if we're still looking at an item we've populated before
             return;
         } else {
@@ -174,9 +174,9 @@ function suggest_people(context) {
     console.log("suggesting people");
     
     var defaultAutocompleteText = "type a name";
-    $(".entry-body", context).before('<div class="feedme-suggestion-container"></div>');
+    context.find(".entry-body").before('<div class="feedme-suggestion-container"></div>');
 
-    $(".feedme-suggestion-container", context)
+    context.find(".feedme-suggestion-container")
     .append('<div class="feedme-suggestions"> \
                     <div class="feedme-placeholder"> \
                         <div class="feedme-person feedme-button"><div>&nbsp;</div></div> \
@@ -187,11 +187,11 @@ function suggest_people(context) {
     .append('<div class="feedme-autocomplete-added feedme-recommendations-group wait-for-suggestions"></div>')
     .append('<div class="feedme-controls wait-for-suggestions expand-container"></div>');
     
-    $(".feedme-more-recommendations", context)
+    context.find(".feedme-more-recommendations")
     .append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><div>&nbsp;</div><div class="feedme-num-shared"><a class="" href="javascript:{}">more...</div></a></div>')
     .append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>');
 
-    $(".feedme-controls", context)
+    context.find(".feedme-controls")
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
     .append('<textarea class="comment-textarea"></textarea></div>')
     .append('<div class="feedme-now-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
@@ -201,15 +201,14 @@ function suggest_people(context) {
     
     // Clear the autocomplete when they start typing
     suggest_autocomplete(context);
-    console.log("autocomplete shit is turned off.");
 
-    $('.feedme-autocomplete', context).focus(function() {
+    context.find('.feedme-autocomplete').focus(function() {
         if ($(this).val() == defaultAutocompleteText) {
             $(this).val('');
         }
         $(this).toggleClass('feedme-autocompleteToggle');
     });
-    $('.feedme-autocomplete', context).blur(function() { 
+    context.find('.feedme-autocomplete').blur(function() { 
         if ($(this).val() == '') {
             $(this).val(defaultAutocompleteText);
         }
@@ -217,16 +216,16 @@ function suggest_people(context) {
         return true;
     });
 
-    $('.feedme-now-button', context).click(share_post);
-    $('.feedme-later-button', context).click(share_post);
-    $('.feedme-more-recommendations-button', context).click(function() {
-        var post_url = $('.entry-title a', context).attr('href');
+    context.find('.feedme-now-button').click(share_post);
+    context.find('.feedme-later-button').click(share_post);
+    context.find('.feedme-more-recommendations-button').click(function() {
+        var post_url = context.find('.entry-title a').attr('href');
         var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
         recommendMorePeople(postToPopulate);
     });
-    $('.feedme-comment-button', context).click(function() {
+    context.find('.feedme-comment-button').click(function() {
         console.log("comment button clicked");
-        var comment_btn = $('.feedme-toggle-hidden', context);
+        var comment_btn = context.find('.feedme-toggle-hidden');
         comment_btn.slideToggle("normal");
     });
     
@@ -251,17 +250,19 @@ function server_recommend(context) {
 
 function get_post_variables(context)
 {
-    var post_url = $('.entry-title a', context).attr('href');
-    var feed_title = $('a.entry-source-title', context).text()
-    var feed_url = unescape($('a.entry-source-title', context).attr('href'));
+    var entry_main = context.find('.entry-main');    
+  
+    var post_url = entry_main.find('.entry-title a').attr('href');
+    var feed_title = entry_main.find('a.entry-source-title').text()
+    var feed_url = unescape(entry_main.find('a.entry-source-title').attr('href'));
     gReaderString = '/reader/view/feed/';
     var feed_url_loc = feed_url.indexOf(gReaderString);
     if (feed_url_loc >= 0) {
         feed_url = feed_url.substring(feed_url_loc + gReaderString.length);
     }
-    var post_title = $('.entry-container .entry-title', context).text();
-    var post_contents = $('.entry-body', context).html();	
-    
+    var post_title = entry_main.find('.entry-container .entry-title').text();
+    var post_contents = entry_main.find('.entry-body').html();	    
+
     var post_vars = new Array();
     post_vars["post_url"] = post_url;
     post_vars["feed_title"] = feed_title;
