@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.14;
+var script_version = 0.141;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -260,7 +260,7 @@ function get_post_variables(context)
     if (feed_url_loc >= 0) {
         feed_url = feed_url.substring(feed_url_loc + gReaderString.length);
     }
-    var post_title = entry_main.find('.entry-container .entry-title').text();
+    var post_title = entry_main.find('.entry-title').text();
     var post_contents = entry_main.find('.entry-body').html();	    
 
     var post_vars = new Array();
