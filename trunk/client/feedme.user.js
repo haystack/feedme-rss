@@ -335,13 +335,13 @@ function populateSuggestions(json) {
         console.log("aborting -- results have already been returned for this post.  Otherwise we start adding multiple copies of folks from different AJAX requests.");
         return;
     }
-    $('.feedme-placeholder', postToPopulate).remove();
     
     console.log('setting jquery data');
     $(postToPopulate).data('people', people);
     $(postToPopulate).data('previously_shared', previously_shared);
     $(postToPopulate).data('start_person', 0);
     recommendMorePeople(postToPopulate);
+    $('.feedme-placeholder', postToPopulate).remove();
 }
 
 /*
@@ -382,7 +382,9 @@ function recommendMorePeople(postToPopulate) {
             // folks
         for (var j=0; j<previously_shared.length; j++) {
             var person = previously_shared[j];
-            $('[email="' + person['email'] + '"]', postToPopulate).addClass("feedme-sent");
+            $('[email="' + person['email'] + '"]', postToPopulate)
+            .addClass("feedme-sent")
+            .find('.feedme-num-shared').text('Sent!');
         }
     
         $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
@@ -484,7 +486,9 @@ function share_post(event)
         .css('background-color', '')
         .css('border', '')
         .addClass("feedme-sent");
-    });
+    })
+    .find('.feedme-num-shared')
+    .text('Sent!');
     
     $(this)
     .animate(animateHighlight, 750)
