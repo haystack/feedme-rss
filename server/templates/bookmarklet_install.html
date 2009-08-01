@@ -5,4 +5,17 @@
 <div>To install the FeedMe bookmarklet, drag the following link onto your bookmark bar:</div>
 <div><a href="javascript:document.getElementsByTagName('body')[0].appendChild(%20document.createElement('script')).setAttribute('src','http://groups.csail.mit.edu/haystack/feedme/bookmarklet.js');">Share with FeedMe</a></div>
 
+<div style="margin-top: 50px; color: gray; font-size: 80%;"><p>Do you use NoScript?  If so, you can get the FeedMe bookmarklet working by following these instructions:</p>
+
+<ol><li>
+Right click on the NoScript icon in the bottom right of your browser.  Choose "Options..." and then go to the XSS tab.  In the list of Anti-XSS Protection Exceptions, add the regex:<br />
+^http://feedme.csail.mit.edu:8000/[^"<>\?%]+$
+</li>
+
+<li>
+Still in the options pane, go to the Whitelist tab.  In the textbox, add the following web sites:<br />
+http://feedme.csail.mit.edu:8000<br />
+googlecode.com
+</li></ol>
+</div>
 {% endblock %}
