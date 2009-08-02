@@ -102,7 +102,8 @@ class SharedPost(models.Model):
     post = models.ForeignKey(Post)
     sharer = models.ForeignKey(Sharer)
     comment = models.TextField()
-    bookmarklet = models.BooleanField()
+    bookmarklet = models.BooleanField(default = False)
+    thanks = models.BooleanField(default = False)
     
     def __unicode__(self):
         return unicode(self.sharer) + u' post: ' + unicode(self.post);

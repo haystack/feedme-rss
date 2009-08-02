@@ -1,0 +1,7 @@
+<p>{{ receivers }}thanks for sharing this post!</p>
+
+<p><span style="font-style: italic;">via {% block feed_title %}<a href="{{post.feed.rss_url}}">{{ post.feed.title.strip }}</a>{% endblock %}</span><br />
+<span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="{{ post.url }}">{{ post.title }}</a>{% endblock %}</span><br />
+<span>Like this article? <a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks!</a></p>
+
+{{ post.contents|safe }}

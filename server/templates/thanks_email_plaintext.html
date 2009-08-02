@@ -1,0 +1,6 @@
+{% extends "thanks_email.html" %}
+
+{% block post_title %}{{ post.title }} ({{ post.url }}){% endblock %}
+
+{% block feed_title %}{{ post.feed.title.strip }}{% endblock %}
+
