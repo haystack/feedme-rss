@@ -4,8 +4,9 @@
 404 Error -- Page Not Found
 {% endblock %}
 
+{% block header %}404 Error - Page Not Found {% endblock %}
+
 {% block body %}
-<h1>404 Error</h1>
 <h3>"Ceci n'est pas une web page" &mdash;Ren&eacute; Magritte</h3>
 <div>The requested page {{ request.path|escape }} does not exist.</div>
 <div>

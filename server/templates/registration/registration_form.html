@@ -1,7 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}Feedme - Register{% endblock %}
+{% block header %}Create a FeedMe account{% endblock %}
+
 {% block body %}
-Hello! Please register an account!<br/>
 <form method="post" action="">
 <dl>
 {% for field in form %}
@@ -17,7 +19,7 @@ Hello! Please register an account!<br/>
 {% endcomment %}
 {% endfor %}
 </dl>
-<input type="submit" />
+<input type="submit" value="Create Account"/>
 </form>
  
 {% endblock %}

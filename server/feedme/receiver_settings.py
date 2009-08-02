@@ -8,7 +8,7 @@ from models import *
 def get_settings_url(request):
   if not 'email' in request.POST:
     return get_email_template("Enter an email address for which to " \
-                              + "change settings")
+                              + "change settings:")
 
   try:
     receiver_email = request.POST['email']
@@ -70,6 +70,7 @@ def change_receiver_settings(request, user_email, settings_seed):
   if not error:
     template_arguments['recommend'] = receiver.recommend
     template_arguments['digest'] = receiver.digest
+    template_arguments['user_email'] = user_email
 
   return render_to_response('change_settings.html', template_arguments)
 
