@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Thanks! - {{ shared_post.post.title }}{% endblock %}
+{% block header %}Thanks, {{ shared_post.sharer.user.first_name }}!{% endblock %}
+
+{% block body %}
+<div>{{ shared_post.post.title}}</div>
+
+<p>We've sent a one-click thanks along to {{ shared_post.sharer.user.first_name }}. Thanks to you for letting them know the effort was appreciated!
+</p>
+
+<div>Leaderboard: Thanks sent to {{ shared_post.sharer.user.first_name}}</div>
+<table cellspacing="0"><tbody>
+{% for receiver in receiver_info %}
+<tr>
+  <td width="150">{{ receiver.receiver.user.email }}</td>
+  <td>{{ receiver.count }}</td>
+  <td><div class="bargraph" style="width: {{ receiver.barwidth }}px;"></div></td>
+</tr>
+{% endfor %}
+</tbody></table>
+{% endblock %}
