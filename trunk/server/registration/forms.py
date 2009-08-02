@@ -37,6 +37,8 @@ class RegistrationForm(forms.Form):
     email = forms.EmailField(widget=forms.TextInput(attrs=dict(attrs_dict,
                                                                maxlength=75)),
                              label=_(u'email address'))
+    first_name = forms.CharField(min_length = 1, max_length=30, label=_(u'first name'))
+    last_name = forms.CharField(min_length = 1, max_length=30, label=_(u'last name'))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
                                 label=_(u'password'))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs=attrs_dict, render_value=False),
@@ -76,7 +78,9 @@ class RegistrationForm(forms.Form):
         """
         new_user = RegistrationProfile.objects.create_inactive_user(username=self.cleaned_data['username'],
                                                                     password=self.cleaned_data['password1'],
-                                                                    email=self.cleaned_data['email'])
+                                                                    email=self.cleaned_data['email'],
+                                                                    first_name=self.cleaned_data['first_name'],
+                                                                    last_name=self.cleaned_data['last_name'])
         return new_user
 
 
