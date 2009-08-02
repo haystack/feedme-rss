@@ -24,4 +24,5 @@ urlpatterns = patterns('',
     url(r'^receiver/settings/(?P<user_email>\S+)/(?P<settings_seed>\d+)/$', 'server.feedme.receiver_settings.change_receiver_settings', name='change receiver settings'),
     url(r'^bookmarklet/', 'server.feedme.bookmarklet.bookmarklet', name='bookmarklet'),
     url(r'^bookmarklet_install/', 'server.feedme.bookmarklet_install.bookmarklet_install', name='bookmarklet installation'),
+    url(r'^thanks/(?P<shared_post>\d+)/$', 'server.feedme.thanks.thanks', name='thanks'),
 )
