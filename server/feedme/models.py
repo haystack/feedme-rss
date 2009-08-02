@@ -12,7 +12,13 @@ class Sharer(models.Model):
     user = models.ForeignKey(User, unique=True)
     
     def __unicode__(self):
-        return unicode(self.user)
+        return self.name()
+    
+    def name(self):
+        if self.user.first_name != u'' or self.user.last_name != u'':
+            return self.user.first_name + u' ' + self.user.last_name
+        else:
+            return self.user.email        
     
 class Receiver(models.Model):
     user = models.ForeignKey(User, unique=True)

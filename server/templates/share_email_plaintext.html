@@ -4,7 +4,7 @@
 
 {% block post_title %}{{ post.title }} ({{ post.url }}){% endblock %}
 
-{% block feed_title %}{{ post.feed.title }} ({{post.feed.rss_url}}){% endblock %}
+{% block feed_title %}{{ post.feed.title.strip }}{% endblock %}
 
 {% block subscription %}Go to http://feedme.csail.mit.edu:8000/receiver/settings/ to change your e-mail receiving settings{% endblock %}
 

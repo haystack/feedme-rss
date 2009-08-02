@@ -1,12 +1,12 @@
 {% if comment %}
-<p>{{ comment|escape|urlize|linebreaksbr }}</p><br />
+<p>{{ comment|escape|urlize|linebreaksbr }}</p>
 {% endif %}
-<p>{{ shared_post.sharer.user.email }} thought you might like this post. They're beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.</p><br />
-
-<p>{% block post_title %}<a href="{{ post.url }}">{{ post.title }}</a>{% endblock %}</p>
-<p>via {% block feed_title %}<a href="{{post.feed.rss_url}}">{{ post.feed.title }}</a>{% endblock %}</p><br />
+<p><span style="font-style: italic;">via {% block feed_title %}<a href="{{post.feed.rss_url}}">{{ post.feed.title.strip }}</a>{% endblock %}:</span><br />
+<span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="{{ post.url }}">{{ post.title }}</a>{% endblock %}</span></p>
 
 {{ post.contents|safe }}
 
 <br />
+<p>{{ shared_post.sharer.name }} is beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.<br />
+
 <p>{% block subscription %}<a href='http://feedme.csail.mit.edu:8000/receiver/settings/'>Change your e-mail receiving settings</a>{% endblock %} to get only a digest, or to never be recommended posts.</p>

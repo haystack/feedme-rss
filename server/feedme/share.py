@@ -119,7 +119,13 @@ def send_post_email(shared_post, receivers):
   """Sends the post in an email to the recipient"""
   post = shared_post.post
   subject = post.title.strip()
-  from_email = shared_post.sharer.user.email
+  sharer = shared_post.sharer.user
+
+  if sharer.first_name != u'' or sharer.last_name != u'':
+    from_email = sharer.first_name + u' ' + sharer.last_name + \
+    u' <' + sharer.email + u'>'
+  else:
+    from_email = shared_post.sharer.user.email
   to_emails = [receiver.receiver.user.email for receiver in receivers]
   if from_email != u'karger@csail.mit.edu':
     to_emails.append(from_email)
@@ -137,7 +143,6 @@ def send_post_email(shared_post, receivers):
   plaintext_template = loader.get_template("share_email_plaintext.html")
   text_content = plaintext_template.render(context)
   text_content = nltk.clean_html(text_content)
-  print text_content
   email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
   email.attach_alternative(html_content, "text/html")
   email.send()
