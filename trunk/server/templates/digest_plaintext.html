@@ -2,7 +2,7 @@
 
 {% block email %}email us at feedme@csail.mit.edu{% endblock %}
 
-{% block post_title %}{{ shared_post_receiver.shared_post.post.title }} ({{ shared_post_receiver.shared_post.post.url }}){% endblock %}
+{% block post_title %}{{ shared_post_receiver.shared_post.post.title }} (http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post_receiver.shared_post.pk %}){% endblock %}
 
 {% block feed_title %}{{ shared_post_receiver.shared_post.post.feed.title }} ({{ shared_post_receiver.shared_post.post.feed.rss_url }}){% endblock %}
 
