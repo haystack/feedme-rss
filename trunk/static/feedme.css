@@ -1,0 +1,66 @@
+/* Feedme CSS */
+
+body {
+    margin:20px;
+/*    background-color: rgb(255, 153, 0); */
+    background-color: rgb(0, 102, 204); 
+    font-family: "trebuchet ms", trebuchet, verdana, arial, sans-serif;
+    font-size:10pt;
+    font-weight:normal;
+    text-align : center;
+    color:#333;
+    overflow: auto;
+}
+
+a {
+    text-decoration: none;
+    color:          #0066CC;
+}
+
+table { font-size: 100% }
+
+.titletext {
+    color:#111;
+    font-size:20pt;
+    font-weight:normal;
+    text-align : left;
+    padding-bottom: 20px;
+}
+
+.container700 {
+    width: 700px;
+    min-height: 100px;
+    margin:0 auto;/* used to center the div (known hack for IE) */
+    text-align: left;
+    border-style:solid;
+    border-width:2px;
+    border-color: rgb(255, 153, 0);
+    background:#FFF;
+    box-shadow: 5px 5px 5px #210;
+    -moz-box-shadow: 5px 5px 5px #210;
+    -webkit-box-shadow: 5px 5px 5px #210;
+    padding: 10px;
+    -moz-border-radius: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+}
+
+.logo {
+    float: right;
+}
+
+.footer {
+    vertical-align: bottom;
+    color: gray;
+    font-size: 8pt;
+}
+
+.footer a {
+    color: gray;
+}
+
+.bargraph {
+    background-color: rgb(255, 153, 0);
+    height: 1em;
+    margin-left: 10px;
+}
