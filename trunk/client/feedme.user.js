@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.161;
+var script_version = 0.162;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -359,6 +359,11 @@ function recommendMorePeople(postToPopulate) {
                      start_person + moreRecommendations : people.length;
     var expanded_div = null;
     
+    console.log('start person is ' + start_person);
+    console.log('morerec is ' + moreRecommendations);
+    console.log('option 1 is ' + (start_person + moreRecommendations));
+    console.log('option 2 is' + people.length);
+    console.log('min length is ' + min_length);
     if (start_person < min_length || people.length == 0) {
         header.append('<div class="expand-container feedme-recommendations-group ' + div_class + '"></div>');
         expanded_div = postToPopulate.find('.' + div_class);
@@ -375,13 +380,12 @@ function recommendMorePeople(postToPopulate) {
             postToPopulate.find(".feedme-more-recommendations").css('display', '');
             
             if (people.length == 0) {
-                var moreRecommendations = postToPopulate.find('.feedme-more-recommendations-button');
+                var more_recommendations_button = postToPopulate.find('.feedme-more-recommendations-button');
                 // move the more recommendations to the end of the list and make it invisible; this retains the usual layout with just the autocomplete visible
-                postToPopulate.find('.feedme-recommendation-group-0').append(moreRecommendations);
-                moreRecommendations.css('visibility', 'hidden');
+                postToPopulate.find('.feedme-recommendation-group-0').append(more_recommendations_button);
+                more_recommendations_button.css('visibility', 'hidden');
                 // Undo the special css we usually put there
                 postToPopulate.find('.feedme-recommendation-group-0').css('position', 'static').css('right', '0');
-                
                 postToPopulate.find('.feedme-recommendation-group-0').prepend($('<span>FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" />share with:&nbsp;&nbsp;&nbsp;&nbsp;</span>'));
             }
         }
