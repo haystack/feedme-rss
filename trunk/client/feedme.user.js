@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.15;
+var script_version = 0.16;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -336,12 +336,12 @@ function populateSuggestions(json) {
         return;
     }
     
-    console.log('setting jquery data');
-    $(postToPopulate).data('people', people);
-    $(postToPopulate).data('previously_shared', previously_shared);
-    $(postToPopulate).data('start_person', 0);
+    postToPopulate.data('people', people);
+    postToPopulate.data('previously_shared', previously_shared);
+    postToPopulate.data('start_person', 0);
     recommendMorePeople(postToPopulate);
-    $('.feedme-placeholder', postToPopulate).remove();
+
+    postToPopulate.find('.feedme-placeholder').remove();
 }
 
 /*
@@ -349,19 +349,19 @@ function populateSuggestions(json) {
  */
 function recommendMorePeople(postToPopulate) {
     console.log("recommending more people");
-    var people = $(postToPopulate).data('people');
-    var start_person = $(postToPopulate).data('start_person');
-    var previously_shared = $(postToPopulate).data('previously_shared');
-    var header = $(".feedme-suggestions", postToPopulate);
+    var people = postToPopulate.data('people');
+    var start_person = postToPopulate.data('start_person');
+    var previously_shared = postToPopulate.data('previously_shared');
+    var header = postToPopulate.find(".feedme-suggestions");
     var div_class = 'feedme-recommendation-group-' + start_person;
     
     var min_length =  start_person + moreRecommendations < people.length ?
                      start_person + moreRecommendations : people.length;
     var expanded_div = null;
     
-    if (start_person < min_length) {
+    if (start_person < min_length || people.length == 0) {
         header.append('<div class="expand-container feedme-recommendations-group ' + div_class + '"></div>');
-        expanded_div = $('.' + div_class, postToPopulate);
+        expanded_div = postToPopulate.find('.' + div_class);
         for (var i = start_person; i < min_length; i++) {
             var person = people[i];
             addFriend(person['email'], person['email'], person['shared_today'], expanded_div, postToPopulate);
@@ -371,24 +371,34 @@ function recommendMorePeople(postToPopulate) {
             expanded_div.removeClass('expand-container');
             expanded_div.css("display", "inline");  // so the placeholder flows with it in the same line
             
-            $('.feedme-recommendation-group-0', postToPopulate).append($(".feedme-more-recommendations", postToPopulate));
-            $(".feedme-more-recommendations", postToPopulate).css('display', '');
+            postToPopulate.find('.feedme-recommendation-group-0').append(postToPopulate.find(".feedme-more-recommendations"));
+            postToPopulate.find(".feedme-more-recommendations").css('display', '');
+            
+            if (people.length == 0) {
+                var moreRecommendations = postToPopulate.find('.feedme-more-recommendations-button');
+                // move the more recommendations to the end of the list and make it invisible; this retains the usual layout with just the autocomplete visible
+                postToPopulate.find('.feedme-recommendation-group-0').append(moreRecommendations);
+                moreRecommendations.css('visibility', 'hidden');
+                // Undo the special css we usually put there
+                postToPopulate.find('.feedme-recommendation-group-0').css('position', 'static').css('right', '0');
+                
+                postToPopulate.find('.feedme-recommendation-group-0').prepend($('<span>FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" />share with:&nbsp;&nbsp;&nbsp;&nbsp;</span>'));
+            }
         }
         else {
             expanded_div.slideToggle("normal");
         }        
 
-            // Commented out until we decide what to do with previously shared
-            // folks
+        // Initialize previously-shared folks
         for (var j=0; j<previously_shared.length; j++) {
             var person = previously_shared[j];
-            $('[email="' + person['email'] + '"]', postToPopulate)
+            postToPopulate.find('[email="' + person['email'] + '"]')
             .addClass("feedme-sent")
             .find('.feedme-num-shared').text('Sent!');
         }
-    
-        $(".wait-for-suggestions", postToPopulate).removeClass("wait-for-suggestions");
-        $(postToPopulate).data('start_person', min_length);
+
+        postToPopulate.data('start_person', min_length);
+        postToPopulate.find(".wait-for-suggestions").removeClass("wait-for-suggestions");
     }
 }
 
@@ -646,7 +656,15 @@ function populateAutocomplete(context) {
             return true;
         });
         
-        $('.feedme-addImg', context).click(function(event) { $('.feedme-autocomplete', context).trigger("result.autocomplete") });
+        $('.feedme-addImg', context).click(function(event) {
+            text = $('.feedme-autocomplete', context).val();
+            // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
+            //$(this).trigger("result.autocomplete", [text, text]);
+            
+            if (text != '') {
+                addFriendAndSelect(text, context);
+            }
+        });
         //$('.feedme-autocomplete', context).bind('keydown.autocomplete', unsafeWindow.imported);
         $('.feedme-autocomplete', context).bind('keydown.autocomplete', function(event) {
             if (event.which == 13) { // user pushed enter
@@ -762,6 +780,11 @@ function setupStyles() {
     .entry .entry-main {
         overflow: visible;
     }
+    .feedme-logo-icon {
+        position: relative;
+        right: 3px;
+        top: -3px;
+    }
     
     ]]></r>).toString();
     
@@ -779,7 +802,8 @@ function verify_login(json) {
         console.log('logged out');
         $("body").append('<a style="display: none;" id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
         $("a#login-iframe").fancybox({
-            frameHeight: 200,
+            frameWidth: 800,
+            frameHeight: 225,
             hideOnContentClick: false,
         });
         $("a#login-iframe").click();
