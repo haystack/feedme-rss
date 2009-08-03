@@ -1,11 +1,9 @@
 {% extends "base.html" %}
 
-{% block title %}FeedMe Login{% endblock %}
-{% block header %}FeedMe Login{% endblock %}
+{% block title %}FeedMe Sign In{% endblock %}
+{% block header %}FeedMe Sign In{% endblock %}
 
 {% block body %}
-
-FeedMe login
 
 {% if form.errors %}
 <p>Your username and password didn't match. Please try again.</p>
@@ -22,8 +20,8 @@ FeedMe login
     <td>{{ form.password }}</td>
 </tr>
 </table>
-
-<input type="submit" value="login" />
+<br />
+<input type="submit" value="Sign In" />
 </form>
 
 {% endblock %}
