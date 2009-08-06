@@ -127,7 +127,7 @@ def send_post_email(shared_post, receivers):
   else:
     from_email = shared_post.sharer.user.email
   to_emails = [receiver.receiver.user.email for receiver in receivers]
-  if from_email != u'karger@csail.mit.edu':
+  if u'karger@csail.mit.edu' not in from_email:
     to_emails.append(from_email)
   else:
     print 'SPECIAL CASE KARGER NOT CC\'ED'
