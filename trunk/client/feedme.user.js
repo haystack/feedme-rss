@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.163;
+var script_version = 0.17;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -160,6 +160,7 @@ function register_entry_click(context) {
             return;
         } else {
             suggest_people($(context));
+            log_clicks($(context));
         }
     } catch (e) { 
         console.log(e);
@@ -233,7 +234,7 @@ function suggest_people(context) {
 }
 
 function server_recommend(context) {
-    server_vars = get_post_variables(context);
+    var server_vars = get_post_variables(context);
     
     var theurl = "recommend/";
     var data = {
@@ -241,11 +242,35 @@ function server_recommend(context) {
         feed_url: server_vars["feed_url"],
         post_url: server_vars["post_url"],
         post_title: server_vars["post_title"],
-        post_contents: server_vars["post_contents"]
+        post_contents: server_vars["post_contents"],
+        expanded_view: server_vars["expanded_view"]
     }
     
     console.log(data)
     ajax_post(theurl, data, populateSuggestions);
+}
+
+function log_clicks(context) {
+    var links = context.find('.entry-body a, a.entry-title-link')
+    console.log('links to track:')
+    console.log(links)
+    links.click( link_clicked );
+}
+
+function link_clicked() {
+    console.log("Link clicked: ")
+    console.log($(this));
+    
+    var entry = $(this).parents('.entry');
+    var server_vars = get_post_variables(entry);
+    
+    var url = "reader_click/";
+    var data = {
+        post_url: server_vars["post_url"],
+        feed_url: server_vars["feed_url"],
+    }
+    console.log(data);
+    ajax_post(url, data, handle_ajax_response);
 }
 
 function get_post_variables(context)
@@ -261,7 +286,14 @@ function get_post_variables(context)
         feed_url = feed_url.substring(feed_url_loc + gReaderString.length);
     }
     var post_title = entry_main.find('.entry-title').text();
-    var post_contents = entry_main.find('.entry-body').html();	    
+    var post_contents = entry_main.find('.entry-body').html();
+
+    if ($('#view-cards.link-selected').length == 1) {
+        var expanded_view = true;
+    }
+    else {
+        var expanded_view = false;
+    }
 
     var post_vars = new Array();
     post_vars["post_url"] = post_url;
@@ -269,6 +301,7 @@ function get_post_variables(context)
     post_vars["feed_url"] = feed_url;
     post_vars["post_title"] = post_title;
     post_vars["post_contents"] = post_contents;
+    post_vars["expanded_view"] = expanded_view;    
     return post_vars;
 }
 
@@ -518,7 +551,7 @@ function share_post(event)
         recipients[i] = recipientDivs[i].getAttribute("email");
     }
     
-    server_vars = get_post_variables(context);
+    var server_vars = get_post_variables(context);
     
     var url = "share/";
     console.log("Sharing post with: " + recipients);
