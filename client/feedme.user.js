@@ -250,7 +250,7 @@ function server_recommend(context) {
 
 function get_post_variables(context)
 {
-    var entry_main = context.find('.entry-main');    
+    var entry_main = context.find('.entry-container .entry-main');
   
     var post_url = entry_main.find('.entry-title a').attr('href');
     var feed_title = entry_main.find('a.entry-source-title').text()
@@ -359,11 +359,6 @@ function recommendMorePeople(postToPopulate) {
                      start_person + moreRecommendations : people.length;
     var expanded_div = null;
     
-    console.log('start person is ' + start_person);
-    console.log('morerec is ' + moreRecommendations);
-    console.log('option 1 is ' + (start_person + moreRecommendations));
-    console.log('option 2 is' + people.length);
-    console.log('min length is ' + min_length);
     if (start_person < min_length || people.length == 0) {
         header.append('<div class="expand-container feedme-recommendations-group ' + div_class + '"></div>');
         expanded_div = postToPopulate.find('.' + div_class);
