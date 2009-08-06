@@ -139,16 +139,40 @@ if __name__ == '__main__':
             with flock(lock_directory + '.feedme-reindex-termvector'):
                 yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
                 newposts = SharedPost.objects \
-                           .filter(sharedpostreceiver__time__gte = yesterday)
+                           .filter(sharedpostreceiver__time__gte = yesterday) \
+                           .distinct()
                 print str(newposts.count()) + ' shared posts since yesterday'
+
+                sp_clicked = SharedPost.objects \
+                             .filter(sharedpostreceiver__time__gte = yesterday) \
+                             .filter(clickthroughs__gte = 1) \
+                             .distinct()
+                print str(sp_clicked.count()) + ' FeedMe links sent yesterday had at least one clickthrough to the link'
+
+                sp_thanked = SharedPost.objects \
+                             .filter(sharedpostreceiver__time__gte = yesterday) \
+                             .filter(thanks = True) \
+                             .distinct()
+                print str(sp_thanked.count()) + ' FeedMe links sent yesterday had a thank you'                
+                             
+                logins = LoggedIn.objects.filter(time__gte = yesterday)
+                print str(logins.count()) + ' GReader views/refreshes since yesterday'
+
+                viewed = ViewedPost.objects.filter(time__gte = yesterday)
+                print str(viewed.count()) + ' posts viewed since yesterday'
+
+                clicked = ViewedPost.objects.filter(time__gte = yesterday) \
+                          .filter(link_clickthrough = True)
+                print str(clicked.count()) + ' GReader posts with clicked-through links yesterday'                
+
                 print
+                print 'sharing records:'
 
                 sharers = Sharer.objects.filter(sharedpost__in = newposts).distinct()
                 for sharer in sharers:
                     shared_by_person = newposts.filter(sharer = sharer)
                     print sharer.user.email + ': ' \
                           + str(len(shared_by_person)) + ' posts'
-                    print
                 
                 print u'Updating receiver term vectors...'
                 reindex_all()
