@@ -1,7 +1,7 @@
 <p style="margin-bottom: 1em;">Your friends using MIT's FeedMe tool thought that these posts might be interesting to you, but didn't want to bother you with a separate email at the time. Here's your weekly newspaper, as authored by your friends!</p>
 
 {% for shared_post_receiver in posts %}
-<p>{% block post_title %}<a href="http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post_receiver.shared_post.pk %}">{{ shared_post_receiver.shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}<a href="{{ shared_post_receiver.shared_post.post.feed.rss_url }}">{{ shared_post_receiver.shared_post.post.feed.title }}</a>{% endblock %}<br />
+<p>{% block post_title %}<a href="http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post_receiver.shared_post.pk %}{{ shared_post.post.url|urlencode }}">{{ shared_post_receiver.shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}<a href="{{ shared_post_receiver.shared_post.post.feed.rss_url }}">{{ shared_post_receiver.shared_post.post.feed.title }}</a>{% endblock %}<br />
 <span style="margin-left: 20px">from {{ shared_post_receiver.shared_post.sharer.user.email }}{% ifnotequal shared_post_receiver.shared_post.comment "" %}: {{ shared_post_receiver.shared_post.comment|escape|urlize|linebreaksbr }}{% endifnotequal %}</span></p>
 {% endfor %}
 

@@ -24,29 +24,33 @@ def get_recommendation_json(request):
   post_url = request.POST['post_url']
   post_title = request.POST['post_title']
   post_contents = request.POST['post_contents']
+  expanded_view = (request.POST['expanded_view'] == 'true')
 
   post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
                                   post_title=post_title, \
                                   post_contents=post_contents, \
                                   sharer_user = sharer_user, \
-                                  feed_title = feed_title)
+                                  feed_title = feed_title, \
+                                  expanded_view = expanded_view)
   feed = post_objects['feed']
   post = post_objects['post']
   sharer = post_objects['sharer']
   shared_post = post_objects['shared_post']
   shared_post_receivers = post_objects['shared_post_receivers']
   shared_users = post_objects['shared_users']
+  viewed_post = post_objects['viewed_post']
 
   print 'get recommendations'
-  recommendations = n_best_friends(post, sharer)
+  recommendations, sorted_friends = n_best_friends(post, sharer)
   print recommendations
+
+  log_recommendations(viewed_post, sorted_friends)
 
   response = dict()
   response['posturl'] = post.url
   response['users'] = create_user_json(recommendations)
   response['shared'] = create_user_json(shared_users)
   response_json = simplejson.dumps(response)
-  print response_json
   
   return response_json
 
@@ -73,7 +77,7 @@ def create_user_json(recommendations):
 
 
 def get_post_objects(feed_title, feed_url, post_url, post_title, \
-                     post_contents, sharer_user):
+                     post_contents, sharer_user, expanded_view):
   # create objects if we need to
   try:
     feed = Feed.objects.get(rss_url=feed_url)
@@ -108,6 +112,12 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
     shared_users = []
     shared_post_receivers = []
 
+  # log the view
+  viewed = ViewedPost(post=post, sharer=sharer, \
+                        expanded_view = expanded_view)
+  viewed.save()
+    
+
   post_objects = dict()
   post_objects['feed'] = feed
   post_objects['post'] = post
@@ -115,6 +125,7 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
   post_objects['shared_post'] = shared_post
   post_objects['shared_post_receivers'] = shared_post_receivers
   post_objects['shared_users'] = shared_users
+  post_objects['viewed_post'] = viewed
   return post_objects
 
 
@@ -160,7 +171,18 @@ def n_best_friends(post, sharer):
   print sorted_friends
 
   print "time for recommendation: " + str(time.clock() - begin_time)
-  return map(lambda friend:friend['receiver'].user, sorted_friends)
+  return map(lambda friend:friend['receiver'].user, sorted_friends), sorted_friends
+
+
+def log_recommendations(viewed_post, recommendations):
+  for i in range( len(recommendations) ):
+    receiver = recommendations[i]['receiver']
+    score = recommendations[i]['score']
+    vp_rec = ViewedPostRecommendation(receiver=receiver, \
+                                      viewed_post = viewed_post, \
+                                      recommendation_order = i, \
+                                      cosine_distance = score)
+    vp_rec.save()
   
 
 def cosine_distance(term_vector, freq_dist, freq_dist_counts):

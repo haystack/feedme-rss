@@ -8,4 +8,10 @@ def check_logged_in(request):
     response['logged_in'] = request.user.is_authenticated()
     response_json = simplejson.dumps(response)
 
+    if response['logged_in']:
+        # logging
+        sharer = Sharer.objects.get(user = request.user)
+        log = LoggedIn(sharer = sharer)
+        log.save()        
+
     return HttpResponse(response_json, mimetype='application/json')

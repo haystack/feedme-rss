@@ -27,5 +27,6 @@ urlpatterns = patterns('',
     url(r'^thanks/(?P<sharedpost_pk>\d+)/$', 'server.feedme.thanks.thanks', name='thanks'),
 
     # logging infrastructure
-    url(r'^clickthrough/(?P<sharedpost_pk>\d+)/$', 'server.feedme.clickthrough.clickthrough', name='clickthrough'),
+    url(r'^clickthrough/(?P<sharedpost_pk>\d+)/.*$', 'server.feedme.clickthrough.clickthrough', name='clickthrough'),
+    url(r'^reader_click/', 'server.feedme.reader_click.reader_click', name='greader clickthrough'),
 )
