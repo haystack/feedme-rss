@@ -132,3 +132,21 @@ class TermVectorCell(models.Model):
 
     def __unicode__(self):
         return unicode(self.term) + u': ' + unicode(self.count);
+
+# For Logging
+class ViewedPost(models.Model):
+    post = models.ForeignKey(Post)
+    sharer = models.ForeignKey(Sharer)
+    time = models.DateTimeField(auto_now_add=True)
+    expanded_view = models.BooleanField()
+    link_clickthrough = models.BooleanField(default = False)
+
+class ViewedPostRecommendation(models.Model):
+    receiver = models.ForeignKey(Receiver)
+    viewed_post = models.ForeignKey(ViewedPost)
+    cosine_distance = models.FloatField()
+    recommendation_order = models.IntegerField()
+
+class LoggedIn(models.Model):
+    sharer = models.ForeignKey(Sharer)
+    time = models.DateTimeField(auto_now_add=True)
