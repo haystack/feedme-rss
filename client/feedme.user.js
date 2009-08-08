@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.17;
+var script_version = 0.18;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -56,6 +56,13 @@ function init() {
     //console.log($('#entries[class*="cards"] .entry'));
     //$('#entries[class*="cards"] .entry').each(entry_class_modified);
     
+    var entryContainer = $('#entries');
+    if (entryContainer.hasClass('list')) {
+        $('.entry').bind("DOMAttrModified", entry_class_modified);
+    }
+    else if (entryContainer.hasClass('cards')) {
+        $('.entry').each(entry_class_modified);
+    }
     $("#entries").bind("DOMNodeInserted", expandListener);
 }
 
@@ -133,7 +140,7 @@ function isExpandedView(entryTarget)
  */
 function isListView(entryTarget)
 {
-    return $(entryTarget).parent().attr("class").indexOf("list") != -1;
+    return $(entryTarget).parent().hasClass("list");
 }
 
 /**
@@ -230,7 +237,21 @@ function suggest_people(context) {
         comment_btn.slideToggle("normal");
     });
     
+    setup_comment_area(context.find('.comment-textarea'));
+    
     server_recommend(context);
+}
+
+function setup_comment_area(comment) {
+    var default_text = "Add an (optional) comment...";
+    comment.text(default_text)
+        .css('color', 'gray')
+        .elastic()
+        .focus( function() {
+            if($(this).text() == default_text) {
+                $(this).text('').css('min-height', '24px').css('color', '');
+            }
+        });
 }
 
 function server_recommend(context) {
@@ -251,10 +272,7 @@ function server_recommend(context) {
 }
 
 function log_clicks(context) {
-    var links = context.find('.entry-body a, a.entry-title-link')
-    console.log('links to track:')
-    console.log(links)
-    links.click( link_clicked );
+    var links = context.find('.entry-body a, a.entry-title-link').click( link_clicked );
 }
 
 function link_clicked() {
@@ -412,9 +430,10 @@ function recommendMorePeople(postToPopulate) {
                 // move the more recommendations to the end of the list and make it invisible; this retains the usual layout with just the autocomplete visible
                 postToPopulate.find('.feedme-recommendation-group-0').append(more_recommendations_button);
                 more_recommendations_button.css('visibility', 'hidden');
+                
                 // Undo the special css we usually put there
                 postToPopulate.find('.feedme-recommendation-group-0').css('position', 'static').css('right', '0');
-                postToPopulate.find('.feedme-recommendation-group-0').prepend($('<span>FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" />share with:&nbsp;&nbsp;&nbsp;&nbsp;</span>'));
+                postToPopulate.find('.feedme-recommendation-group-0').prepend($('<span>FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" />share with:&nbsp;&nbsp;</span>'));
             }
         }
         else {
@@ -771,7 +790,7 @@ function setupStyles() {
         display: none; 
     }
     .comment-textarea { 
-        height: 42px; 
+        height: 21px; 
         width: 415px; 
         margin-top: 10px;
         margin-right: 20px; 
@@ -882,6 +901,11 @@ function verify_login(json) {
     link.type = 'text/css';
     document.getElementsByTagName('head')[0].appendChild(link);
     
+    var JQ_elastic = document.createElement('script');
+    JQ_elastic.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.elastic-1.6.source.js';
+    JQ_elastic.type = 'text/javascript';
+    document.getElementsByTagName('head')[0].appendChild(JQ_elastic);
+    
     // Add jQuery-color animation
     var JQ_color = document.createElement('script');
     JQ_color.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.color.js';
@@ -892,7 +916,7 @@ function verify_login(json) {
 
         // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
         // TODO: can't figure out how to wait for jQuery Color Animation
-        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.ui == 'undefined' || typeof unsafeWindow.jQuery.ui.autocomplete == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || unsafeWindow.jQuery("#entries").size() == 0) {
+        if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.ui == 'undefined' || typeof unsafeWindow.jQuery.ui.autocomplete == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || typeof unsafeWindow.jQuery.fn.elastic == 'undefined' || unsafeWindow.jQuery(".entry").size() == 0) {
             window.setTimeout(GM_wait,100);
         }
         
