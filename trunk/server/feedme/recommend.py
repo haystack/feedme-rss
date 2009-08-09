@@ -43,6 +43,8 @@ def get_recommendation_json(request):
   print 'get recommendations'
   recommendations, sorted_friends = n_best_friends(post, sharer)
   print recommendations
+  print 'TEMP DEBUG'
+  recommendations = []
 
   log_recommendations(viewed_post, sorted_friends)
 
@@ -153,7 +155,6 @@ def n_best_friends(post, sharer):
     if not receiver.recommend:
       continue
 
-    print 'reviewing friend: ' + receiver.user.username
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
                   .order_by('term__term').select_related('term')
     if len(term_vector) > 0:

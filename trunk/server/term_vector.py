@@ -8,8 +8,12 @@ from server.feedme.models import *
 from django.db import transaction
 import math
 import datetime
-import sys
+import sys, codecs
 from flock import flock
+
+# set stdout to Unicode so we can write Unicode strings to stdout
+# todo: create some sort of startup script which calls this
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 @transaction.commit_manually
 def reindex_all():

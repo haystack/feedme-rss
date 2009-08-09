@@ -16,6 +16,8 @@ urlpatterns = patterns('',
     # Uncomment the next line to enable the admin:
     url(r'^admin/(.*)', admin.site.root, name="admin"),
     url(r'^accounts/', include('registration.urls')),
+    url(r'^address_book/', 'server.feedme.address_book.address_book', \
+        name='address book'),
     url(r'^recommend/', 'server.feedme.recommend.recommend', name='recommend'),
     url(r'^loggedin/', 'server.feedme.loggedin.logged_in', name='logged in'),
     url(r'^check_logged_in/', 'server.feedme.check_logged_in.check_logged_in', name='check login'),
