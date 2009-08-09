@@ -42,7 +42,7 @@ def send_thanks_email(shared_post):
       receiver_string += " say "      
   else:
       receiver_string = u", ".join(receivers[:-1])
-      receiver_string += u"and " + receivers[-1]
+      receiver_string += u" and " + receivers[-1]
       receiver_string += " say "      
   
   context = Context({"shared_post": shared_post, \
