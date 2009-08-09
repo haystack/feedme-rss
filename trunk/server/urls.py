@@ -27,6 +27,7 @@ urlpatterns = patterns('',
     url(r'^bookmarklet/', 'server.feedme.bookmarklet.bookmarklet', name='bookmarklet'),
     url(r'^bookmarklet_install/', 'server.feedme.bookmarklet_install.bookmarklet_install', name='bookmarklet installation'),
     url(r'^thanks/(?P<sharedpost_pk>\d+)/$', 'server.feedme.thanks.thanks', name='thanks'),
+    url(r'^seen_it/$', 'server.feedme.seen_it.seen_it', name='seen it'),
 
     # logging infrastructure
     url(r'^clickthrough/(?P<sharedpost_pk>\d+)/.*$', 'server.feedme.clickthrough.clickthrough', name='clickthrough'),

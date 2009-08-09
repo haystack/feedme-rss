@@ -1,13 +1,12 @@
 {% if comment %}
 <p>{{ comment|escape|urlize|linebreaksbr }}</p>
 {% endif %}
-<p><span style="font-style: italic;">via {% block feed_title %}<a href="{{post.feed.rss_url}}">{{ post.feed.title.strip }}</a>{% endblock %}</span><br />
+<p><span style="font-style: italic;">via {% block feed_title %}<a href="{{post.feed.rss_url}}">{{ post.feed.title.strip }}</a>{% endblock %}:</span><br />
 <span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post.pk %}{{ shared_post.post.url|urlencode }}">{{ post.title }}</a>{% endblock %}</span><br />
-<span><a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link %}{% endblock %}</p>
+{% if thanks %}<span><a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link %}{% endblock %}</p>{% endif %}
 
 {{ post.contents|safe }}
 
-<br />
 <p>{{ shared_post.sharer.name }} is beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.<br />
 
 <p>{% block subscription %}<a href='http://feedme.csail.mit.edu:8000/receiver/settings/'>Change your e-mail receiving settings</a>{% endblock %} to get only a digest, or to never be recommended posts.</p>

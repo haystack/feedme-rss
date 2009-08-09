@@ -133,7 +133,13 @@ def send_post_email(shared_post, receivers):
     print 'SPECIAL CASE KARGER NOT CC\'ED'
   comment = shared_post.comment
 
-  context = Context({"shared_post": shared_post, "post": post, "comment": comment})
+  try:
+    thanks = StudyParticipant.objects.get(sharer = shared_post.sharer) \
+             .social_features
+  except StudyParticipant.DoesNotExist:
+    thanks = True
+
+  context = Context({"shared_post": shared_post, "post": post, "comment": comment, "thanks": thanks})
   template = loader.get_template("share_email.html")
   html_content = template.render(context)
 
