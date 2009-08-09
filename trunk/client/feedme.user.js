@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.18;
+var script_version = 0.182;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -422,7 +422,7 @@ function recommendMorePeople(postToPopulate) {
         expanded_div = postToPopulate.find('.' + div_class);
         for (var i = start_person; i < min_length; i++) {
             var person = people[i];
-            addFriend(person['email'], person['email'], person['shared_today'], expanded_div, postToPopulate);
+            addFriend(person['email'], person['email'], person['shared_today'], person['seen_it'], expanded_div, postToPopulate);
         }
      
         if (start_person == 0) {
@@ -463,16 +463,20 @@ function recommendMorePeople(postToPopulate) {
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
-function addFriend(name, email, shared_today, header, context) {
+function addFriend(name, email, shared_today, seen_it, header, context) {
     var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared"></div></div>');
     header.append(newPerson);
 
     num_shared = $('[email="' + email + '"] .feedme-num-shared', context);
-    if (shared_today == null) {
-        num_shared.html('&nbsp;');
+    if (seen_it) {
+        num_shared.text('Saw it already');
+        newPerson.addClass("feedme-sent");
+    }
+    else if (shared_today != null) {
+        num_shared.text('Received ' + shared_today + ' today');
     }
     else {
-        num_shared.text('Received ' + shared_today + ' today');
+        num_shared.html('&nbsp;');
     }
     // Make the elements interactive
     newPerson.click(toggle_friend);
