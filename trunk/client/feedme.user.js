@@ -36,8 +36,12 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.183;
+var script_version = 0.19;
+/* data used to populate the autocomplete widget */
 var autocompleteData = null;
+/* for toggling on and off parts of the interface */
+var user_interface = true;
+var social_features = true;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
 
@@ -201,13 +205,16 @@ function suggest_people(context) {
     .append('<div class="feedme-more-recommendations-button feedme-button wait-for-suggestions"><div>&nbsp;</div><div class="feedme-num-shared"><a class="" href="javascript:{}">more...</div></a></div>')
     .append('<div class="feedme-autocomplete-container"><input class="feedme-autocomplete feedme-autocompleteToggle wait-for-suggestions" value="' + defaultAutocompleteText + '"></input><img class="feedme-addImg wait-for-suggestions" src="http://groups.csail.mit.edu/haystack/feedme/plus.png"></img></div>');
 
-    context.find(".feedme-controls")
+    var controls = context.find(".feedme-controls");
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
-    .append('<textarea class="comment-textarea"></textarea>')
-    .append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
-    .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
-    //.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
-
+    controls.append('<textarea class="comment-textarea"></textarea>');
+    if (social_features) {
+        controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
+        .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
+        //.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
+    } else {
+        controls.append('<div class="feedme-now-button no-social feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Send</a></div>')
+    }
     
     // Clear the autocomplete when they start typing
     suggest_autocomplete(context);
@@ -244,19 +251,19 @@ function suggest_people(context) {
     server_recommend(context);
 }
 
+var default_comment_text = "Add an (optional) comment...";
 function setup_comment_area(comment) {
-    var default_text = "Add an (optional) comment...";
-    comment.text(default_text)
+    comment.text(default_comment_text)
         .css('color', 'gray')
         .elastic()
         .focus( function() {
-            if ($(this).val() == default_text) {
+            if ($(this).val() == default_comment_text) {
                 $(this).val('').css('color', '');
             }
         })
         .blur( function() {
             if ($(this).val() == '') {
-                $(this).val(default_text).css('color', 'gray');
+                $(this).val(default_comment_text).css('color', 'gray');
             }
         });
 }
@@ -468,23 +475,29 @@ function addFriend(name, email, shared_today, seen_it, header, context) {
     header.append(newPerson);
 
     num_shared = $('[email="' + email + '"] .feedme-num-shared', context);
-    if (seen_it) {
-        num_shared.text('Saw it already');
-        newPerson.addClass("feedme-sent");
-    }
-    else if (shared_today != null) {
-        num_shared.text('Received ' + shared_today + ' today');
-    }
+    set_social_feedback(num_shared, newPerson, shared_today, seen_it);
     // Make the elements interactive
     newPerson.click(toggle_friend);
 }
 
+function set_social_feedback(num_shared, newPerson, shared_today, seen_it) {
+    if (social_features) {
+        if (seen_it) {
+            num_shared.text('Saw it already');
+            newPerson.addClass("feedme-sent");
+        }
+        else if (shared_today != null) {
+            num_shared.text('Received ' + shared_today + ' today');
+        }
+    }
+}
+
 function addFriendAndSelect(name, context) {
-    var header = $('.feedme-autocomplete-added', context);
+    var header = context.find('.feedme-autocomplete-added');
     addFriend(name, name, null, false, header, context);
     // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
-    $(".feedme-person:last", context).toggleClass("feedme-toggle");
-    $(".feedme-controls", context).slideDown("normal");
+    context.find(".feedme-person:last").toggleClass("feedme-toggle");
+    context.find(".feedme-controls").slideDown("normal");
     
     // Because the following call generates a "Component is not available" error when called!
     // It's called out of the jQuery code, apparently because the elements in a GM script are
@@ -493,7 +506,32 @@ function addFriendAndSelect(name, context) {
     // This seemed to break in FF 3.5 for me.
     //$(".feedme-person:last", context).click();
     
-    $('.feedme-autocomplete').val('');
+    context.find('.feedme-autocomplete').val('');
+    
+    // Get social feedback information about them
+    var url = 'seen_it/';
+    var server_vars = get_post_variables(context);
+    var data = {
+        post_url: server_vars["post_url"],
+        feed_url: server_vars["feed_url"],
+        recipient: name
+    }
+    console.log(data);
+    ajax_post(url, data, seen_it_response);
+}
+
+function seen_it_response(response) {
+    console.log("Seen it response:");
+    console.log(response);
+    var post_url = response['posturl'];
+    var shared_today = response['shared_today'];
+    var seen_it = response['seen_it'];
+    var email = response['email'];
+    
+    var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');    
+    var newPerson = postToPopulate.find('.feedme-person[email="' + email + '"]');
+    
+    set_social_feedback(num_shared, newPerson, shared_today, seen_it);
 }
 
 /* Selects or deselects a friend */
@@ -514,8 +552,48 @@ function share_post(event)
 {
     console.log("sharing post.");
     var context = $(this).parents('.entry');
+    animate_share($(this), context);
+    
+    var digest = $(this).hasClass("feedme-later-button");
+    //var broadcast = ($('.feedme-suggest.feedme-toggle', context).length == 1);
+    var recipientDivs = $(".feedme-person.feedme-toggle", context);
+    if (recipientDivs.length == 0) {
+        console.log("nobody to share with.");
+        alert("Please select a contact to share the feed item with.");
+        return;
+    }
+    
+    var recipients = new Array();
+    for (var i=0; i < recipientDivs.length; i++)
+    {
+        recipients[i] = recipientDivs[i].getAttribute("email");
+    }
+    
+    var comment = context.find('.comment-textarea').val();
+    console.log("comment: " + comment);
+    if (comment == default_comment_text) {
+        comment = '';
+    }    
+    
+    var server_vars = get_post_variables(context);
+    
+    var url = "share/";
+    console.log("Sharing post with: " + recipients);
+    var data = {
+        post_url: server_vars["post_url"],
+        feed_url: server_vars["feed_url"],
+        recipients: recipients,
+        comment: comment,
+        bookmarklet: false,
+        digest: digest
+    }
+    console.log(data);
+    ajax_post(url, data, handle_ajax_response);
+}
+
+function animate_share(shareButton, context) {
     // remove comment box
-    $('.feedme-toggle-hidden', context).slideUp("normal");
+    context.find('.feedme-toggle-hidden').slideUp("normal");
     
     // Flash the selected elements
     // Bottom____Color is necessary because jQuery color doesn't animate "borderColor"
@@ -547,7 +625,7 @@ function share_post(event)
         borderLeftColor: '#d2d2d2',
         borderRightColor: '#d2d2d2'	
     };
-    $(".feedme-person.feedme-toggle", context)
+    context.find(".feedme-person.feedme-toggle")
     .animate(animateHighlight, 750)
     .animate(animateSent, 750, function() {
         // clean up
@@ -559,40 +637,9 @@ function share_post(event)
     .find('.feedme-num-shared')
     .text('Sent!');
     
-    $(this)
-    .animate(animateHighlight, 750)
+    shareButton.animate(animateHighlight, 750)
     .animate(animateSelected, 750);
-    
-    var digest = $(this).hasClass("feedme-later-button");
-    //var broadcast = ($('.feedme-suggest.feedme-toggle', context).length == 1);
-    var recipientDivs = $(".feedme-person.feedme-toggle", context);
-    if (recipientDivs.length == 0) {
-        console.log("nobody to share with.");
-        alert("Please select a contact to share the feed item with.");
-        return;
-    }
-    
-    var recipients = new Array();
-    for (var i=0; i < recipientDivs.length; i++)
-    {
-        recipients[i] = recipientDivs[i].getAttribute("email");
-    }
-    
-    var server_vars = get_post_variables(context);
-    
-    var url = "share/";
-    console.log("Sharing post with: " + recipients);
-    var data = {
-        post_url: server_vars["post_url"],
-        feed_url: server_vars["feed_url"],
-        recipients: recipients,
-        comment: $('.comment-textarea', context).val(),
-        bookmarklet: false,
-        digest: digest
-    }
-    console.log(data);
-    ajax_post(url, data, handle_ajax_response);
-}
+}    
 
 var gdocs_autocompleteData = null;
 var feedme_autocompleteData = null;
@@ -860,6 +907,10 @@ function setupStyles() {
         margin-right: 0px; 
         border-right: 0px;  
     }
+    .feedme-now-button.no-social {
+        border: 1px solid #d2d2d2;
+        -moz-border-radius: 5px; 
+    }
     .feedme-later-button { 
         -moz-border-radius-topleft: 0px;
         -moz-border-radius-bottomleft: 0px; 
@@ -905,6 +956,11 @@ function verify_login(json) {
             hideOnContentClick: false,
         });
         $("a#login-iframe").click();
+    } else {
+        user_interface = json.user_interface == 1;
+        console.log("User interface on?: " + user_interface);
+        social_features = json.social_features == 1;
+        console.log("Social features on?: " + social_features);
     }
 }
 
