@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.182;
+var script_version = 0.183;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
@@ -464,7 +464,7 @@ function recommendMorePeople(postToPopulate) {
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
 function addFriend(name, email, shared_today, seen_it, header, context) {
-    var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared"></div></div>');
+    var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">&nbsp;</div></div>');
     header.append(newPerson);
 
     num_shared = $('[email="' + email + '"] .feedme-num-shared', context);
@@ -475,16 +475,13 @@ function addFriend(name, email, shared_today, seen_it, header, context) {
     else if (shared_today != null) {
         num_shared.text('Received ' + shared_today + ' today');
     }
-    else {
-        num_shared.html('&nbsp;');
-    }
     // Make the elements interactive
     newPerson.click(toggle_friend);
 }
 
 function addFriendAndSelect(name, context) {
     var header = $('.feedme-autocomplete-added', context);
-    addFriend(name, name, null, header, context);
+    addFriend(name, name, null, false, header, context);
     // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
     $(".feedme-person:last", context).toggleClass("feedme-toggle");
     $(".feedme-controls", context).slideDown("normal");
