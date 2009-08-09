@@ -1,5 +1,4 @@
 from django.http import HttpResponse
-from django.core import serializers
 from django.utils import simplejson
 from django.contrib.auth.models import User 
 from models import *
@@ -102,6 +101,7 @@ def who_has_seen_it(recommendations, post):
   viewed_it = [vp.sharer.user.email for vp in viewed_query]
 
   return set(received_it + viewed_it)
+
 
 def get_post_objects(feed_title, feed_url, post_url, post_title, \
                      post_contents, sharer_user, expanded_view):
