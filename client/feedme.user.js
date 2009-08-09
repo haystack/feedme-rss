@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.19;
+var script_version = 0.191;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
 /* for toggling on and off parts of the interface */
@@ -1016,8 +1016,23 @@ function verify_login(json) {
     document.getElementsByTagName('head')[0].appendChild(JQ_color);
     
     var $;
+    /**
+        * We want to give GReader the $ function back ASAP because it tends to mess with the user interface.
+        * GReader uses $ in its minified code, and jQuery bashes that up.  So, as soon as jQuery is loaded,
+        * we release the $ function.  TODO: we could change our hosted version of jQuery.js 
+        * to (at the bottom of the code) call jQuery.noConflict() a first time to absolutely avoid any problems.
+        **/
+    function safe_$() {
+        if(typeof unsafeWindow.jQuery == 'undefined') {
+            window.setTimeout(safe_$, 50);
+        } else {
+            $ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
+            console.log("jQuery has released $()");
+        }
+    }
+    safe_$();
+    
     function GM_wait() {
-
         // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
         // TODO: can't figure out how to wait for jQuery Color Animation
         if(typeof unsafeWindow.jQuery == 'undefined' || typeof unsafeWindow.jQuery.ui == 'undefined' || typeof unsafeWindow.jQuery.ui.autocomplete == 'undefined' || typeof unsafeWindow.jQuery.fn == 'undefined' || typeof unsafeWindow.jQuery.fn.fancybox == 'undefined' || typeof unsafeWindow.jQuery.fn.elastic == 'undefined' || unsafeWindow.jQuery(".entry").size() == 0) {
@@ -1025,7 +1040,7 @@ function verify_login(json) {
         }
         
         else {
-            $ = unsafeWindow.jQuery.noConflict();	// ensures that gReader gets its $ back
+            safe_$();   // just to make double-extra sure that the other callback has occurred
             $(document).ready( function() {
                 window.setTimeout(init, 0);     // gives control back to greasemonkey window
             });
