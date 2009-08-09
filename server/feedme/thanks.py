@@ -38,10 +38,10 @@ def send_thanks_email(shared_post):
       receiver_string = receivers[0]
       receiver_string += " says "
   elif len(receivers) == 2:
-      receiver_string = receivers.join(u" and ")
+      receiver_string = u" and ".join(receivers)
       receiver_string += " say "      
   else:
-      receiver_string = receivers[:-1].join(u", ")
+      receiver_string = u", ".join(receivers[:-1])
       receiver_string += u"and " + receivers[-1]
       receiver_string += " say "      
   

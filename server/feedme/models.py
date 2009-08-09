@@ -150,3 +150,8 @@ class ViewedPostRecommendation(models.Model):
 class LoggedIn(models.Model):
     sharer = models.ForeignKey(Sharer)
     time = models.DateTimeField(auto_now_add=True)
+
+class StudyParticipant(models.Model):
+    sharer = models.ForeignKey(Sharer)
+    user_interface = models.BooleanField()
+    social_features = models.BooleanField()
