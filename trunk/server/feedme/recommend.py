@@ -42,20 +42,23 @@ def get_recommendation_json(request):
 
   print 'get recommendations'
   recommendations, sorted_friends = n_best_friends(post, sharer)
-  print recommendations
+  print recommendations  
+  seen_it = who_has_seen_it(recommendations, post)
+  print 'seen it:'
+  print seen_it
 
   log_recommendations(viewed_post, sorted_friends)
 
   response = dict()
   response['posturl'] = post.url
-  response['users'] = create_user_json(recommendations)
-  response['shared'] = create_user_json(shared_users)
+  response['users'] = create_user_json(recommendations, seen_it)
+  response['shared'] = create_user_json(shared_users, seen_it)
   response_json = simplejson.dumps(response)
   
   return response_json
 
 
-def create_user_json(recommendations):
+def create_user_json(recommendations, seen_it):
   """Turns a list of users into a list of dicts with important properties
   for the Greasemonkey script exposed.  To be sent to simplejson.dumps
   to create a json object to return"""
@@ -69,12 +72,31 @@ def create_user_json(recommendations):
     shared_today = SharedPostReceiver.objects \
                    .filter(receiver__user = recommendation) \
                    .filter(digest = False) \
-                   .filter(time__gte = midnight_today)
-    person['shared_today'] = len(shared_today)
-    
+                   .filter(time__gte = midnight_today) \
+                   .count()
+    person['shared_today'] = shared_today
+    person['seen_it'] = recommendation.email in seen_it
+
     rec_list.append(person)
+
   return rec_list
 
+def who_has_seen_it(recommendations, post):
+  """who has already seen the link?"""
+  received_query = SharedPostReceiver.objects \
+            .filter(shared_post__post = post) \
+            .filter(receiver__user__in = recommendations) \
+            .select_related('receiver__user__email')
+  received_it = [spr.receiver.user.email for spr in received_query]
+
+  # who has already viewed it in GReader?
+  viewed_query = ViewedPost.objects \
+                 .filter(post = post) \
+                 .filter(sharer__user__in = recommendations) \
+                 .select_related('sharer__user__email')
+  viewed_it = [vp.sharer.user.email for vp in viewed_query]
+
+  return set(received_it + viewed_it)
 
 def get_post_objects(feed_title, feed_url, post_url, post_title, \
                      post_contents, sharer_user, expanded_view):
