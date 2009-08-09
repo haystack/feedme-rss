@@ -20,7 +20,7 @@ def seen_it(request):
     # who has already viewed it in GReader?
     viewed_query = ViewedPost.objects \
                    .filter(post = feed_objects['post']) \
-                   .filter(sharer = feed_objects['sharer']) \
+                   .filter(sharer__user = feed_objects['receiver'].user) \
                    .count()
 
     has_seen_it = set()
