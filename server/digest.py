@@ -5,6 +5,11 @@ from django.contrib.auth.models import User
 from server.feedme.models import *
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context, loader
+import sys, codecs
+
+# set stdout to Unicode so we can write Unicode strings to stdout
+# todo: create some sort of startup script which calls this
+sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 def digest_posts():
     for receiver in Receiver.objects.all():
