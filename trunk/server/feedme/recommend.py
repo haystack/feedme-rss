@@ -39,13 +39,18 @@ def get_recommendation_json(request):
   shared_post_receivers = post_objects['shared_post_receivers']
   shared_users = post_objects['shared_users']
   viewed_post = post_objects['viewed_post']
+  study_participant = post_objects['study_participant']
 
   print 'get recommendations'
-  recommendations, sorted_friends = n_best_friends(post, sharer)
-  print recommendations  
+  if study_participant is None or study_participant.user_interface:
+    recommendations, sorted_friends = n_best_friends(post, sharer)
+    print recommendations
+  else:
+    print 'no recommendations'
+    recommendations = []
+    sorted_friends = []
+    
   seen_it = who_has_seen_it(recommendations, post)
-  print 'seen it:'
-  print seen_it
 
   log_recommendations(viewed_post, sorted_friends)
 
@@ -115,11 +120,17 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
     post = Post(url=post_url, feed=feed, title=post_title,
                 contents=post_contents)
     post.save()
+    
   try:
     sharer = Sharer.objects.get(user=sharer_user)
   except Sharer.DoesNotExist:
     sharer = Sharer(user=sharer_user)
     sharer.save()
+
+  try:
+    study_participant = StudyParticipant.objects.get(sharer = sharer)
+  except StudyParticipant.DoesNotExist:
+    study_participant = None
 
   # find out if we've already shared it with anyone
   try:
@@ -148,6 +159,7 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
   post_objects['shared_post_receivers'] = shared_post_receivers
   post_objects['shared_users'] = shared_users
   post_objects['viewed_post'] = viewed
+  post_objects['study_participant'] = study_participant
   return post_objects
 
 

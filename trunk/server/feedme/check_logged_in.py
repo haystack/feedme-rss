@@ -6,6 +6,17 @@ from models import *
 def check_logged_in(request):
     response = dict()
     response['logged_in'] = request.user.is_authenticated()
+    response['user_interface'] = True
+    response['social_features'] = True
+
+    try:
+        sharer = Sharer.objects.get(user = request.user)
+        study_participant = StudyParticipant.objects.get(sharer = sharer)
+        response['user_interface'] = study_participant.user_interface
+        response['social_features'] = study_participant.social_features
+    except StudyParticipant.DoesNotExist:
+        print 'not a study participant'
+    
     response_json = simplejson.dumps(response)
 
     if response['logged_in']:
