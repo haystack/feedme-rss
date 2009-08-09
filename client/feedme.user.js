@@ -35,7 +35,7 @@
 // Fail gracefully if Firebug's not installed
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
-var port = 8000;
+var port = 8001;
 var script_version = 0.18;
 var autocompleteData = null;
 // number of recommendations to show when a person asks for more
@@ -63,7 +63,9 @@ function init() {
     else if (entryContainer.hasClass('cards')) {
         $('.entry').each(entry_class_modified);
     }
+    
     $("#entries").bind("DOMNodeInserted", expandListener);
+
 }
 
 /* Sees if there's a newer version of the script, and if so, prompts the user */
@@ -201,9 +203,9 @@ function suggest_people(context) {
 
     context.find(".feedme-controls")
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
-    .append('<textarea class="comment-textarea"></textarea></div>')
-    .append('<div class="feedme-now-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
-    .append('<div class="feedme-later-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
+    .append('<textarea class="comment-textarea"></textarea>')
+    .append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
+    .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
     //.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
 
     
@@ -248,8 +250,13 @@ function setup_comment_area(comment) {
         .css('color', 'gray')
         .elastic()
         .focus( function() {
-            if($(this).text() == default_text) {
-                $(this).text('').css('min-height', '24px').css('color', '');
+            if ($(this).val() == default_text) {
+                $(this).val('').css('color', '');
+            }
+        })
+        .blur( function() {
+            if ($(this).val() == '') {
+                $(this).val(default_text).css('color', 'gray');
             }
         });
 }
@@ -586,18 +593,15 @@ function share_post(event)
     ajax_post(url, data, handle_ajax_response);
 }
 
+var gdocs_autocompleteData = null;
+var feedme_autocompleteData = null;
 // Original author mattkolb
 // http://userscripts.org/scripts/show/29604
 function initAutocomplete() {
     console.log('initializing autocomplete');
-    // my email address
-    // add your email to have it display as the top result on all searches
-    // example: var my_email = ["me@myself.com", "my_other@address.com"];
-    var my_email = [];
+    
+    // GDocs
     var contacts_xml_url = "http://docs.google.com/c/data/contacts?max=1000";
-    // whether to add your gmail address to the list of suggestions
-    var add_gmail = true;
-    var contact_entries = [];
     GM_xmlhttpRequest({
         method: 'GET',
         url: contacts_xml_url,
@@ -605,55 +609,95 @@ function initAutocomplete() {
         'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey/0.3',
         'Accept': 'application/atom+xml,application/xml,text/xml'
         },
-        onload: function(responseDetails) {
-        console.log('autocomplete data received');
-        var parser = new DOMParser();
-        var dom = parser.parseFromString(responseDetails.responseText,
-            "application/xml");
-        if (add_gmail) {
-            var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
-            var email = dom.getElementsByTagName('Email')[0].textContent;
-            if (display_email != 'undefined') {
-                var found = false;
-                for (var i in my_email) {
-                    if (my_email[i] == display_email) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    my_email.push(display_email);
-                }
-            }
-            if (email != 'undefined') {
-                found = false;
-                for (var i in my_email) {
-                    if (my_email[i] == email) {
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found) {
-                    my_email.push(email);
-                }
-            }
-        }
-
-        var xml_objects = dom.getElementsByTagName('Object');
-        for (var i = 0; i < xml_objects.length; i++) {
-            var display_names = xml_objects[i].getElementsByTagName('DisplayName');
-            if (display_names.length > 0) {
-                var xml_addresses = xml_objects[i].getElementsByTagName('Address');
-                for (var j = 0; j < xml_addresses.length; j++) {
-                    contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
-                }
-            }
-        }
-        
-        autocompleteData = contact_entries;
-        console.log('autocomplete data set');
-        }
+        onload: gdocs_autocomplete_response
     });
+    
+    // FeedMe
+    var feedme_contacts_url = 'address_book/';
+    ajax_get(feedme_contacts_url, null, feedme_autocomplete_response);
+    
+    // Now wait for them to return
+    merge_autocomplete();
+}
+
+function gdocs_autocomplete_response(responseDetails) {
+    console.log('gdocs autocomplete data received');
+    // whether to add your gmail address to the list of suggestions
+    var add_gmail = true;
+    var contact_entries = [];
+    
+    // my email address
+    // add your email to have it display as the top result on all searches
+    // example: var my_email = ["me@myself.com", "my_other@address.com"];
+    var my_email = [];    
+    
+    var parser = new DOMParser();
+    var dom = parser.parseFromString(responseDetails.responseText,
+        "application/xml");
+    if (add_gmail) {
+        var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
+        var email = dom.getElementsByTagName('Email')[0].textContent;
+        if (display_email != 'undefined') {
+            var found = false;
+            for (var i in my_email) {
+                if (my_email[i] == display_email) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                my_email.push(display_email);
+            }
+        }
+        if (email != 'undefined') {
+            found = false;
+            for (var i in my_email) {
+                if (my_email[i] == email) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                my_email.push(email);
+            }
+        }
+    }
+
+    var xml_objects = dom.getElementsByTagName('Object');
+    for (var i = 0; i < xml_objects.length; i++) {
+        var display_names = xml_objects[i].getElementsByTagName('DisplayName');
+        if (display_names.length > 0) {
+            var xml_addresses = xml_objects[i].getElementsByTagName('Address');
+            for (var j = 0; j < xml_addresses.length; j++) {
+                contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
+            }
+        }
+    }
+    
+    gdocs_autocompleteData = contact_entries;
+    console.log('gdocs autocomplete data set');
+}
+
+function feedme_autocomplete_response(result) {
+    console.log('feedme address book autocomplete data received.');
+    var contact_entries = []
+    for (var i=0; i<result.length; i++) {
+        contact_entries.push( { name: result[i]['email'], to: result[i]['email'] } );
+    }
+    feedme_autocompleteData = contact_entries;
+    console.log('feedme address book autocomplete data set.');
+}
+
+function merge_autocomplete() {
+    if(gdocs_autocompleteData == null || feedme_autocompleteData == null) {
+        window.setTimeout(merge_autocomplete, 100);
+    } else {         
+        console.log('merging autocomplete data');
+        autocompleteData = $.merge(gdocs_autocompleteData, feedme_autocompleteData);
+        // Garbage collect
+        gdocs_autocompleteData = null;
+        feedme_autocompleteData = null;
+    }
 }
 
 /*
@@ -671,7 +715,7 @@ function autocompleteWait(context) {
     }
 }
 
-function populateAutocomplete(context) {
+function populateAutocomplete(context) {    
     try {
         $(".feedme-autocomplete", context).autocomplete({
             data: autocompleteData,
@@ -732,6 +776,7 @@ function populateAutocomplete(context) {
     catch(err) {
         console.log(err)
     }
+    console.log('autocomplete ready.');
 }
 
 /*
@@ -803,19 +848,20 @@ function setupStyles() {
         display: inline-block; 
         margin-right: 5px; 
     }
+    .feedme-share-button {
+        width: 30px;
+        vertical-align: bottom;
+        /*border-color: #FF9900;*/
+    }
     .feedme-now-button { 
-        width: 30px; 
         -moz-border-radius-topright: 0px;
         -moz-border-radius-bottomright: 0px;
         margin-right: 0px; 
-        border-right: 0px; 
-        vertical-align: bottom; 
+        border-right: 0px;  
     }
     .feedme-later-button { 
-        width: 30px; 
         -moz-border-radius-topleft: 0px;
         -moz-border-radius-bottomleft: 0px; 
-        vertical-align: bottom; 
     }
     .feedme-more-recommendations {
         display: inline;
@@ -912,6 +958,7 @@ function verify_login(json) {
     JQ_color.type = 'text/javascript';
     document.getElementsByTagName('head')[0].appendChild(JQ_color);
     
+    var $;
     function GM_wait() {
 
         // wait if jQuery or jQuery Autocomplete aren't loaded, or if GReader hasn't finished populating its entries div.
