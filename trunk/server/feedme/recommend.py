@@ -43,8 +43,6 @@ def get_recommendation_json(request):
   print 'get recommendations'
   recommendations, sorted_friends = n_best_friends(post, sharer)
   print recommendations
-  print 'TEMP DEBUG'
-  recommendations = []
 
   log_recommendations(viewed_post, sorted_friends)
 
