@@ -15,7 +15,7 @@ from flock import flock
 # todo: create some sort of startup script which calls this
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-#@transaction.commit_manually
+@transaction.commit_manually
 def reindex_all():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
