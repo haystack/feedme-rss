@@ -3,6 +3,7 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml">
 <head><script>
+try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 var unsafeWindow = window;
 function GM_addStyle(css) {
   var head, style;
@@ -62,14 +63,14 @@ zzzzzzzzzzzzzzzzz
 
 function GM_xmlhttpRequest(params) {
   if (params.url.indexOf('http://feedme.csail.mit.edu') != 0) {
+    console.log('cannot do cross-domain request! canceling.');
     if (params.url.indexOf('http://docs.google.com') == 0) {
         // We want to pretend it returned no contacts
+        console.log('Faux GDocs request for contacts.');
         responseDetails = {'responseText': defaultGDocsResponse };
         params.onload(responseDetails);
     }
-    if (console != null) {
-        console.log('cannot do cross-domain request! canceling.');
-    }
+
     return;
   }
   $.ajax({
@@ -176,7 +177,6 @@ body, html {
 </div></div></div></div></td></tr></tbody></table></div></div>
 <script>
 jQuery(document).ready(function() {
-    autocompleteData = new Array();
     suggest_people($('#current-entry'));
 });
 </script>
