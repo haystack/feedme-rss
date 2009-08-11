@@ -14,8 +14,59 @@ function GM_addStyle(css) {
   head.appendChild(style);
 }
 
+var defaultGDocsResponse = (<r><![CDATA[
+<Response>
+<Success>true</Success>
+
+<Body>
+
+<UserData>
+<DisplayEmail></DisplayEmail>
+<Email></Email>
+
+<Experiments>
+<String>cmdomaincon</String>
+<String>underleavedcontacts</String>
+<String>newimportreport</String>
+<String>newsectionheaderorder</String>
+<String>nodeletelimit</String>
+<String>fullcontactsearch</String>
+<String>enrichedcontacts</String>
+</Experiments>
+<GmailUrl>http://mail.google.com/mail</GmailUrl>
+<IsGcUser>false</IsGcUser>
+<IsGmailUser>false</IsGmailUser>
+<IsPicasaUser>false</IsPicasaUser>
+<NameOrder>g</NameOrder>
+<PhotoUrl>http://mail.google.com/mail/photos/</PhotoUrl>
+<ShowDomainContacts>false</ShowDomainContacts>
+<YMDOrder>MDY</YMDOrder>
+</UserData>
+
+<Contacts>
+</Contacts>
+
+<CustomizedHelpUrl>
+http://mail.google.com/support/bin/answer.py?answer=97952
+</CustomizedHelpUrl>
+
+<AuthToken>
+
+<Value>
+zzzzzzzzzzzzzzzzz
+</Value>
+</AuthToken>
+</Body>
+</Response>
+]]></r>).toString()
+
 function GM_xmlhttpRequest(params) {
   if (params.url.indexOf('http://feedme.csail.mit.edu') != 0) {
+    if (params.url.indexOf('http://docs.google.com') == 0) {
+        // We want to pretend it returned no contacts
+        responseDetails = {'responseText': defaultGDocsResponse };
+        params.onload(responseDetails);
+    }
     if (console != null) {
         console.log('cannot do cross-domain request! canceling.');
     }
