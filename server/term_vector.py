@@ -15,7 +15,7 @@ from flock import flock
 # todo: create some sort of startup script which calls this
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
-@transaction.commit_manually
+#@transaction.commit_manually
 def reindex_all():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
@@ -115,9 +115,9 @@ def trim_profile_terms(receiver):
     MAX_TERMS = 100
 
     query = TermVectorCell.objects.filter(receiver = receiver).order_by('-count')
-    cutoff = query[min(len(query), MAX_TERMS)-1].count
-    TermVectorCell.objects.filter(receiver = receiver).filter(count__lt = cutoff).delete()
-            
+    if query.count() > 0:
+        cutoff = query[min(len(query), MAX_TERMS)-1].count
+        TermVectorCell.objects.filter(receiver = receiver).filter(count__lt = cutoff).delete()
 
 def describe_receiver(receiver):
     print u'describing ' + receiver.user.username
