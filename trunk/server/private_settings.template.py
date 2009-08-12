@@ -1,3 +1,5 @@
+import os
+
 DATABASE_ENGINE = ''           # 'postgresql_psycopg2', 'postgresql', 'mysql', 'sqlite3' or 'oracle'.
 DATABASE_NAME = ''             # Or path to database file if using sqlite3.
 DATABASE_USER = ''             # Not used with sqlite3.
@@ -17,3 +19,5 @@ TEMPLATE_DIRS = ()
 
 DEBUG = # True or False
 TEMPLATE_DEBUG = DEBUG # Or override this
+
+os.environ['PYTHON_EGG_CACHE'] = '/absolute/path/to/a/writable/directory/.python-eggs'
