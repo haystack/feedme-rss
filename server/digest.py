@@ -53,7 +53,7 @@ def send_digest_posts(posts, receiver):
   context = Context({"posts": posts})
   template = loader.get_template("digest.html")
   html_content = template.render(context)
-  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')
+  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('ascii', 'backslashreplace')
   
   template_plaintext = loader.get_template("digest_plaintext.html")
   text_content = template_plaintext.render(context)
