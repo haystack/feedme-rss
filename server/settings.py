@@ -75,6 +75,7 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.admin',
     #'django.contrib.admindocs',
+    'django.contrib.humanize',
     'server.feedme',
     'registration',
     'email_usernames'
