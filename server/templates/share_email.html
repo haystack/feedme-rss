@@ -1,7 +1,7 @@
 {% if comment %}
 <p>{{ comment|escape|urlize|linebreaksbr }}</p>
 {% endif %}
-<p><span style="font-style: italic;">via {% block feed_title %}<a href="{{post.feed.rss_url}}">{{ post.feed.title.strip }}</a>{% endblock %}:</span><br />
+<p><span style="font-style: italic;">via {% block feed_title %}{{ post.feed.title.strip }}{% endblock %}:</span><br />
 <span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post.pk %}{{ shared_post.post.url|urlencode }}">{{ post.title }}</a>{% endblock %}</span><br />
 {% if thanks %}<span><a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link %}{% endblock %}</p>{% endif %}
 
