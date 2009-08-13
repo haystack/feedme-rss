@@ -94,7 +94,7 @@ def send_digest_report(shared_posts, sharer):
     text_content = template_plaintext.render(context)
     text_content = nltk.clean_html(text_content)
 
-    print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')    
+    print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('ascii', 'backslashreplace')
     email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
     email.attach_alternative(html_content, "text/html")
     email.send()
