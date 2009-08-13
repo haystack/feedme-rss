@@ -103,7 +103,7 @@ class SharedPost(models.Model):
     sharer = models.ForeignKey(Sharer)
     comment = models.TextField()
     bookmarklet = models.BooleanField(default = False)
-    thanks = models.BooleanField(default = False)
+    thanks = models.IntegerField(default = 0)
     clickthroughs = models.IntegerField(default = 0)
     
     def __unicode__(self):
