@@ -111,7 +111,12 @@ class RegistrationManager(models.Manager):
         """
         from registration.signals import user_registered
 
-        new_user = User.objects.create_user(username, email, password)
+        try:
+            new_user = User.objects.get(email = email)
+            new_user.set_password(password)
+        except User.DoesNotExist:
+            new_user = User.objects.create_user(username, email, password)
+
         new_user.first_name = first_name
         new_user.last_name = last_name
         new_user.is_active = False
