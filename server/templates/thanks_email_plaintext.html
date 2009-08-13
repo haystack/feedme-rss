@@ -1,6 +1,6 @@
-{% extends "thanks_email.html" %}
+<p>{{ receivers }}thanks for sharing this post!</p>
 
-{% block post_title %}{{ post.title }} ({{ post.url }}){% endblock %}
+{% include "share_email_plaintext.html" %}
 
-{% block feed_title %}{{ post.feed.title.strip }}{% endblock %}
+
 
