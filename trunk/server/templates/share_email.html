@@ -7,6 +7,8 @@
 
 {{ post.contents|safe }}
 
-<p>{{ shared_post.sharer.name }} is beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.<br />
+<p>---<br />
+{% if thanks %}<a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link_2 %}{% endblock %}</p>{% endif %}
 
-<p>{% block subscription %}<a href='http://feedme.csail.mit.edu:8000/receiver/settings/'>Change your e-mail receiving settings</a>{% endblock %} to get only a digest, or to never be recommended posts.</p>
+<p>{{ shared_post.sharer.name }} is beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments. {% block subscription %}<a href='http://feedme.csail.mit.edu:8000/receiver/settings/'>Change your e-mail receiving settings</a>{% endblock %} to get only a digest, or to never be recommended posts.</p>
+
