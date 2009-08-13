@@ -1,3 +1,14 @@
-<p>{{ receivers }}thanks for sharing this post!</p>
+{% load humanize %}
+<p>
+{% ifequal shared_post.thanks 1 %}
+{% ifequal shared_post.sharedpostreceiver_set.count 1 %}
+{{ shared_post.sharedpostreceiver_set.all.0.receiver.user.username }}
+{% else %}
+One of the recipients
+{% endifequal %}
+{% else %}
+A {{ shared_post.thanks|ordinal }} recipient
+{% endifequal %}
+ says thanks for sharing this post!</p>
 
 {% include 'share_email.html' %}

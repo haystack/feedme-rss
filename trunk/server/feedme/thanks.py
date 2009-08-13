@@ -10,7 +10,8 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 def thanks(request, sharedpost_pk):
     shared_post = SharedPost.objects.get(pk = sharedpost_pk)
-    shared_post.thanks = True
+    shared_post.thanks += 1
+    print 'now ' + str(shared_post.thanks) + ' thanks for this post'
     shared_post.save()
 
     send_thanks_email(shared_post)
@@ -33,20 +34,19 @@ def send_thanks_email(shared_post):
   to_emails = [ to_email ]
   from_email = "feedme@csail.mit.edu"
 
-  receivers = [spr.receiver.user.email for spr in shared_post.sharedpostreceiver_set.all() ]
-  if len(receivers) == 1:
-      receiver_string = receivers[0]
-      receiver_string += " says "
-  elif len(receivers) == 2:
-      receiver_string = u" and ".join(receivers)
-      receiver_string += " say "      
-  else:
-      receiver_string = u", ".join(receivers[:-1])
-      receiver_string += u" and " + receivers[-1]
-      receiver_string += " say "      
+#  receivers = [spr.receiver.user.email for spr in shared_post.sharedpostreceiver_set.all() ]
+#  if len(receivers) == 1:
+#      receiver_string = receivers[0]
+#      receiver_string += " says "
+#  elif len(receivers) == 2:
+#      receiver_string = u" and ".join(receivers)
+#      receiver_string += " say "      
+#  else:
+#      receiver_string = u", ".join(receivers[:-1])
+#      receiver_string += u" and " + receivers[-1]
+#      receiver_string += " say "      
   
   context = Context({"shared_post": shared_post, \
-                     "receivers": receiver_string, \
                      "thanks": True})
   template = loader.get_template("thanks_email.html")
   html_content = template.render(context)
