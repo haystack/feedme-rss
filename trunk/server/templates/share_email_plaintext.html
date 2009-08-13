@@ -2,9 +2,9 @@
 
 {% block email %}email us at feedme@csail.mit.edu{% endblock %}
 
-{% block post_title %}{{ post.title }} (http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post.pk %}{{ shared_post.post.url|urlencode }}){% endblock %}
+{% block post_title %}{{ shared_post.post.title }} (http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post.pk %}{{ shared_post.post.url|urlencode }}){% endblock %}
 
-{% block feed_title %}{{ post.feed.title.strip }}{% endblock %}
+{% block feed_title %}{{ shared_post.post.feed.title.strip }}{% endblock %}
 
 {% block thanks_link %}http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/{% endblock %}
 

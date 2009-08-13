@@ -46,12 +46,10 @@ def send_thanks_email(shared_post):
       receiver_string += " say "      
   
   context = Context({"shared_post": shared_post, \
-                     "post": post, \
-                     "receivers": receiver_string})
+                     "receivers": receiver_string, \
+                     "thanks": True})
   template = loader.get_template("thanks_email.html")
   html_content = template.render(context)
-
-  print u'sending ' + subject + u' to ' + unicode(to_emails)
 
   plaintext_template = loader.get_template("thanks_email_plaintext.html")
   text_content = plaintext_template.render(context)

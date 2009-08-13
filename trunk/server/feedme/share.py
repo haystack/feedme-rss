@@ -131,7 +131,6 @@ def send_post_email(shared_post, receivers):
     to_emails.append(from_email)
   else:
     print 'SPECIAL CASE KARGER NOT CC\'ED'
-  comment = shared_post.comment
 
   try:
     thanks = StudyParticipant.objects.get(sharer = shared_post.sharer) \
@@ -139,11 +138,11 @@ def send_post_email(shared_post, receivers):
   except StudyParticipant.DoesNotExist:
     thanks = True
 
-  context = Context({"shared_post": shared_post, "post": post, "comment": comment, "thanks": thanks})
+  context = Context({"shared_post": shared_post, "thanks": thanks})
   template = loader.get_template("share_email.html")
   html_content = template.render(context)
   
-  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')    
+  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('ascii', 'backslashreplace')    
   plaintext_template = loader.get_template("share_email_plaintext.html")
   text_content = plaintext_template.render(context)
   text_content = nltk.clean_html(text_content)
