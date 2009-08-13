@@ -142,10 +142,8 @@ def send_post_email(shared_post, receivers):
   context = Context({"shared_post": shared_post, "post": post, "comment": comment, "thanks": thanks})
   template = loader.get_template("share_email.html")
   html_content = template.render(context)
-
-  print u'sending ' + subject + u' to ' + unicode(to_emails)
-
-
+  
+  print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')    
   plaintext_template = loader.get_template("share_email_plaintext.html")
   text_content = plaintext_template.render(context)
   text_content = nltk.clean_html(text_content)
