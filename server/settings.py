@@ -90,6 +90,8 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # app-specific settings
-ACCOUNT_ACTIVATION_DAYS = 7
+ACCOUNT_ACTIVATION_DAYS = 1000000
 REGISTER_COMPLETE_URL = '/accounts/register/complete/'
 LOGIN_REDIRECT_URL = '/accounts/login/complete/'
+
+DEFAULT_FROM_EMAIL = 'feedme@csail.mit.edu' 

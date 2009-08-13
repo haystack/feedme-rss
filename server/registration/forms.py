@@ -3,6 +3,9 @@ Forms and validation code for user registration.
 
 """
 
+# Necessary for our logic that says that receivers can sign up to become
+# sharers
+from feedme.models import Sharer
 
 from django.contrib.auth.models import User
 from django import forms
@@ -52,8 +55,14 @@ class RegistrationForm(forms.Form):
         """
         try:
             user = User.objects.get(username__iexact=self.cleaned_data['username'])
+            # If the user exists but is not a sharer, we don't want to stop
+            # them from becoming one.
+            sharer = Sharer.objects.get(user=user)
         except User.DoesNotExist:
             return self.cleaned_data['username']
+        except Sharer.DoesNotExist:
+            return self.cleaned_data['username']
+        
         raise forms.ValidationError(_(u'This username is already taken. Please choose another.'))
 
     def clean(self):
@@ -107,10 +116,17 @@ class RegistrationFormUniqueEmail(RegistrationForm):
         site.
         
         """
-        if User.objects.filter(email__iexact=self.cleaned_data['email']):
-            raise forms.ValidationError(_(u'This email address is already in use. Please supply a different email address.'))
-        return self.cleaned_data['email']
-
+        try:
+            user = User.objects.get(email__iexact=self.cleaned_data['email'])
+            # If the user exists but is not a sharer, we don't want to stop
+            # them from becoming one.
+            sharer = Sharer.objects.get(user=user)
+        except User.DoesNotExist:
+            return self.cleaned_data['email']
+        except Sharer.DoesNotExist:
+            return self.cleaned_data['email']
+        
+        raise forms.ValidationError(_(u'This email address is already in use. Please supply a different email address.'))
 
 class RegistrationFormNoFreeEmail(RegistrationForm):
     """
