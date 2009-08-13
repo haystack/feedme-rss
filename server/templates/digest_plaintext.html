@@ -4,7 +4,7 @@
 
 {% block post_title %}{{ shared_post_receiver.shared_post.post.title }} (http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post_receiver.shared_post.pk %}{{ shared_post.post.url|urlencode }}){% endblock %}
 
-{% block feed_title %}{{ shared_post_receiver.shared_post.post.feed.title }} ({{ shared_post_receiver.shared_post.post.feed.rss_url }}){% endblock %}
+{% block feed_title %}{{ shared_post_receiver.shared_post.post.feed.title.strip }}{% endblock %}
 
 {% block subscription %}Go to http://feedme.csail.mit.edu:8000/receiver/settings/ to change your e-mail receiving settings{% endblock %}
 
