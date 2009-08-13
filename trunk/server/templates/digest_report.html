@@ -1,7 +1,7 @@
 <p style="margin-bottom: 1em;">FeedMe just shared these posts with your friends as part of their occasional FeedMe digest. Now you can talk to them about it, and you were nice enough not to clog their inboxes at the time. What a friend!</p>
 
 {% for shared_post in shared_posts %}
-<p>{% block post_title %}<a href="{{ shared_post.post.url }}">{{ shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}<a href="{{ shared_post.post.feed.rss_url }}">{{ shared_post.post.feed.title }}</a>{% endblock %}<br />
+<p>{% block post_title %}<a href="{{ shared_post.post.url }}">{{ shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}{{ shared_post.post.feed.title }}{% endblock %}<br />
 
 <span style="margin-left: 20px">shared with: {% for shared_post_receiver in shared_post.receivers %}{{ shared_post_receiver.receiver.user.email }}{% ifnotequal forloop.revcounter 1 %}, {% endifnotequal %}{% endfor %}</span></p>
 {% endfor %}
