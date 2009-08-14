@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}FeedMe Tutorial: FeedMe Bookmarklet{% endblock %}
+{% block header %}FeedMe Tutorial: FeedMe Bookmarklet{% endblock %}
+
+{% block body %}
+
+<p>So far we've shown you how to share items you read in Google Reader with
+friends.  We also have a bookmarklet, which is a button in your Firefox
+toolbar, that lets you share any page you view on the web.</p>
+
+<b><div>To install the FeedMe bookmarklet, drag the following link onto
+your bookmark bar:</div></b>
+<div><a href="javascript:document.getElementsByTagName('body')[0].appendChild(%20document.createElement('script')).setAttribute('src','http://groups.csail.mit.edu/haystack/feedme/bookmarklet.js');">Share with FeedMe</a></div>
+
+
+<noscript>
+<div style="margin-top: 50px; color: gray; font-size: 80%;"><p>Do you use NoScript?  If so, you can get the FeedMe bookmarklet working by following these instructions:</p>
+
+<ol><li>
+Right click on the NoScript icon in the bottom right of your browser.  Choose "Options..." and then go to the XSS tab.  In the list of Anti-XSS Protection Exceptions, add the regex:<br />
+^http://feedme.csail.mit.edu:8000/[^"<>\?%]+$
+</li>
+
+<li>
+Still in the options pane, go to the Whitelist tab.  In the textbox, add the following web sites:<br />
+http://feedme.csail.mit.edu:8000<br />
+googlecode.com
+</li></ol>
+</div>
+</noscript>
+
+<p>Now, whenever you want to share a webpage with friends, you can click on
+"Share with FeedMe" in your toolbar, and select who you wish to share the
+webpage with.</p>
+
+<p>You're almost ready to start our study. To let us know you've gotten
+this far, <a
+href="/tutorial/exercise/">proceed to the next step</a>.</p>
+
+{% endblock %}

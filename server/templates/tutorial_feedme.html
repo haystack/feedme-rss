@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+
+{% block title %}FeedMe Tutorial: Installing FeedMe{% endblock %}
+{% block header %}FeedMe Tutorial: Installing FeedMe{% endblock %}
+
+{% block body %}
+<p>Now it's time to install FeedMe!</p>
+
+<p>You can install FeedMe by clicking <a
+href="{{ url }}"
+target="_blank">here</a>. A Greasemonkey dialog should pop up, and you
+should click on the "Install" button, as seen in the image below.</p>
+
+<p>Once FeedMe is installed, you may <a
+href="/tutorial/login/">proceed to the next step</a>.</p>
+
+<center><img
+src="http://groups.csail.mit.edu/haystack/feedme/tutorial_install.png"
+width="50%"></center>
+
+{% endblock %}
