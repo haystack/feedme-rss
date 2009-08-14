@@ -3,7 +3,7 @@ from django.utils import simplejson
 import urllib2
 
 def tutorial(request):
-  return firefox(request)
+  return render_to_response('tutorial_index.html')
 def firefox(request):
   return render_to_response('tutorial_firefox.html')
 def greasemonkey(request):
