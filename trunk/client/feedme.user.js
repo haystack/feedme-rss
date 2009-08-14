@@ -855,8 +855,6 @@ function setupStyles() {
         -moz-border-radius: 5px; 
     }
     .feedme-sent {
-        background-color: #e0e0e0;
-        border: 1px solid #d2d2d2;
         -moz-border-radius: 5px;         
     }
     .feedme-autocomplete { 
