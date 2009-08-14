@@ -41,4 +41,6 @@ urlpatterns = patterns('',
     # logging infrastructure
     url(r'^clickthrough/(?P<sharedpost_pk>\d+)/.*$', 'server.feedme.clickthrough.clickthrough', name='clickthrough'),
     url(r'^reader_click/', 'server.feedme.reader_click.reader_click', name='greader clickthrough'),
+
+    url(r'^$', 'server.feedme.study.study', name='study'),
 )
