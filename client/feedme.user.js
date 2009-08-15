@@ -184,10 +184,11 @@ function register_entry_click(context) {
 /*
  * Adds the friend suggestions contained in array people to node body.
  */
+
+var defaultAutocompleteText = "type a name";
 function suggest_people(context) {
     console.log("suggesting people");
     
-    var defaultAutocompleteText = "type a name";
     context.find(".entry-body").before('<div class="feedme-suggestion-container"></div>');
 
     context.find(".feedme-suggestion-container")
@@ -804,7 +805,7 @@ function populateAutocomplete(context) {
             // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
             //$(this).trigger("result.autocomplete", [text, text]);
             
-            if (text != '') {
+            if (text != '' && text !=defaultAutocompleteText) {
                 addFriendAndSelect(text, context);
             }
         });
