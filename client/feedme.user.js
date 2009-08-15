@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 8000;
-var script_version = 0.192;
+var script_version = 0.193;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
 /* for toggling on and off parts of the interface */
@@ -488,7 +488,12 @@ function set_social_feedback(num_shared, newPerson, shared_today, seen_it) {
             newPerson.addClass("feedme-sent");
         }
         else if (shared_today != null) {
-            num_shared.text('Received ' + shared_today + ' today');
+            var numShared = shared_today + ' FeedMe';
+            if (shared_today != 1) {
+                numShared = numShared + 's'
+            }
+            numShared = numShared + ' today';
+            num_shared.text(numShared);
         }
     }
 }
