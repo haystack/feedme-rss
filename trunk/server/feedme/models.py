@@ -155,3 +155,6 @@ class StudyParticipant(models.Model):
     sharer = models.ForeignKey(Sharer)
     user_interface = models.BooleanField()
     social_features = models.BooleanField()
+
+    def __unicode__(self):
+        return self.sharer.name() + u"---" + self.sharer.user.email
