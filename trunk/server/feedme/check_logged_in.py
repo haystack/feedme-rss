@@ -9,8 +9,6 @@ def check_logged_in(request):
     response['user_interface'] = True
     response['social_features'] = True
 
-    response_json = simplejson.dumps(response)
-
     if response['logged_in']:
         # logging
         sharer = Sharer.objects.get(user = request.user)
@@ -25,7 +23,6 @@ def check_logged_in(request):
             response['social_features'] = study_participant.social_features
         except StudyParticipant.DoesNotExist:
             print 'not a study participant'
-    
-        
-
+            
+    response_json = simplejson.dumps(response)
     return HttpResponse(response_json, mimetype='application/json')
