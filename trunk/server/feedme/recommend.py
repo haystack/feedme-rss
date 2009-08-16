@@ -112,9 +112,9 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
     feed = Feed.objects.get(rss_url=feed_url)
     if feed.title != feed_title:
       feed.title = feed_title
-      feed.save()
   except Feed.DoesNotExist:
-    feed = Feed(rss_url=feed_url, title = feed_title)
+      feed = Feed(rss_url=feed_url, title = feed_title)
+  try:
     feed.save()
   except IntegrityError:
     print 'the feed got created while the transaction was going. retrieving.'
