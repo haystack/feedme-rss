@@ -50,6 +50,12 @@ def send_digest_posts(posts, receiver):
   from_email = 'FeedMe <feedme@csail.mit.edu>'
   to_emails = [receiver.user.email]
 
+  for post in posts:
+      post.thanks = True
+      if post.shared_post.sharer.studyparticipant_set.all().count() == 1:
+          participant = post.shared_post.sharer.studyparticipant_set.all()[0]
+          post.thanks = participant.social_features
+
   context = Context({"posts": posts})
   template = loader.get_template("digest.html")
   html_content = template.render(context)
