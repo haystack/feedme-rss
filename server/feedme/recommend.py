@@ -3,6 +3,7 @@ from django.utils import simplejson
 from django.contrib.auth.models import User 
 from models import *
 from django.contrib.auth.decorators import login_required
+from django.db import IntegrityError
 import math
 import operator
 import datetime
@@ -25,12 +26,14 @@ def get_recommendation_json(request):
   post_contents = request.POST['post_contents']
   expanded_view = (request.POST['expanded_view'] == 'true')
 
-  post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
-                                  post_title=post_title, \
-                                  post_contents=post_contents, \
-                                  sharer_user = sharer_user, \
-                                  feed_title = feed_title, \
-                                  expanded_view = expanded_view)
+  try:
+    post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
+                                    post_title=post_title, \
+                                    post_contents=post_contents, \
+                                    sharer_user = sharer_user, \
+                                    feed_title = feed_title, \
+                                    expanded_view = expanded_view)
+    
   feed = post_objects['feed']
   post = post_objects['post']
   sharer = post_objects['sharer']
@@ -114,6 +117,10 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
   except Feed.DoesNotExist:
     feed = Feed(rss_url=feed_url, title = feed_title)
     feed.save()
+  except IntegrityError:
+    print 'the feed got created while the transaction was going. retrieving.'
+    feed = Feed.objects.get(rss_url = feed_url)
+    
   try:
     post = Post.objects.filter(feed = feed).get(url=post_url)
   except Post.DoesNotExist:
