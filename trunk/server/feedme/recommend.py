@@ -26,13 +26,12 @@ def get_recommendation_json(request):
   post_contents = request.POST['post_contents']
   expanded_view = (request.POST['expanded_view'] == 'true')
 
-  try:
-    post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
-                                    post_title=post_title, \
-                                    post_contents=post_contents, \
-                                    sharer_user = sharer_user, \
-                                    feed_title = feed_title, \
-                                    expanded_view = expanded_view)
+  post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
+                                  post_title=post_title, \
+                                  post_contents=post_contents, \
+                                  sharer_user = sharer_user, \
+                                  feed_title = feed_title, \
+                                  expanded_view = expanded_view)
     
   feed = post_objects['feed']
   post = post_objects['post']
