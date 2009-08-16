@@ -2,7 +2,8 @@
 
 {% for shared_post_receiver in posts %}
 <p>{% block post_title %}<a href="http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post_receiver.shared_post.pk %}{{ shared_post.post.url|urlencode }}">{{ shared_post_receiver.shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}{{ shared_post_receiver.shared_post.post.feed.title }}{% endblock %}<br />
-<span style="margin-left: 20px">from {{ shared_post_receiver.shared_post.sharer.user.email }}{% ifnotequal shared_post_receiver.shared_post.comment "" %}: "{{ shared_post_receiver.shared_post.comment|escape|urlize|linebreaksbr }}"{% endifnotequal %}</span></p>
+<span style="margin-left: 20px">from {{ shared_post_receiver.shared_post.sharer.user.email }}{% ifnotequal shared_post_receiver.shared_post.comment "" %}: "{{ shared_post_receiver.shared_post.comment|escape|urlize|linebreaksbr }}"{% endifnotequal %}</span>
+{% if shared_post_receiver.thanks %}<br /><span style="margin-left: 20px;"><a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post_receiver.shared_post.pk}}/">Send {% if shared_post_receiver.shared_post.sharer.user.first_name %}{{ shared_post_receiver.shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link %}{% endblock %}</p>{% endif %}
 {% endfor %}
 
 <p style="margin-top: 1em;">Your friends are beta testing FeedMe, a tool we're developing at MIT, so please feel free to {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments.</p>
