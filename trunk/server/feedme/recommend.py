@@ -4,6 +4,7 @@ from django.contrib.auth.models import User
 from models import *
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.db import transaction
 import math
 import operator
 import datetime
@@ -12,6 +13,7 @@ import time
 NUM_RECOMMENDATIONS = 21
 
 @login_required
+@transaction.commit_manually
 def recommend(request):
   return HttpResponse(get_recommendation_json(request), \
                       mimetype='application/json')
@@ -25,14 +27,23 @@ def get_recommendation_json(request):
   post_title = request.POST['post_title']
   post_contents = request.POST['post_contents']
   expanded_view = (request.POST['expanded_view'] == 'true')
+  
+  # If the feed or post or other items are viewed in two transactions at
+  # the same time, one will fail with an IntegrityError.  We'll keep
+  # looping until we either load them or create them in new transactions
+  keep_looping = True
+  while keep_looping:
+    try:
+      post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
+                                      post_title=post_title, \
+                                      post_contents=post_contents, \
+                                      sharer_user = sharer_user, \
+                                      feed_title = feed_title, \
+                                      expanded_view = expanded_view)
+      keep_looping = False
+    except IntegrityError:
+      transaction.rollback()
 
-  post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
-                                  post_title=post_title, \
-                                  post_contents=post_contents, \
-                                  sharer_user = sharer_user, \
-                                  feed_title = feed_title, \
-                                  expanded_view = expanded_view)
-    
   feed = post_objects['feed']
   post = post_objects['post']
   sharer = post_objects['sharer']
@@ -60,7 +71,8 @@ def get_recommendation_json(request):
   response['users'] = create_user_json(recommendations, seen_it)
   response['shared'] = create_user_json(shared_users, seen_it)
   response_json = simplejson.dumps(response)
-  
+ 
+  transaction.commit()
   return response_json
 
 
@@ -116,10 +128,7 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
   except Feed.DoesNotExist:
     feed = Feed(rss_url=feed_url, title = feed_title)
     feed.save()
-
-#  except IntegrityError:
-#    print 'the feed got created while the transaction was going.'
-    
+ 
   try:
     post = Post.objects.filter(feed = feed).get(url=post_url)
   except Post.DoesNotExist:
