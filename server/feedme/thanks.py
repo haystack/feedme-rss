@@ -65,7 +65,8 @@ def get_receiver_info(shared_post):
     for receiver in receivers:
         thanks = SharedPost.objects \
                  .filter(sharedpostreceiver__receiver = receiver) \
-                 .filter(thanks= True)
+                 .filter(sharer = shared_post.sharer) \
+                 .filter(thanks__gt = 0)
         count = len(thanks)
 
         if count > 0:
