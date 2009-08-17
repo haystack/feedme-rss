@@ -26,7 +26,7 @@ def share(request):
 
   comment = request.POST['comment']
   if 'bookmarklet' in request.POST:
-    bookmarklet = request.POST['bookmarklet']
+    bookmarklet = request.POST['bookmarklet'] == 'true' or request.POST['bookmarklet'] == '1'
   else:
     bookmarklet = False
 
