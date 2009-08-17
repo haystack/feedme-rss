@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 import nltk
+import textutil
 
 # make email addresses be 75 characters like usernames
 User._meta.get_field_by_name('username')[0].max_length=75
@@ -34,9 +35,9 @@ class Receiver(models.Model):
         received_posts = Post.objects.filter( \
             sharedpost__sharedpostreceiver__receiver = self)
         for received_post in received_posts:
-            post_text = nltk.clean_html(received_post.title) + u' ' + \
-                        nltk.clean_html(received_post.contents) + u' ' + \
-                        nltk.clean_html(received_post.feed.title)
+            post_text = textutil.clean_html(received_post.title) + u' ' + \
+                        textutil.clean_html(received_post.contents) + u' ' + \
+                        textutil.clean_html(received_post.feed.title)
             text = text + post_text
         
         tokens = nltk.word_tokenize(text)
@@ -76,9 +77,9 @@ class Post(models.Model):
         """Returns a tokenized frequency distribution of the post contents
         Each item in the list has [0] = the string, and [1] = the count
         """
-        text = nltk.clean_html(self.title) + ' ' + \
-                   nltk.clean_html(self.contents) + \
-                   nltk.clean_html(self.feed.title)
+        text = textutil.clean_html(self.title) + u' ' + \
+                   textutil.clean_html(self.contents) + u' ' + \
+                   textutil.clean_html(self.feed.title)
         tokens = nltk.word_tokenize(text)
 
         porter = nltk.PorterStemmer()
