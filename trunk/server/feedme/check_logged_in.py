@@ -10,14 +10,17 @@ def check_logged_in(request):
     response['social_features'] = True
 
     if response['logged_in']:
-        # logging
-        sharer = Sharer.objects.get(user = request.user)
+        try:
+            sharer = Sharer.objects.get(user = request.user)
+        except Sharer.DoesNotExist:
+            sharer = Sharer(user = request.user)
+            sharer.save()
+
         log = LoggedIn(sharer = sharer)
         log.save()
 
-        # personalized UI
         try:
-            sharer = Sharer.objects.get(user = request.user)
+            # personalized UI
             study_participant = StudyParticipant.objects.get(sharer = sharer)
             response['user_interface'] = study_participant.user_interface
             response['social_features'] = study_participant.social_features
