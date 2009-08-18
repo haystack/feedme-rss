@@ -46,7 +46,8 @@ def digest_posts():
     
 def send_digest_posts(posts, receiver):
   """Sends the list of posts in an email to the recipient"""
-  subject = u"[FeedMe] Personalized Newspaper: " + posts[0].shared_post.post.title.strip()
+  subject = u"[FeedMe] Personalized Newspaper: " + posts[0].shared_post.post.title.strip().replace("\n"," ")
+
   from_email = 'FeedMe <feedme@csail.mit.edu>'
   to_emails = [receiver.user.email]
 
