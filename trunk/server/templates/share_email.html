@@ -1,4 +1,6 @@
-{% load removehttp %}{% ifnotequal shared_post.comment "" %}
+{% load removehttp %}
+{% load clean_html %}
+{% ifnotequal shared_post.comment "" %}
 <p>
 {{ shared_post.comment|escape|urlize|linebreaksbr }}
 </p>
@@ -7,7 +9,7 @@
 <span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="http://feedme.csail.mit.edu:8000{% url server.feedme.clickthrough.clickthrough shared_post.pk %}?redirect={{ shared_post.post.url|removehttp }}">{{ shared_post.post.title }}</a>{% endblock %}</span><br />
 {% if thanks %}<span><a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link %}{% endblock %}</p>{% endif %}
 
-{{ shared_post.post.contents|safe }}
+{{ shared_post.post.contents|safe|clean_html}}
 
 <p>---<br />
 {% if thanks %}<a href="http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link_2 %}{% endblock %}</p>{% endif %}
