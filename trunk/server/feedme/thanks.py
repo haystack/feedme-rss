@@ -23,7 +23,7 @@ def thanks(request, sharedpost_pk):
 def send_thanks_email(shared_post):
   """Sends a thank-you note to the sharer"""
   post = shared_post.post
-  subject = u"Thanks: " + post.title.strip()
+  subject = u"Thanks: [FeedMe] " + post.title.strip()
   sharer = shared_post.sharer.user
 
   if sharer.first_name != u'' or sharer.last_name != u'':
