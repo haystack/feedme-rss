@@ -46,7 +46,7 @@ def digest_posts():
     
 def send_digest_posts(posts, receiver):
   """Sends the list of posts in an email to the recipient"""
-  subject = u"FeedMe Personalized Newspaper: " + posts[0].shared_post.post.title.strip()
+  subject = u"[FeedMe] Personalized Newspaper: " + posts[0].shared_post.post.title.strip()
   from_email = 'FeedMe <feedme@csail.mit.edu>'
   to_emails = [receiver.user.email]
 
@@ -77,7 +77,7 @@ def pluralize(count):
 
 def send_digest_report(shared_posts, sharer):
     """Sends an email to the sharer letting him/her know that the digest went out"""
-    subject = u"FeedMe Digest Report: " + \
+    subject = u"[FeedMe] Digest Report: " + \
               unicode(shared_posts.count()) + u' post' + \
               pluralize(shared_posts.count()) + ' shared'
     from_email = 'FeedMe <feedme@csail.mit.edu>'

@@ -33,7 +33,7 @@ def reset_seed(receiver):
   receiver.settings_seed = random.randrange(1,1000000)
 
 def email_settings_url(receiver_email, settings_seed):
-  subject = u'Subscription settings information for FeedMe'
+  subject = u'[FeedMe] Subscription settings information for FeedMe'
   from_email = u'feedme@csail.mit.edu'
   to_emails = [receiver_email]
 
@@ -90,7 +90,7 @@ def settings_access_allowed(request, user_email, settings_seed):
   return (False, None, receiver)
   
 def email_settings_changed(receiver_email, settings_seed):
-  subject = u'Subscription settings changed for FeedMe'
+  subject = u'[FeedMe] Subscription settings changed for FeedMe'
   from_email = u'feedme@csail.mit.edu'
   to_emails = [receiver_email]
 

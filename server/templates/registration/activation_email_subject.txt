@@ -1,1 +1,1 @@
-Account Activation - {{ site }}
+[FeedMe] Account Activation - {{ site }}
