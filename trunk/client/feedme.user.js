@@ -44,7 +44,8 @@ var user_interface = true;
 var social_features = true;
 // number of recommendations to show when a person asks for more
 var moreRecommendations = 3;
-
+/* is this being loaded through the bookmarklet? */
+var bookmarklet = false;
 /*
  * Gets called when all the required libraries have successfully loaded.  Sets up click listeners.
  */
@@ -590,7 +591,7 @@ function share_post(event)
         feed_url: server_vars["feed_url"],
         recipients: recipients,
         comment: comment,
-        bookmarklet: false,
+        bookmarklet: bookmarklet,
         digest: digest
     }
     console.log(data);
