@@ -156,6 +156,19 @@ class StudyParticipant(models.Model):
     sharer = models.ForeignKey(Sharer)
     user_interface = models.BooleanField()
     social_features = models.BooleanField()
+    study_group = models.CharField(max_length = 20)
 
     def __unicode__(self):
         return self.sharer.name() + u"---" + self.sharer.user.email
+
+class StudyParticipantAssignment(models.Model):
+    study_participant = models.ForeignKey(StudyParticipant)
+    user_interface = models.BooleanField()
+    social_features = models.BooleanField()
+    start_time = models.DateTimeField()
+    end_time = models.DateTimeField()
+
+    def __unicode__(self):
+        return unicode(study_participant) + u" " + study_participant.study_group
+
+                                                            
