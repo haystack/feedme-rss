@@ -1,4 +1,6 @@
 {% extends "share_email.html" %}{% load removehttp %}
+{% load removehttp %}
+{% load clean_html %}
 
 {% block email %}email us at feedme@csail.mit.edu{% endblock %}
 
@@ -11,4 +13,8 @@
 {% block thanks_link_2 %}http://feedme.csail.mit.edu:8000/thanks/{{shared_post.pk}}/{% endblock %}
 
 {% block subscription %}Go to http://feedme.csail.mit.edu:8000/receiver/settings/ to change your e-mail receiving settings{% endblock %}
+
+{% block post_contents %}
+{{ shared_post.post.contents|safe|clean_html}}
+{% endblock %}
 
