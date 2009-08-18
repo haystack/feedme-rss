@@ -169,6 +169,6 @@ class StudyParticipantAssignment(models.Model):
     end_time = models.DateTimeField()
 
     def __unicode__(self):
-        return unicode(study_participant) + u" " + study_participant.study_group
+        return unicode(self.study_participant) + u" " + self.study_participant.study_group
 
                                                             
