@@ -66,6 +66,7 @@ def create_shared_post(user_sharer, post_url, feed_url, \
     shared_post = SharedPost(post = post, sharer = sharer)
   shared_post.comment = comment
   shared_post.bookmarklet = bookmarklet
+  print 'bookmarklet: ' + str(shared_post.bookmarklet)
   shared_post.save()
 
   # get or create the recipients' User, Recipient and SharedPostRecipient
