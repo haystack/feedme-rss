@@ -119,7 +119,7 @@ def send_post(post_to_send):
 def send_post_email(shared_post, receivers):
   """Sends the post in an email to the recipient"""
   post = shared_post.post
-  subject = u"[FeedMe] " + post.title.strip()
+  subject = u"[FeedMe] " + post.title.strip().replace("\n"," ")
   sharer = shared_post.sharer.user
 
   if sharer.first_name != u'' or sharer.last_name != u'':
