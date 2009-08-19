@@ -2,12 +2,12 @@ from django.http import HttpResponse
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render_to_response
+from html5lib import treebuilders
+from BeautifulSoup import BeautifulSoup
 import nltk
 import re
 import html5lib
-import time
-from html5lib import treebuilders
-from BeautifulSoup import BeautifulSoup
+import versionutils
 
 @login_required
 def bookmarklet(request):
@@ -38,5 +38,5 @@ def bookmarklet(request):
                                 'feed_url' : request.POST['feed_url'],
                                 'feed_title' : request.POST['feed_title'],
                                 'text' : text.decode('utf-8'),
-                                'time' : int(time.time())
+                                'jsurl' : versionutils.latest_url()
                               })
