@@ -5,7 +5,7 @@ from django.shortcuts import render_to_response
 import nltk
 import re
 import html5lib
-import datetime
+import time
 from html5lib import treebuilders
 from BeautifulSoup import BeautifulSoup
 
