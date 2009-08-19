@@ -35,8 +35,8 @@
 // Fail gracefully if Firebug's not installed
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
-var port = 8000;
-var script_version = 0.193;
+var port = 80;
+var script_version = 0.20;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
 /* for toggling on and off parts of the interface */
