@@ -73,7 +73,7 @@ function GM_xmlhttpRequest(params) {
 
     return;
   }
-  $.ajax({
+  jQuery.ajax({
             type: "POST",
             url: params.url,
             data: params.data,
@@ -178,7 +178,7 @@ body, html {
 <script>
 jQuery(document).ready(function() {
     bookmarklet = true; // set the bookmarklet global
-    suggest_people($('#current-entry'));
+    suggest_people(jQuery('#current-entry'));
 });
 </script>
 </body></html>
