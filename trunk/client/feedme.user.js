@@ -677,58 +677,61 @@ function initAutocomplete() {
 
 function gdocs_autocomplete_response(responseDetails) {
     console.log('gdocs autocomplete data received');
-    // whether to add your gmail address to the list of suggestions
-    var add_gmail = true;
     var contact_entries = [];
-    
-    // my email address
-    // add your email to have it display as the top result on all searches
-    // example: var my_email = ["me@myself.com", "my_other@address.com"];
-    var my_email = [];    
-    
-    var parser = new DOMParser();
-    var dom = parser.parseFromString(responseDetails.responseText,
-        "application/xml");
-    if (add_gmail) {
-        var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
-        var email = dom.getElementsByTagName('Email')[0].textContent;
-        if (display_email != 'undefined') {
-            var found = false;
-            for (var i in my_email) {
-                if (my_email[i] == display_email) {
-                    found = true;
-                    break;
+    try {
+        // whether to add your gmail address to the list of suggestions
+        var add_gmail = true;
+        
+        // my email address
+        // add your email to have it display as the top result on all searches
+        // example: var my_email = ["me@myself.com", "my_other@address.com"];
+        var my_email = [];    
+        
+        var parser = new DOMParser();
+        var dom = parser.parseFromString(responseDetails.responseText,
+            "application/xml");
+        if (add_gmail) {
+            var display_email = dom.getElementsByTagName('DisplayEmail')[0].textContent;
+            var email = dom.getElementsByTagName('Email')[0].textContent;
+            if (display_email != 'undefined') {
+                var found = false;
+                for (var i in my_email) {
+                    if (my_email[i] == display_email) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    my_email.push(display_email);
                 }
             }
-            if (!found) {
-                my_email.push(display_email);
-            }
-        }
-        if (email != 'undefined') {
-            found = false;
-            for (var i in my_email) {
-                if (my_email[i] == email) {
-                    found = true;
-                    break;
+            if (email != 'undefined') {
+                found = false;
+                for (var i in my_email) {
+                    if (my_email[i] == email) {
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found) {
+                    my_email.push(email);
                 }
             }
-            if (!found) {
-                my_email.push(email);
-            }
         }
-    }
 
-    var xml_objects = dom.getElementsByTagName('Object');
-    for (var i = 0; i < xml_objects.length; i++) {
-        var display_names = xml_objects[i].getElementsByTagName('DisplayName');
-        if (display_names.length > 0) {
-            var xml_addresses = xml_objects[i].getElementsByTagName('Address');
-            for (var j = 0; j < xml_addresses.length; j++) {
-                contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
+        var xml_objects = dom.getElementsByTagName('Object');
+        for (var i = 0; i < xml_objects.length; i++) {
+            var display_names = xml_objects[i].getElementsByTagName('DisplayName');
+            if (display_names.length > 0) {
+                var xml_addresses = xml_objects[i].getElementsByTagName('Address');
+                for (var j = 0; j < xml_addresses.length; j++) {
+                    contact_entries.push( { name: display_names[0].textContent, to: xml_addresses[j].textContent } );
+                }
             }
         }
+    } catch (e) {
+        console.log(e);
     }
-    
     gdocs_autocompleteData = contact_entries;
     console.log('gdocs autocomplete data set');
 }
