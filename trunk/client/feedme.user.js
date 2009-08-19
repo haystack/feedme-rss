@@ -370,6 +370,7 @@ function ajax_req(url, data, callback, method)
         onload: function(responseDetails) {
             if (responseDetails.status == 200) {
                 console.log('response received');
+                console.log(responseDetails.responseText);
                 callback(eval("(" + responseDetails.responseText + ")"));
             }
             else {
