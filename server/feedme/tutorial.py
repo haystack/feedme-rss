@@ -1,6 +1,5 @@
 from django.shortcuts import render_to_response
-from django.utils import simplejson
-import urllib2
+import versionutils
 
 def tutorial(request):
   return render_to_response('tutorial_index.html')
@@ -9,12 +8,8 @@ def firefox(request):
 def greasemonkey(request):
   return render_to_response('tutorial_greasemonkey.html')
 def feedme(request):
-  response = urllib2.urlopen('http://groups.csail.mit.edu/haystack/feedme/current_version.js')
-  html = response.read()
-  html = html.replace("versionData = ", "")
-  version = simplejson.loads(html)
   return render_to_response('tutorial_feedme.html',
-                            {'url' : version['url']})
+                            {'url' : versionutils.latest_url()})
 def login(request):
   return render_to_response('tutorial_login.html')
 def readpost(request):
