@@ -74,7 +74,7 @@ def send_digest_posts(posts, receiver):
   html_content += u"<br /><br /><span style='color: gray'>Sent via FeedMe: " +\
                   u"a (very) alpha tool at MIT. Have comments, or are your " +\
                   u"friends spamming you? Email us at feedme@csail.mit.edu." +\
-                  u"<br /><br /><a href='http://feedme.csail.mit.edu:8000" +\
+                  u"<br /><br /><a href='http://feedme.csail.mit.edu" +\
                   u"/unsubscribe/'>Change your e-mail receiving settings" +\
                   u"</a> to get only a digest, or never be recommended posts."
 
