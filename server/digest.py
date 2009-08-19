@@ -21,7 +21,7 @@ def digest_posts():
         if digested_posts.count() > 0:
             send_digest_posts(digested_posts, receiver)
         else:
-            print receiver.user.username + ' hasn\'t received posts recently'
+            print (receiver.user.username + ' hasn\'t received posts recently').encode('ascii', 'backslashreplace')
 
     # tell the sharers that their posts have been sent
     for sharer in Sharer.objects \
@@ -36,7 +36,7 @@ def digest_posts():
         if shared_posts.count() > 0:
             send_digest_report(shared_posts, sharer)
         else:
-            print sharer.user.username + u' hasn\'t shared digest posts'
+            print (sharer.user.username + u' hasn\'t shared digest posts').encode('ascii', 'backslashreplace')
 
     for s_p_receiver in SharedPostReceiver.objects \
             .filter(sent = False).filter(digest = True):

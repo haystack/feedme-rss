@@ -43,7 +43,7 @@ def email_settings_url(receiver_email, settings_seed):
 
   To modify your settings, go here:
 
-  http://feedme.csail.mit.edu:8000/receiver/settings/%s/%d/
+  http://feedme.csail.mit.edu/receiver/settings/%s/%d/
 
   Thank you! Feel free to email us at feedme@csail.mit.edu with any comments.
   """ % (receiver_email, settings_seed)
@@ -98,7 +98,7 @@ def email_settings_changed(receiver_email, settings_seed):
   Your settings for FeedMe have changed.  If you are receiving
   this email in error and wish to verify your settings, please visit
 
-  http://feedme.csail.mit.edu:8000/receiver/settings/%s/%d/
+  http://feedme.csail.mit.edu/receiver/settings/%s/%d/
 
   Thank you! Feel free to email us at feedme@csail.mit.edu with any comments.
   """ % (receiver_email, settings_seed)
