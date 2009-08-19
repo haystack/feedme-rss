@@ -347,8 +347,17 @@ function ajax_get(url, data, callback) {
     ajax_req(url, data, callback, 'GET');
 }
 
+function generate_url(page_url) {
+    url = 'http://feedme.csail.mit.edu'
+    if (port != 80) {
+        url = url + ':' + port;
+    }
+    url = url + '/' + page_url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
+    return url;
+}
+
 // gives Greasemonkey control so we can call the XMLhttprequest. This is a security risk.
-function ajax_req(url, data, callback, method)
+function ajax_req(page_url, data, callback, method)
 {
     var headers = {
         'User-Agent': 'Mozilla/4.0 (compatible) Greasemonkey',
@@ -360,7 +369,7 @@ function ajax_req(url, data, callback, method)
         postData = $.param(data)
     }
     
-    url = 'http://feedme.csail.mit.edu:' + port + '/' + url;	// this mitigates a security risk -- we can be sure at worst we're just calling our own server cross-domain
+    var url = generate_url(page_url);
     window.setTimeout(function() {	// window.setTimeout is a loophole to allow page code to call Greasemonkey code
         GM_xmlhttpRequest({
         method: method,
@@ -958,7 +967,8 @@ function verify_login(json) {
     console.log('verified');
     if (json.logged_in == false) {
         console.log('logged out');
-        $("body").append('<a style="display: none;" id="login-iframe" href="http://feedme.csail.mit.edu:' + port + '/accounts/login?iframe">login</a>');
+        var url = generate_url('accounts/login?iframe');
+        $("body").append('<a style="display: none;" id="login-iframe" href="' + url + '">login</a>');
         $("a#login-iframe").fancybox({
             frameWidth: 800,
             frameHeight: 225,
