@@ -401,14 +401,14 @@ function populateSuggestions(json) {
     
     var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
     // if we can't find the post, jettison
-    if (postToPopulate.size() == 0 || $('.entry-title-link', postToPopulate).attr('href').indexOf(post_url) == -1)
+    if (postToPopulate.size() == 0 || postToPopulate.find('.entry-title-link').attr('href').indexOf(post_url) == -1)
     {
         console.log("cannot find post -- aborting.");
         return;
     }
     
     // if we've already suggested, exit
-    if ($('.feedme-suggestions .feedme-placeholder', postToPopulate).size() == 0) {
+    if (postToPopulate.find('.feedme-suggestions .feedme-placeholder').size() == 0) {
         console.log("aborting -- results have already been returned for this post.  Otherwise we start adding multiple copies of folks from different AJAX requests.");
         return;
     }
@@ -486,7 +486,7 @@ function addFriend(name, email, shared_today, seen_it, header, context) {
     var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">&nbsp;</div></div>');
     header.append(newPerson);
 
-    num_shared = $('[email="' + email + '"] .feedme-num-shared', context);
+    num_shared = context.find('[email="' + email + '"] .feedme-num-shared');
     set_social_feedback(num_shared, newPerson, shared_today, seen_it);
     // Make the elements interactive
     newPerson.click(toggle_friend);
@@ -521,7 +521,7 @@ function addFriendAndSelect(name, context) {
     // in an XPCNativeWrapper, and jQuery doesn't deal with this.  A similar issue:
     // http://stackoverflow.com/questions/564342/jquery-ui-dialog-throw-errors-when-invoked-from-greasemonkey
     // This seemed to break in FF 3.5 for me.
-    //$(".feedme-person:last", context).click();
+    //context.find(".feedme-person:last").click();
     
     context.find('.feedme-autocomplete').val('');
     
@@ -557,7 +557,7 @@ function toggle_friend(event)
     var context = $(this).parents('.entry');
     $(this).removeClass("feedme-sent");
     $(this).toggleClass("feedme-toggle");
-    $(".feedme-controls", context).slideDown("normal");
+    context.find(".feedme-controls").slideDown("normal");
 }
 
 function handle_ajax_response(data)
@@ -572,8 +572,8 @@ function share_post(event)
     animate_share($(this), context);
     
     var digest = $(this).hasClass("feedme-later-button");
-    //var broadcast = ($('.feedme-suggest.feedme-toggle', context).length == 1);
-    var recipientDivs = $(".feedme-person.feedme-toggle", context);
+    //var broadcast = (context.find('.feedme-suggest.feedme-toggle').length == 1);
+    var recipientDivs = context.find(".feedme-person.feedme-toggle");
     if (recipientDivs.length == 0) {
         console.log("nobody to share with.");
         alert("Please select a contact to share the feed item with.");
@@ -785,7 +785,7 @@ function autocompleteWait(context) {
 
 function populateAutocomplete(context) {    
     try {
-        $(".feedme-autocomplete", context).autocomplete({
+        context.find(".feedme-autocomplete").autocomplete({
             data: autocompleteData,
             width: 300,
             max: 6,
@@ -811,16 +811,16 @@ function populateAutocomplete(context) {
             }
         });
 
-        $('.ac_results', context).blur(function() {
-            var selected = $('.ac_over', context);
+        context.find('.ac_results').blur(function() {
+            var selected = context.find('.ac_over');
             console.log(selected);
             // store the last remembered highlighted person so that if they click '+', we know what they were pointing at
             $(this).data('last_selected_entry', selected);
             return true;
         });
         
-        $('.feedme-addImg', context).click(function(event) {
-            text = $('.feedme-autocomplete', context).val();
+        context.find('.feedme-addImg').click(function(event) {
+            text = context.find('.feedme-autocomplete').val();
             // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
             //$(this).trigger("result.autocomplete", [text, text]);
             
@@ -828,10 +828,10 @@ function populateAutocomplete(context) {
                 addFriendAndSelect(text, context);
             }
         });
-        //$('.feedme-autocomplete', context).bind('keydown.autocomplete', unsafeWindow.imported);
-        $('.feedme-autocomplete', context).bind('keydown.autocomplete', function(event) {
+        //context.find('.feedme-autocomplete').bind('keydown.autocomplete', unsafeWindow.imported);
+        context.find('.feedme-autocomplete').bind('keydown.autocomplete', function(event) {
             if (event.which == 13) { // user pushed enter
-                text = $('.feedme-autocomplete', context).val();
+                text = context.find('.feedme-autocomplete').val();
                 // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
                 //$(this).trigger("result.autocomplete", [text, text]);
                 
