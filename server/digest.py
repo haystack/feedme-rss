@@ -6,6 +6,7 @@ from server.feedme.models import *
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context, loader
 import sys, codecs
+from django.db import transaction
 
 # set stdout to Unicode so we can write Unicode strings to stdout
 # todo: create some sort of startup script which calls this
@@ -14,9 +15,9 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 def digest_posts():
     for receiver in Receiver.objects.all():
         digested_posts = SharedPostReceiver.objects \
-                             .filter(receiver = receiver) \
-                             .filter(digest = True) \
-                             .filter(sent = False)
+                         .filter(receiver = receiver) \
+                         .filter(digest = True) \
+                         .filter(sent = False)
 
         if digested_posts.count() > 0:
             send_digest_posts(digested_posts, receiver)
@@ -24,10 +25,7 @@ def digest_posts():
             print (receiver.user.username + ' hasn\'t received posts recently').encode('ascii', 'backslashreplace')
 
     # tell the sharers that their posts have been sent
-    for sharer in Sharer.objects \
-            .filter(sharedpost__sharedpostreceiver__sent = False) \
-            .filter(sharedpost__sharedpostreceiver__digest = True) \
-            .distinct():
+    for sharer in Sharer.objects.all():
         shared_posts = SharedPost.objects \
                        .filter(sharer = sharer) \
                        .filter(sharedpostreceiver__sent = False) \
@@ -38,11 +36,12 @@ def digest_posts():
         else:
             print (sharer.user.username + u' hasn\'t shared digest posts').encode('ascii', 'backslashreplace')
 
+
     for s_p_receiver in SharedPostReceiver.objects \
-            .filter(sent = False).filter(digest = True):
+            .filter(sent = False) \
+            .filter(digest = True):
         s_p_receiver.sent = True
         s_p_receiver.save()
-
     
 def send_digest_posts(posts, receiver):
   """Sends the list of posts in an email to the recipient"""
