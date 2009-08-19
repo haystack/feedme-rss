@@ -5,6 +5,7 @@ from django.shortcuts import render_to_response
 import nltk
 import re
 import html5lib
+import datetime
 from html5lib import treebuilders
 from BeautifulSoup import BeautifulSoup
 
@@ -36,5 +37,6 @@ def bookmarklet(request):
                                 'post_title' : request.POST['post_title'],
                                 'feed_url' : request.POST['feed_url'],
                                 'feed_title' : request.POST['feed_title'],
-                                'text' : text.decode('utf-8')
+                                'text' : text.decode('utf-8'),
+                                'time' : int(time.time())
                               })
