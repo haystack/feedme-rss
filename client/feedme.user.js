@@ -374,6 +374,7 @@ function ajax_req(url, data, callback, method)
             }
             else {
                 console.log('AJAX error: "' + responseDetails.statusText + '" for URL: ' + url);
+                console.log(responseDetails.responseText);
             }
         },
         onerror: function(responseDetails) {
