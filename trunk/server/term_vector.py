@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
                 sp_thanked = SharedPost.objects \
                              .filter(sharedpostreceiver__time__gte = yesterday) \
-                             .filter(thanks = True) \
+                             .filter(thanks__gte = 1) \
                              .distinct()
                 print str(sp_thanked.count()) + ' FeedMe links sent yesterday had a thank you'                
                              
