@@ -210,6 +210,7 @@ function suggest_people(context) {
     var controls = context.find(".feedme-controls");
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
     controls.append('<textarea class="comment-textarea"></textarea>');
+    controls.append('<span class="feedme-send-individually-area"><input class="feedme-send-individually" type="checkbox"></input> e-mail recipients individually</span>');
     if (social_features) {
         controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
         .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
@@ -591,6 +592,8 @@ function share_post(event)
     if (comment == default_comment_text) {
         comment = '';
     }    
+
+    var send_individually = context.find('.feedme-send-individually').attr('checked');
     
     var server_vars = get_post_variables(context);
     
@@ -602,7 +605,8 @@ function share_post(event)
         recipients: recipients,
         comment: comment,
         bookmarklet: bookmarklet,
-        digest: digest
+        digest: digest,
+        send_individually: send_individually
     }
     console.log(data);
     ajax_post(url, data, handle_ajax_response);
@@ -902,9 +906,9 @@ function setupStyles() {
     }
     .comment-textarea { 
         height: 21px; 
-        width: 415px; 
+        width: 315px; 
         margin-top: 10px;
-        margin-right: 20px; 
+        margin-right: 5px; 
     }
     .feedme-num-shared { 
         font-size: 7pt; 
@@ -951,6 +955,9 @@ function setupStyles() {
         position: relative;
         right: 3px;
         top: -3px;
+    }
+    .feedme-send-individually-area {
+        margin-right: 10px;
     }
     
     ]]></r>).toString();
