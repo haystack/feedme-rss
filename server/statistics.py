@@ -11,8 +11,6 @@ def generate_statistics(sharers, start_time, end_time):
     stats = dict()
 
     # unique sharing events
-    # TODO: Add this in once we have an end_time.
-    # sharedpostreceiver__time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time'),
     # TODO: handle what happens when users switch to second half of study
     newposts = SharedPost.objects \
                .filter(
