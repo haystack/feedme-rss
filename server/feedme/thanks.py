@@ -68,7 +68,7 @@ def get_receiver_info(shared_post):
                  .filter(sharedpostreceiver__receiver = receiver) \
                  .filter(sharer = shared_post.sharer) \
                  .filter(thanks__gt = 0)
-        count = len(thanks)
+        count = thanks.count()
 
         if count > 0:
             receiver_info.append( { 'receiver': receiver, 'count': count, 'barwidth': 10*count})

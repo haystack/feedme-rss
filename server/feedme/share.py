@@ -60,13 +60,8 @@ def create_shared_post(user_sharer, post_url, feed_url, \
 
   # get the post
   post = Post.objects.filter(feed__rss_url = feed_url).get(url=post_url)
-  try:
-    shared_post = SharedPost.objects.get(post = post, sharer = sharer)
-  except SharedPost.DoesNotExist:
-    shared_post = SharedPost(post = post, sharer = sharer)
-  shared_post.comment = comment
-  shared_post.bookmarklet = bookmarklet
-  print 'bookmarklet: ' + str(shared_post.bookmarklet)
+  shared_post = SharedPost(post = post, sharer = sharer, \
+                           comment = comment, bookmarklet = bookmarklet)
   shared_post.save()
 
   # get or create the recipients' User, Recipient and SharedPostRecipient

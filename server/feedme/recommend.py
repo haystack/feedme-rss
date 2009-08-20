@@ -47,7 +47,7 @@ def get_recommendation_json(request):
   feed = post_objects['feed']
   post = post_objects['post']
   sharer = post_objects['sharer']
-  shared_post = post_objects['shared_post']
+  shared_posts = post_objects['shared_posts']
   shared_post_receivers = post_objects['shared_post_receivers']
   shared_users = post_objects['shared_users']
   viewed_post = post_objects['viewed_post']
@@ -148,17 +148,12 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
     study_participant = None
 
   # find out if we've already shared it with anyone
-  try:
-    shared_post = SharedPost.objects.get(post=post, sharer=sharer)
-    shared_post_receivers = SharedPostReceiver.objects \
-                            .filter(shared_post=shared_post)
-    shared_users = []
-    for shared_user in shared_post_receivers:
-      shared_users.append(shared_user.receiver.user)
-  except SharedPost.DoesNotExist:
-    shared_post = None
-    shared_users = []
-    shared_post_receivers = []
+  shared_posts = SharedPost.objects.filter(post=post, sharer=sharer)
+  shared_post_receivers = SharedPostReceiver.objects \
+                            .filter(shared_post__in = shared_posts)
+  shared_users = []
+  for shared_user in shared_post_receivers:
+    shared_users.append(shared_user.receiver.user)
 
   # log the view
   viewed = ViewedPost(post=post, sharer=sharer, \
@@ -170,7 +165,7 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
   post_objects['feed'] = feed
   post_objects['post'] = post
   post_objects['sharer'] = sharer
-  post_objects['shared_post'] = shared_post
+  post_objects['shared_posts'] = shared_posts
   post_objects['shared_post_receivers'] = shared_post_receivers
   post_objects['shared_users'] = shared_users
   post_objects['viewed_post'] = viewed
