@@ -12,7 +12,7 @@ def generate_statistics(sharers, start_time, end_time):
 
     # unique sharing events
     # TODO: Add this in once we have an end_time.
-    # sharedpostreceiver__time__lte = F('sharer__studyparticipant__studyparticipantassignment__end_time'),
+    # sharedpostreceiver__time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time'),
     # TODO: handle what happens when users switch to second half of study
     newposts = SharedPost.objects \
                .filter(
@@ -20,7 +20,8 @@ def generate_statistics(sharers, start_time, end_time):
                  sharedpostreceiver__time__lt = end_time,
                  sharer__in = sharers
                ).filter(
-                 sharedpostreceiver__time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time')
+                 sharedpostreceiver__time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time'),
+                 sharedpostreceiver__time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time')
                ).distinct()
     stats['shared_posts'] = newposts.count()
 
@@ -33,6 +34,11 @@ def generate_statistics(sharers, start_time, end_time):
     thanked = newposts.all() \
               .filter(thanks__gte = 1)
     stats['thanks'] = thanked.count()
+    
+    # total number of people (not unique) shared with
+    recipients = Receiver.objects \
+              .filter(sharedpostreceiver__shared_post__in = newposts.all())
+    stats['recipients'] = recipients.count()
 
     # unique number of people shared with
     unique_recipients = Receiver.objects \
@@ -41,20 +47,32 @@ def generate_statistics(sharers, start_time, end_time):
     stats['unique_recipients'] = unique_recipients.count()
 
     # times GReader loaded in browser
-    logins = LoggedIn.objects.filter(time__gte = start_time,
-                                     time__lt = end_time,
-                                     sharer__in = sharers)
+    logins = LoggedIn.objects \
+      .filter(
+              time__gte = start_time,
+              time__lt = end_time,
+              sharer__in = sharers
+             ).filter(
+                time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time'),
+                time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time')
+             ).distinct()
     stats['logins'] = logins.count()
 
     # number of posts viewed
-    viewed = ViewedPost.objects.filter(time__gte = start_time,
-                                       time__lte = end_time,
-                                       sharer__in =  sharers)
+    viewed = ViewedPost.objects \
+        .filter(
+                time__gte = start_time,
+                time__lte = end_time,
+                sharer__in =  sharers
+               ).filter(
+                time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time'),
+                time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time')
+               ).distinct()
     stats['viewed'] = viewed.count()
 
     # number of viewed posts with a link clicked in the greader interface
     greader_clicked = viewed.all().filter(link_clickthrough = True)
-    stats['greader_clicked'] = clicked.count()
+    stats['greader_clicked'] = greader_clicked.count()
 
     return stats
 
@@ -62,7 +80,7 @@ def since(mode, num_days):
     sinceday = datetime.datetime.now() - datetime.timedelta(days = num_days)
     now = datetime.datetime.now()
 
-    print "Printing %s report since %d ago" % (mode, num_days)
+    print "Printing %s report since %d days ago" % (mode, num_days)
 
     if (mode == "usersummary"):
         usersummary(sinceday, now)
@@ -102,6 +120,7 @@ def avg_stats(stats, sharers):
     stats['shared_posts'] /= count
     stats['clickthroughs'] /= count
     stats['thanks'] /= count
+    stats['recipients'] /= count
     stats['unique_recipients'] /= count
     stats['logins'] /= count
     stats['viewed'] /= count
