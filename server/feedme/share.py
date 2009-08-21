@@ -21,6 +21,9 @@ def share(request):
   feed_url = request.POST['feed_url']
   post_url = request.POST['post_url']
   digest = (request.POST['digest'] == 'true')
+  send_individually = False
+  if 'send_individually' in request.POST:
+    send_individually = (request.POST['send_individually'] == 'true')
 
   recipient_emails = request.POST.getlist('recipients')
 
@@ -43,7 +46,7 @@ def share(request):
     receiver.save()
 
   print "preparing to send post"
-  send_post(shared_post)
+  send_post(shared_post, send_individually)
 
   script_output = "{\"response\": \"ok\"}"
   return HttpResponse(script_output, mimetype='application/json')
@@ -94,7 +97,7 @@ def create_shared_post(user_sharer, post_url, feed_url, \
   return shared_post
 
 
-def send_post(post_to_send):
+def send_post(post_to_send, send_individually):
     receivers = SharedPostReceiver.objects \
                 .filter(shared_post = post_to_send) \
                 .filter(digest = False) \
@@ -104,12 +107,15 @@ def send_post(post_to_send):
       print 'No receivers, escaping'
       return
     
-    send_post_email(post_to_send, receivers)
+    if send_individually:
+      for receiver in receivers:
+        send_post_email(post_to_send, [receiver])
+    else:
+      send_post_email(post_to_send, receivers)
 
     for receiver in receivers:
       receiver.sent = True
       receiver.save()
-
 
 def send_post_email(shared_post, receivers):
   """Sends the post in an email to the recipient"""
