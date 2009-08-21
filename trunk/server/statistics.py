@@ -89,10 +89,18 @@ def since(mode, num_days):
 
 def usersummary(sinceday, now):
     sharers = [sp.sharer for sp in StudyParticipant.objects.all()]
+    first = True
+    keys = dict()
     for sharer in sharers:
         stats = generate_statistics([sharer], sinceday, now)
-        print sharer
-        print stats
+        if first:
+            keys = stats.keys()
+            print "name, email, %s" % (", ".join(keys))
+            first = False
+        name = sharer.name()
+        email = sharer.user.email
+        stats_str = ", ".join([str(stats[key]) for key in keys])
+        print ("%s, %s, %s" % (name, email, stats_str)).encode('ascii', 'backslashreplace')
 
 def groupsummary(sinceday, now):
     admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
