@@ -129,10 +129,8 @@ def send_post_email(shared_post, receivers):
   else:
     from_email = shared_post.sharer.user.email
   to_emails = [receiver.receiver.user.email for receiver in receivers]
-  if u'karger@csail.mit.edu' not in from_email:
+  if shared_post.sharer.cc_me:
     to_emails.append(from_email)
-  else:
-    print 'SPECIAL CASE KARGER NOT CC\'ED'
 
   try:
     thanks = StudyParticipant.objects.get(sharer = shared_post.sharer) \
