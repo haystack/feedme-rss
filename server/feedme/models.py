@@ -11,6 +11,7 @@ User._meta.get_field_by_name('username')[0].max_length=75
 
 class Sharer(models.Model):
     user = models.ForeignKey(User, unique=True)
+    cc_me = models.BooleanField("CC me on e-mails when I share a post", default = True)
     
     def __unicode__(self):
         return self.name()

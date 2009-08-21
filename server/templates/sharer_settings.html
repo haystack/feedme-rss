@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+
+{% block title %}FeedMe Settings{% endblock %}
+{% block header %}FeedMe Settings - {{ user }}{% endblock %}
+
+{% block body %}
+{% if done %}<div style="font-weight: bold">Changes set.</div>{% endif %}
+Here you can update preferences about your FeedMe experience.
+<form method="POST" action="">
+    {{ formset }}
+    <div style="margin-top: 20px;"><input type="submit" value="Done" /></div>
+</form>
+{% endblock %}
