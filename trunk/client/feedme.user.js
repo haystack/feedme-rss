@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 80;
-var script_version = 0.20;
+var script_version = 0.21;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
 /* for toggling on and off parts of the interface */
@@ -209,8 +209,10 @@ function suggest_people(context) {
 
     var controls = context.find(".feedme-controls");
     /*.append('<div class="feedme-comment-button feedme-button wait-for-suggestions"><img src="http://groups.csail.mit.edu/haystack/feedme/comment.png"></img></div>')*/
-    controls.append('<textarea class="comment-textarea"></textarea>');
-    controls.append('<span class="feedme-send-individually-area"><input class="feedme-send-individually" type="checkbox"></input> e-mail recipients individually</span>');
+    controls.append('<div style="display: inline-block; margin-right: 20px;"> \
+                                <div class="display: inline;"><textarea class="comment-textarea"></textarea></div> \
+                                <div class="feedme-send-individually-area" style="display: inline;"><input class="feedme-send-individually" type="checkbox"></input>send individual emails</div> \
+                            </div>');
     if (social_features) {
         controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
         .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
@@ -514,8 +516,7 @@ function addFriendAndSelect(name, context) {
     var header = context.find('.feedme-autocomplete-added');
     addFriend(name, name, null, false, header, context);
     // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
-    context.find(".feedme-person:last").toggleClass("feedme-toggle");
-    context.find(".feedme-controls").slideDown("normal");
+    toggle_friend_button(context.find(".feedme-person:last"));
     
     // Because the following call generates a "Component is not available" error when called!
     // It's called out of the jQuery code, apparently because the elements in a GM script are
@@ -555,10 +556,25 @@ function seen_it_response(response) {
 /* Selects or deselects a friend */
 function toggle_friend(event)
 {
-    var context = $(this).parents('.entry');
-    $(this).removeClass("feedme-sent");
-    $(this).toggleClass("feedme-toggle");
+    toggle_friend_button($(this));
+}
+
+function toggle_friend_button(friend)
+{
+    var context = friend.parents('.entry');
+    friend.removeClass("feedme-sent");
+    friend.toggleClass("feedme-toggle");
     context.find(".feedme-controls").slideDown("normal");
+    
+    // If there is more than one friend toggled, give them the option to cc blindly
+    var cc_friends = context.find(".feedme-send-individually-area")
+    if (context.find(".feedme-person.feedme-toggle").size() > 1 && cc_friends.css("opacity") == 0) {
+        console.log('fading in');
+        cc_friends.css('opacity', 0).animate({'opacity': 100});
+    }
+    else if (context.find(".feedme-person.feedme-toggle").size() == 1 && cc_friends.css('opacity') == 100) {
+        cc_friends.animate({'opacity': 0});
+    }
 }
 
 function handle_ajax_response(data)
@@ -919,8 +935,10 @@ function setupStyles() {
         margin-right: 5px; 
     }
     .feedme-share-button {
+        position: relative;
         width: 30px;
-        vertical-align: bottom;
+        vertical-align: top;
+        top: 10px;
         /*border-color: #FF9900;*/
     }
     .feedme-now-button { 
@@ -957,7 +975,9 @@ function setupStyles() {
         top: -3px;
     }
     .feedme-send-individually-area {
-        margin-right: 10px;
+        opacity: 0;
+        position: relative;
+        right: 3    px;
     }
     
     ]]></r>).toString();
