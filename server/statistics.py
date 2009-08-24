@@ -4,6 +4,7 @@ setup_environ(settings)
 from server.feedme.models import *
 import datetime
 import sys
+import numpy
 from django.db.models import F
 
 # We don't want to show up in statistics
@@ -122,23 +123,13 @@ def groupsummary(sinceday, now):
                   .filter(studyparticipant__user_interface = user_interface,
                           studyparticipant__social_features = social_features)\
                   .exclude(user__email__in = admins)
-        stats = generate_statistics(sharers, sinceday, now)
+        all_stats = [generate_statistics([sharer], sinceday, now) for sharer in sharers]
+        keys = all_stats[0].keys()
         print "For %d members:" % (sharers.count())
-        avg_stats(stats, sharers)
-        print stats
-
-def avg_stats(stats, sharers):
-    count = sharers.count()
-    count *= 1.0
-    stats['shared_posts'] /= count
-    stats['clickthroughs'] /= count
-    stats['thanks'] /= count
-    stats['recipients'] /= count
-    stats['unique_recipients'] /= count
-    stats['logins'] /= count
-    stats['viewed'] /= count
-    stats['greader_clicked'] /= count
-
+        for key in keys:
+            vals = [stats[key] for stats in all_stats]
+            median = numpy.median(vals)
+            print "Median %s: %f" % (key, median)
 
 if __name__ == "__main__":
     if len(sys.argv) == 3:
