@@ -101,12 +101,16 @@ def usersummary(sinceday, now):
         stats = generate_statistics([sharer], sinceday, now)
         if first:
             keys = stats.keys()
-            print "name, email, %s" % (", ".join(keys))
+            print "name, email, study group, ui on, social on, %s" % (", ".join(keys))
             first = False
         name = sharer.name()
         email = sharer.user.email
+        participant = StudyParticipant.objects.get(sharer = sharer)
+        study_group = participant.study_group
+        ui = participant.user_interface
+        social = participant.social_features
         stats_str = ", ".join([str(stats[key]) for key in keys])
-        print ("%s, %s, %s" % (name, email, stats_str)).encode('ascii', 'backslashreplace')
+        print ("%s, %s, %s, %s, %s, %s" % (name, email, study_group, ui, social, stats_str)).encode('ascii', 'backslashreplace')
 
 def groupsummary(sinceday, now):
     for i in range(4):
