@@ -6,6 +6,10 @@ import datetime
 import sys
 from django.db.models import F
 
+# We don't want to show up in statistics
+admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
+          'karger@csail.mit.edu']
+
 def generate_statistics(sharers, start_time, end_time):
     """Returns a dictionary of useful statistics for the sharers"""
     stats = dict()
@@ -88,7 +92,9 @@ def since(mode, num_days):
         print "Mode must be one of 'usersummary' or 'groupsummary'."
 
 def usersummary(sinceday, now):
-    sharers = [sp.sharer for sp in StudyParticipant.objects.all()]
+    participants = StudyParticipant.objects \
+                    .exclude(sharer__user__email__in = admins)
+    sharers = [sp.sharer for sp in participants]
     first = True
     keys = dict()
     for sharer in sharers:
@@ -103,9 +109,6 @@ def usersummary(sinceday, now):
         print ("%s, %s, %s" % (name, email, stats_str)).encode('ascii', 'backslashreplace')
 
 def groupsummary(sinceday, now):
-    admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
-              'karger@csail.mit.edu']
-
     for i in range(4):
         user_interface = (i <= 1)
         social_features = ( i % 2 == 0 )
