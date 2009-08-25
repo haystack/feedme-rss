@@ -23,11 +23,23 @@ def seen_it(request):
                    .filter(sharer__user = feed_objects['receiver'].user) \
                    .count()
 
+    # Have we sent it to them before?
+    sent_query = SharedPostReceiver.objects \
+                 .filter(shared_post__post = feed_objects['post']) \
+                 .filter(receiver = feed_objects['receiver']) \
+                 .filter(shared_post__sharer = feed_objects['sharer']) \
+                 .count()
+
     has_seen_it = set()
+    sent = set()
     if received_query > 0 or viewed_query > 0:
-        has_seen_it.add(feed_objects['receiver'].user.email)
+        has_seen_it.add(feed_objects['receiver'].user)
+    if sent_query > 0:
+        sent.add(feed_objects['receiver'].user)
+        
     user_info = create_user_json([ feed_objects['receiver'].user ],
-                                 has_seen_it)
+                                 has_seen_it, sent)
+    # little tweaks since that method wasn't meant for this purpose
     user_info[0]['posturl'] = request.POST['post_url']
     
     user_info_json = simplejson.dumps(user_info[0])

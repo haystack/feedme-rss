@@ -68,15 +68,14 @@ def get_recommendation_json(request):
 
   response = dict()
   response['posturl'] = post.url
-  response['users'] = create_user_json(recommendations, seen_it)
-  response['shared'] = create_user_json(shared_users, seen_it)
+  response['users'] = create_user_json(recommendations, seen_it, shared_users)
   response_json = simplejson.dumps(response)
  
   transaction.commit()
   return response_json
 
 
-def create_user_json(recommendations, seen_it):
+def create_user_json(recommendations, seen_it, sent_already):
   """Turns a list of users into a list of dicts with important properties
   for the Greasemonkey script exposed.  To be sent to simplejson.dumps
   to create a json object to return"""
@@ -93,7 +92,8 @@ def create_user_json(recommendations, seen_it):
                    .filter(time__gte = midnight_today) \
                    .count()
     person['shared_today'] = shared_today
-    person['seen_it'] = recommendation.email in seen_it
+    person['seen_it'] = recommendation in seen_it
+    person['sent'] = recommendation in sent_already
 
     rec_list.append(person)
 
@@ -104,15 +104,15 @@ def who_has_seen_it(recommendations, post):
   received_query = SharedPostReceiver.objects \
             .filter(shared_post__post = post) \
             .filter(receiver__user__in = recommendations) \
-            .select_related('receiver__user__email')
-  received_it = [spr.receiver.user.email for spr in received_query]
+            .select_related('receiver__user')
+  received_it = [spr.receiver.user for spr in received_query]
 
   # who has already viewed it in GReader?
   viewed_query = ViewedPost.objects \
                  .filter(post = post) \
                  .filter(sharer__user__in = recommendations) \
-                 .select_related('sharer__user__email')
-  viewed_it = [vp.sharer.user.email for vp in viewed_query]
+                 .select_related('sharer__user')
+  viewed_it = [vp.sharer.user for vp in viewed_query]
 
   return set(received_it + viewed_it)
 
