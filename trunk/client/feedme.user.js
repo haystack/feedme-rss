@@ -494,7 +494,7 @@ function is_valid_email(email) {
 function addFriend(name, email, shared_today, seen_it, sent, header, context) {
     if (!is_valid_email(email)) {
         alert(email + ' is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".');
-        return;
+        return false;
     }
     
     var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">&nbsp;</div></div>');
@@ -504,6 +504,7 @@ function addFriend(name, email, shared_today, seen_it, sent, header, context) {
     set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent);
     // Make the elements interactive
     newPerson.click(toggle_friend);
+    return true;
 }
 
 function set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent) {
@@ -529,7 +530,11 @@ function set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent)
 
 function addFriendAndSelect(name, context) {
     var header = context.find('.feedme-autocomplete-added');
-    addFriend(name, name, null, false, false, header, context);
+    var result = addFriend(name, name, null, false, false, header, context);
+    
+    if (!result) {
+        return;
+    }
     // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
     toggle_friend_button(context.find(".feedme-person:last"));
     
@@ -872,9 +877,10 @@ function populateAutocomplete(context) {
                 addFriendAndSelect(text, context);
             }
         });
-        //context.find('.feedme-autocomplete').bind('keydown.autocomplete', unsafeWindow.imported);
+        
         context.find('.feedme-autocomplete').bind('keydown.autocomplete', function(event) {
             if (event.which == 13) { // user pushed enter
+                event.preventDefault();
                 text = context.find('.feedme-autocomplete').val();
                 // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
                 //$(this).trigger("result.autocomplete", [text, text]);
