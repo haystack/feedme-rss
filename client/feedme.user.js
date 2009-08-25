@@ -35,8 +35,8 @@
 // Fail gracefully if Firebug's not installed
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
-var port = 80;
-var script_version = 0.21;
+var port = 8001;
+var script_version = 0.22;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
 /* for toggling on and off parts of the interface */
@@ -444,7 +444,7 @@ function recommendMorePeople(postToPopulate) {
         expanded_div = postToPopulate.find('.' + div_class);
         for (var i = start_person; i < min_length; i++) {
             var person = people[i];
-            addFriend(person['email'], person['email'], person['shared_today'], person['seen_it'], expanded_div, postToPopulate);
+            addFriend(person['email'], person['email'], person['shared_today'], person['seen_it'], person['sent'], expanded_div, postToPopulate);
         }
      
         if (start_person == 0) {
@@ -468,7 +468,8 @@ function recommendMorePeople(postToPopulate) {
         else {
             expanded_div.slideToggle("normal");
         }        
-
+    
+        /*
         // Initialize previously-shared folks
         for (var j=0; j<previously_shared.length; j++) {
             var person = previously_shared[j];
@@ -476,28 +477,42 @@ function recommendMorePeople(postToPopulate) {
             .addClass("feedme-sent")
             .find('.feedme-num-shared').text('Sent!');
         }
+        */
 
         postToPopulate.data('start_person', min_length);
         postToPopulate.find(".wait-for-suggestions").removeClass("wait-for-suggestions");
     }
 }
 
+function is_valid_email(email) {
+    return /^((([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+(\.([a-z]|\d|[!#\$%&'\*\+\-\/=\?\^_`{\|}~]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])+)*)|((\x22)((((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(([\x01-\x08\x0b\x0c\x0e-\x1f\x7f]|\x21|[\x23-\x5b]|[\x5d-\x7e]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(\\([\x01-\x09\x0b\x0c\x0d-\x7f]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF]))))*(((\x20|\x09)*(\x0d\x0a))?(\x20|\x09)+)?(\x22)))@((([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?$/i.test(email)
+}
+
 /*
  * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
  */
-function addFriend(name, email, shared_today, seen_it, header, context) {
+function addFriend(name, email, shared_today, seen_it, sent, header, context) {
+    if (!is_valid_email(email)) {
+        alert(email + ' is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".');
+        return;
+    }
+    
     var newPerson = $('<div class="feedme-person feedme-button" email="' + email + '"><div><a class="feedme-person-link" href="javascript:{}">' + name + '</a></div><div class="feedme-num-shared">&nbsp;</div></div>');
     header.append(newPerson);
 
     num_shared = context.find('[email="' + email + '"] .feedme-num-shared');
-    set_social_feedback(num_shared, newPerson, shared_today, seen_it);
+    set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent);
     // Make the elements interactive
     newPerson.click(toggle_friend);
 }
 
-function set_social_feedback(num_shared, newPerson, shared_today, seen_it) {
+function set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent) {
     if (social_features) {
-        if (seen_it) {
+        if (sent) {
+            num_shared.text('Sent!');
+            newPerson.addClass("feedme-sent");            
+        }
+        else if (seen_it) {
             num_shared.text('Saw it already');
             newPerson.addClass("feedme-sent");
         }
@@ -514,7 +529,7 @@ function set_social_feedback(num_shared, newPerson, shared_today, seen_it) {
 
 function addFriendAndSelect(name, context) {
     var header = context.find('.feedme-autocomplete-added');
-    addFriend(name, name, null, false, header, context);
+    addFriend(name, name, null, false, false, header, context);
     // TODO: This is a horrible hack to replicate the functionality of toggle_friend...
     toggle_friend_button(context.find(".feedme-person:last"));
     
@@ -545,12 +560,13 @@ function seen_it_response(response) {
     var post_url = response['posturl'];
     var shared_today = response['shared_today'];
     var seen_it = response['seen_it'];
+    var sent = response['sent'];
     var email = response['email'];
     
     var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');    
     var newPerson = postToPopulate.find('.feedme-person[email="' + email + '"]');
     
-    set_social_feedback(num_shared, newPerson, shared_today, seen_it);
+    set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent);
 }
 
 /* Selects or deselects a friend */
