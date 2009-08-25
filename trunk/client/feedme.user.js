@@ -106,7 +106,7 @@ function upgrade(version, link, whats_new) {
     $("a#upgrade").click();
 }
 
-function expandListener(event) {    
+function expandListener(event) {
     if (!isEntry(event.target)) {
         // we're not looking at a post
         return;
@@ -602,9 +602,7 @@ function share_post(event)
 {
     console.log("sharing post.");
     var context = $(this).parents('.entry');
-    animate_share($(this), context);
     
-    var digest = $(this).hasClass("feedme-later-button");
     //var broadcast = (context.find('.feedme-suggest.feedme-toggle').length == 1);
     var recipientDivs = context.find(".feedme-person.feedme-toggle");
     if (recipientDivs.length == 0) {
@@ -613,6 +611,16 @@ function share_post(event)
         return;
     }
     
+    var autocompleteText = context.find(".feedme-autocomplete").val()
+    console.log(autocompleteText);
+    if (autocompleteText != "" && autocompleteText != defaultAutocompleteText) {
+        console.log("email in autocomplete");
+        alert("It looks like you have an e-mail address in the textbox, but haven't clicked '+' or pressed Enter to confirm the address. Please confirm the address or clear the textbox before sharing.");
+        return;
+    }
+    
+    animate_share($(this), context);    
+    var digest = $(this).hasClass("feedme-later-button");    
     var recipients = new Array();
     for (var i=0; i < recipientDivs.length; i++)
     {
