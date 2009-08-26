@@ -56,8 +56,8 @@ function init() {
     setupStyles();
     log_in();
     initAutocomplete();
-    setupEmailError();
-    
+    setupErrorMessages();    
+
     // initialize with any posts that are open in expanded (cards) view when the page loads
     //console.log($('#entries[class*="cards"] .entry'));
     //$('#entries[class*="cards"] .entry').each(entry_class_modified);
@@ -74,12 +74,28 @@ function init() {
 
 }
 
-function setupEmailError() {
-    $("body").append('<a style="display: none" id="feedme-invalid-email" href="#feedme-invalid-email-data"></a><div style="display: none; margin: 20px; background-color: white" id="feedme-invalid-email-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Formatting Error</h2><div>The email you entered is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".</div></div></div>');
-    $("a#feedme-invalid-email").fancybox( {
-        hideOnContentClick: false
+/* Attach error messages as invisible divs in the DOM so that if they occur,
+   callError() can bring them up in a fancybox */
+function setupErrorMessages() {
+    setupErrorMessage('feedme-invalid-email', 'The email you entered is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".');
+    setupErrorMessage('feedme-unselected-contact', 'Please select a contact to share the feed item with.');
+    setupErrorMessage('feedme-orphaned-email', "It looks like you have an e-mail address in the textbox, but haven't clicked '+' or pressed Enter to confirm the address. Please confirm the address or clear the textbox before sharing.");
+}
+
+/* Attach error messages as invisible divs in the DOM so that if they occur,
+   callError() can bring them up in a fancybox */
+function setupErrorMessage(errorname, errormessage) {
+    $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="display: none; margin: 20px; background-color: white" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div>');
+    $("a#" + errorname).fancybox( {
+        hideOnContentClick: true
     });
 }
+
+/* Bring up the error message generated in setupErrorMessage() */
+function callError(errorname) {
+    $("a#" + errorname).click();
+}
+
 
 /* Sees if there's a newer version of the script, and if so, prompts the user */
 function checkVersion()
@@ -501,7 +517,7 @@ function is_valid_email(email) {
  */
 function addFriend(name, email, shared_today, seen_it, sent, header, context) {
     if (!is_valid_email(email)) {
-        $("a#feedme-invalid-email").click();
+        callError('feedme-invalid-email');
         return false;
     }
     
@@ -620,7 +636,7 @@ function share_post(event)
     var recipientDivs = context.find(".feedme-person.feedme-toggle");
     if (recipientDivs.length == 0) {
         console.log("nobody to share with.");
-        alert("Please select a contact to share the feed item with.");
+        callError('feedme-unselected-contact');
         return;
     }
     
@@ -628,7 +644,8 @@ function share_post(event)
     console.log(autocompleteText);
     if (autocompleteText != "" && autocompleteText != defaultAutocompleteText) {
         console.log("email in autocomplete");
-        alert("It looks like you have an e-mail address in the textbox, but haven't clicked '+' or pressed Enter to confirm the address. Please confirm the address or clear the textbox before sharing.");
+        callError('feedme-orphaned-email');
+        context.find(".feedme-autocomplete").focus();
         return;
     }
     
