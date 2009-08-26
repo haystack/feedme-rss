@@ -35,7 +35,7 @@
 // Fail gracefully if Firebug's not installed
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
-var port = 8000;
+var port = 80;
 var script_version = 0.22;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
@@ -56,6 +56,7 @@ function init() {
     setupStyles();
     log_in();
     initAutocomplete();
+    setupEmailError();
     
     // initialize with any posts that are open in expanded (cards) view when the page loads
     //console.log($('#entries[class*="cards"] .entry'));
@@ -71,6 +72,13 @@ function init() {
     
     $("#entries").bind("DOMNodeInserted", expandListener);
 
+}
+
+function setupEmailError() {
+    $("body").append('<a style="display: none" id="feedme-invalid-email" href="#feedme-invalid-email-data"></a><div style="display: none; margin: 20px; background-color: white" id="feedme-invalid-email-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Formatting Error</h2><div>The email you entered is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".</div></div></div>');
+    $("a#feedme-invalid-email").fancybox( {
+        hideOnContentClick: false
+    });
 }
 
 /* Sees if there's a newer version of the script, and if so, prompts the user */
@@ -493,7 +501,7 @@ function is_valid_email(email) {
  */
 function addFriend(name, email, shared_today, seen_it, sent, header, context) {
     if (!is_valid_email(email)) {
-        alert(email + ' is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".');
+        $("a#feedme-invalid-email").click();
         return false;
     }
     
@@ -880,7 +888,6 @@ function populateAutocomplete(context) {
         
         context.find('.feedme-autocomplete').bind('keydown.autocomplete', function(event) {
             if (event.which == 13) { // user pushed enter
-                event.preventDefault();
                 text = context.find('.feedme-autocomplete').val();
                 // for some reason the following fails brilliantly, even though it works in ui.autocomplete.js
                 //$(this).trigger("result.autocomplete", [text, text]);
