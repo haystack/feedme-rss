@@ -16,15 +16,11 @@ def generate_statistics(sharers, start_time, end_time):
     stats = dict()
 
     # unique sharing events
-    # TODO: handle what happens when users switch to second half of study
     newposts = SharedPost.objects \
                .filter(
                  sharedpostreceiver__time__gte = start_time,
                  sharedpostreceiver__time__lt = end_time,
                  sharer__in = sharers
-               ).filter(
-                 sharedpostreceiver__time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time'),
-                 sharedpostreceiver__time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time')
                ).distinct()
     stats['shared_posts'] = newposts.count()
 
@@ -55,9 +51,6 @@ def generate_statistics(sharers, start_time, end_time):
               time__gte = start_time,
               time__lt = end_time,
               sharer__in = sharers
-             ).filter(
-                time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time'),
-                time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time')
              ).distinct()
     stats['logins'] = logins.count()
 
@@ -67,9 +60,6 @@ def generate_statistics(sharers, start_time, end_time):
                 time__gte = start_time,
                 time__lte = end_time,
                 sharer__in =  sharers
-               ).filter(
-                time__gte = F('sharer__studyparticipant__studyparticipantassignment__start_time'),
-                time__lt = F('sharer__studyparticipant__studyparticipantassignment__end_time')
                ).distinct()
     stats['viewed'] = viewed.count()
 
@@ -79,20 +69,9 @@ def generate_statistics(sharers, start_time, end_time):
 
     return stats
 
-def since(mode, num_days):
-    sinceday = datetime.datetime.now() - datetime.timedelta(days = num_days)
+def userstatssince(numdays):
+    sinceday = datetime.datetime.now() - datetime.timedelta(days = numdays)
     now = datetime.datetime.now()
-
-    print "Printing %s report since %d days ago" % (mode, num_days)
-
-    if (mode == "usersummary"):
-        usersummary(sinceday, now)
-    elif (mode == "groupsummary"):
-        groupsummary(sinceday, now)
-    else:
-        print "Mode must be one of 'usersummary' or 'groupsummary'."
-
-def usersummary(sinceday, now):
     participants = StudyParticipant.objects \
                     .exclude(sharer__user__email__in = admins)
     sharers = [sp.sharer for sp in participants]
@@ -108,33 +87,47 @@ def usersummary(sinceday, now):
         email = sharer.user.email
         participant = StudyParticipant.objects.get(sharer = sharer)
         study_group = participant.study_group
-        ui = participant.user_interface
-        social = participant.social_features
+        ui = (participant.user_interface == 1)
+        social = (participant.social_features == 1)
         stats_str = ", ".join([str(stats[key]) for key in keys])
-        print ("%s, %s, %s, %s, %s, %s" % (name, email, study_group, ui, social, stats_str)).encode('ascii', 'backslashreplace')
+        print ("%s, %s, %s, %s, %s, %s" % (name, email, study_group, str(ui), str(social), stats_str)).encode('ascii', 'backslashreplace')
 
-def groupsummary(sinceday, now):
-    for i in range(4):
-        user_interface = (i <= 1)
-        social_features = ( i % 2 == 0 )
-        print 'user interface: ' + str(user_interface)
-        print 'social features: ' + str(social_features)
-        sharers = Sharer.objects \
-                  .filter(studyparticipant__user_interface = user_interface,
-                          studyparticipant__social_features = social_features)\
-                  .exclude(user__email__in = admins)
-        all_stats = [generate_statistics([sharer], sinceday, now) for sharer in sharers]
-        keys = all_stats[0].keys()
-        print "For %d members:" % (sharers.count())
-        for key in keys:
-            vals = [stats[key] for stats in all_stats]
-            median = numpy.median(vals)
-            print "Median %s: %f" % (key, median)
+def userstats():
+    participants = StudyParticipant.objects \
+                    .exclude(sharer__user__email__in = admins)
+    first = True
+    keys = dict()
+    for participant in participants: 
+        sharer = participant.sharer
+        spas = StudyParticipantAssignment.objects \
+            .filter(study_participant = participant)
+        spaslist = [spa for spa in spas]
+        spaslist.sort(lambda x,y: cmp(x.start_time, y.start_time))
+        for (order, spa) in enumerate(spaslist):
+            stats = generate_statistics([sharer], spa.start_time, spa.end_time)
+            # pk, ui on---assign, social on---assign, order, date_started,
+            # date_ended
+            if first:
+                keys = stats.keys()
+                print "pk, name, email, study group, ui on, social on, order, date_started, date_ended, %s" % (", ".join(keys))
+                first = False
+            pk = sharer.user.pk
+            name = sharer.name()
+            email = sharer.user.email
+            participant = StudyParticipant.objects.get(sharer = sharer)
+            study_group = participant.study_group
+            ui = (spa.user_interface == 1)
+            social = (spa.social_features == 1)
+            date_started = spa.start_time
+            date_ended = spa.end_time
+            stats_str = ", ".join([str(stats[key]) for key in keys])
+            print ("%d, %s, %s, %s, %s, %s, %d, %s, %s, %s" % (pk, name, email, study_group, str(ui), str(social), order+1, date_started, date_ended, stats_str)).encode('ascii', 'backslashreplace')
 
 if __name__ == "__main__":
-    if len(sys.argv) == 3:
-        mode = str(sys.argv[1])
-        days = int(sys.argv[2])
-        since(mode, days)
+    num_args = len(sys.argv)
+    if (num_args == 3) and (sys.argv[1] == 'user-stats-since'):
+        userstatssince(int(sys.argv[2]))
+    elif (len(sys.argv) == 2) and (sys.argv[1] == 'user-stats'):
+        userstats()
     else:
-        print "Arguments: [usersummary|groupsummary] num-days"
+        print "Arguments: [user-stats|user-stats-since num-days]"
