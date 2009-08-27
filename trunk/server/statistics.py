@@ -97,6 +97,7 @@ def userstats():
                     .exclude(sharer__user__email__in = admins)
     first = True
     keys = dict()
+    norm_keys = dict()
     for participant in participants: 
         sharer = participant.sharer
         spas = StudyParticipantAssignment.objects \
@@ -105,11 +106,13 @@ def userstats():
         spaslist.sort(lambda x,y: cmp(x.start_time, y.start_time))
         for (order, spa) in enumerate(spaslist):
             stats = generate_statistics([sharer], spa.start_time, spa.end_time)
+            normalized = normalize(stats, "viewed")
             # pk, ui on---assign, social on---assign, order, date_started,
             # date_ended
             if first:
                 keys = stats.keys()
-                print "pk, name, email, study group, ui on, social on, order, date_started, date_ended, %s" % (", ".join(keys))
+                norm_keys = normalized.keys()
+                print "pk, name, email, study_group, ui_on, social_on, order, date_started, date_ended, %s, %s" % (", ".join(keys), ",".join(norm_keys))
                 first = False
             pk = sharer.user.pk
             name = sharer.name()
@@ -121,7 +124,19 @@ def userstats():
             date_started = spa.start_time
             date_ended = spa.end_time
             stats_str = ", ".join([str(stats[key]) for key in keys])
-            print ("%d, %s, %s, %s, %s, %s, %d, %s, %s, %s" % (pk, name, email, study_group, str(ui), str(social), order+1, date_started, date_ended, stats_str)).encode('ascii', 'backslashreplace')
+            norm_stats_str = ", ".join([str(normalized[key]) for key in norm_keys])
+            print ("%d, %s, %s, %s, %s, %s, %d, %s, %s, %s, %s" % (pk, name, email, study_group, str(ui), str(social), order+1, date_started, date_ended, stats_str, norm_stats_str)).encode('ascii', 'backslashreplace')
+
+def normalize(to_norm, norm_key):
+    normalized = dict()
+    norm_val = to_norm[norm_key] * 1.0
+    for k, v in to_norm.items():
+        new_key = "%s_div_%s" % (k, norm_key)
+        if norm_val != 0:
+            normalized[new_key] = to_norm[k]/norm_val
+        else:
+            normalized[new_key] = 'divby0'
+    return normalized
 
 if __name__ == "__main__":
     num_args = len(sys.argv)
