@@ -81,7 +81,7 @@ def userstatssince(numdays):
         stats = generate_statistics([sharer], sinceday, now)
         if first:
             keys = stats.keys()
-            print "name, email, study group, ui on, social on, %s" % (", ".join(keys))
+            print "name,email,study_group,ui_on,social_on,%s" % (",".join(keys))
             first = False
         name = sharer.name()
         email = sharer.user.email
@@ -89,30 +89,30 @@ def userstatssince(numdays):
         study_group = participant.study_group
         ui = (participant.user_interface == 1)
         social = (participant.social_features == 1)
-        stats_str = ", ".join([str(stats[key]) for key in keys])
-        print ("%s, %s, %s, %s, %s, %s" % (name, email, study_group, str(ui), str(social), stats_str)).encode('ascii', 'backslashreplace')
+        stats_str = ",".join([str(stats[key]) for key in keys])
+        print ("%s,%s,%s,%s,%s,%s" % (name, email, study_group, str(ui), str(social), stats_str)).encode('ascii', 'backslashreplace')
 
 def userstats():
     participants = StudyParticipant.objects \
                     .exclude(sharer__user__email__in = admins)
-    first = True
     keys = dict()
     norm_keys = dict()
     for participant in participants: 
         sharer = participant.sharer
         spas = StudyParticipantAssignment.objects \
-            .filter(study_participant = participant)
-        spaslist = [spa for spa in spas]
-        spaslist.sort(lambda x,y: cmp(x.start_time, y.start_time))
+            .filter(study_participant = participant) \
+            .order_by("start_time")
+        spaslist = list(spas)
+
         for (order, spa) in enumerate(spaslist):
             stats = generate_statistics([sharer], spa.start_time, spa.end_time)
             normalized = normalize(stats, "viewed")
             # pk, ui on---assign, social on---assign, order, date_started,
             # date_ended
-            if first:
+            if order == 0:
                 keys = stats.keys()
                 norm_keys = normalized.keys()
-                print "pk, name, email, study_group, ui_on, social_on, order, date_started, date_ended, %s, %s" % (", ".join(keys), ",".join(norm_keys))
+                print "pk,name,email,study_group,ui_on,social_on,order,date_started,date_ended,%s,%s" % (",".join(keys), ",".join(norm_keys))
                 first = False
             pk = sharer.user.pk
             name = sharer.name()
@@ -123,9 +123,9 @@ def userstats():
             social = (spa.social_features == 1)
             date_started = spa.start_time
             date_ended = spa.end_time
-            stats_str = ", ".join([str(stats[key]) for key in keys])
-            norm_stats_str = ", ".join([str(normalized[key]) for key in norm_keys])
-            print ("%d, %s, %s, %s, %s, %s, %d, %s, %s, %s, %s" % (pk, name, email, study_group, str(ui), str(social), order+1, date_started, date_ended, stats_str, norm_stats_str)).encode('ascii', 'backslashreplace')
+            stats_str = ",".join([str(stats[key]) for key in keys])
+            norm_stats_str = ",".join([str(normalized[key]) for key in norm_keys])
+            print ("%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s" % (pk, name, email, study_group, str(ui), str(social), order+1, date_started, date_ended, stats_str, norm_stats_str)).encode('ascii', 'backslashreplace')
 
 def normalize(to_norm, norm_key):
     normalized = dict()

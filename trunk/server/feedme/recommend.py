@@ -176,8 +176,10 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
 
 def n_best_friends(post, sharer):
   begin_time = time.clock()
-  friends = Receiver.objects.filter(
-    sharedpostreceiver__shared_post__sharer=sharer).distinct()
+  friends = Receiver.objects
+            .filter(sharedpostreceiver__shared_post__sharer=sharer)
+            .filter(recommend = True)
+            .distinct()
 
   #pseudocode
   # get freqdist (not term vector) for post
@@ -195,8 +197,6 @@ def n_best_friends(post, sharer):
   freq_dist_counts = post.tokenize()
   freq_dist = sorted(freq_dist_counts)
   for receiver in friends:
-    if not receiver.recommend:
-      continue
     # skip people who aren't real email addresses
     if email_re.match(receiver.user.email) is None:
       continue
