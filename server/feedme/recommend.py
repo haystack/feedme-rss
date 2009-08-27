@@ -5,6 +5,7 @@ from models import *
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.db import transaction
+from django.forms.fields import email_re
 import math
 import operator
 import datetime
@@ -195,6 +196,9 @@ def n_best_friends(post, sharer):
   freq_dist = sorted(freq_dist_counts)
   for receiver in friends:
     if not receiver.recommend:
+      continue
+    # skip people who aren't real email addresses
+    if email_re.match(receiver.user.email) is None:
       continue
 
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
