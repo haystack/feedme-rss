@@ -135,7 +135,7 @@ def normalize(to_norm, norm_key):
         if norm_val != 0:
             normalized[new_key] = to_norm[k]/norm_val
         else:
-            normalized[new_key] = 'divby0'
+            normalized[new_key] = ''
     return normalized
 
 if __name__ == "__main__":
