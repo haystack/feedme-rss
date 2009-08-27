@@ -170,6 +170,11 @@ class StudyParticipantAssignment(models.Model):
     end_time = models.DateTimeField()
 
     def __unicode__(self):
-        return unicode(self.study_participant) + u" " + self.study_participant.study_group
-
-                                                            
+        return "%s: %s, ui=%s, social=%s, start=%s, end=%s" % ( \
+            unicode(self.study_participant), \
+            self.study_participant.study_group, \
+            str(self.user_interface), \
+            str(self.social_features), \
+            unicode(self.start_time), \
+            unicode(self.end_time) \
+        )
