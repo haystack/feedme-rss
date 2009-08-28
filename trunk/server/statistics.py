@@ -95,37 +95,84 @@ def userstatssince(numdays):
 def userstats():
     participants = StudyParticipant.objects \
                     .exclude(sharer__user__email__in = admins)
-    keys = dict()
-    norm_keys = dict()
-    for participant in participants: 
-        sharer = participant.sharer
+    first = True
+    (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys) = ([], [], [], [], [])
+    for participant in participants:
+        keyreport = dict()
         spas = StudyParticipantAssignment.objects \
-            .filter(study_participant = participant) \
-            .order_by("start_time")
-        spaslist = list(spas)
-
-        for (order, spa) in enumerate(spaslist):
-            stats = generate_statistics([sharer], spa.start_time, spa.end_time)
+               .filter(study_participant = participant) \
+               .order_by("start_time")
+        
+        for (order, spa) in enumerate(spas):
+            stats = generate_statistics([participant.sharer], spa.start_time, spa.end_time)
             normalized = normalize(stats, "viewed")
-            # pk, ui on---assign, social on---assign, order, date_started,
-            # date_ended
-            if order == 0:
-                keys = stats.keys()
-                norm_keys = normalized.keys()
-                print "pk,name,email,study_group,ui_on,social_on,order,date_started,date_ended,%s,%s" % (",".join(keys), ",".join(norm_keys))
+            if first:
+                (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys) = \
+                    userstats_first(stats, normalized)
                 first = False
-            pk = sharer.user.pk
-            name = sharer.name()
-            email = sharer.user.email
-            participant = StudyParticipant.objects.get(sharer = sharer)
-            study_group = participant.study_group
-            ui = (spa.user_interface == 1)
-            social = (spa.social_features == 1)
-            date_started = spa.start_time
-            date_ended = spa.end_time
-            stats_str = ",".join([str(stats[key]) for key in keys])
-            norm_stats_str = ",".join([str(normalized[key]) for key in norm_keys])
-            print ("%d,%s,%s,%s,%s,%s,%d,%s,%s,%s,%s" % (pk, name, email, study_group, str(ui), str(social), order+1, date_started, date_ended, stats_str, norm_stats_str)).encode('ascii', 'backslashreplace')
+            keyreport = userstats_updateassignments(spa, order, keyreport)
+            keyreport = userstats_updatereport(spa.user_interface, keyreport, stats)
+            keyreport = userstats_updatereport(spa.user_interface, keyreport, normalized)
+
+        userstats_printreport(participant, keyreport, \
+            [assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys])
+
+def userstats_printreport(participant, report, key_lists):
+    """ Prints a participant row """
+    sharer = participant.sharer
+    pk = sharer.user.pk
+    name = sharer.name()
+    email = sharer.user.email
+    participant = StudyParticipant.objects.get(sharer = sharer)
+    study_group = participant.study_group
+    social = participant.social_features
+    valstrings = [userstats_valstring(report, key_list) for key_list in key_lists]
+    print ("%d,%s,%s,%s,%s,%s" % \
+           (pk, name, email, study_group, str(social),"".join(valstrings)) \
+          ).encode('ascii', 'backslashreplace')
+
+def userstats_valstring(report, keys):
+    vals = [str(report[key]) for key in keys]
+    return ",".join(vals)
+
+def userstats_uistring(ui):
+    """ Turns the ui boolean into a human-readable variable """
+    return "ui" if (ui == 1) else "noui"
+ 
+def userstats_updateassignments(spa, order, assignments):
+    """
+    Given the assignment in spa, updates and returns the
+    assignments dictionary
+    """
+    ui = userstats_uistring(spa.user_interface)
+    assignments['order_%s' % (ui)] = order
+    assignments['start_time_%s' % (ui)] = spa.start_time
+    assignments['end_time_%s' % (ui)] = spa.end_time
+    return assignments
+
+def userstats_updatereport(ui, report, stats):
+    """ Updates the report with the statistics from stats """
+    uistring = userstats_uistring(ui)
+    for k, v in stats.items():
+        report["%s_%s" % (k, uistring)] = v
+    return report
+
+def userstats_first(stats, normalized):
+    """ Called on the very first iteration/user """
+    keys = stats.keys()
+    norm_keys = normalized.keys()
+    assign_keys = ["order_ui", "order_noui", "start_time_ui", \
+        "start_time_noui", "end_time_ui", "end_time_noui"]
+    ui_keys = ["%s_ui" % (key) for key in keys]
+    noui_keys = ["%s_noui" % (key) for key in keys]
+    ui_norm_keys = ["%s_ui" % (key) for key in norm_keys]
+    noui_norm_keys = ["%s_noui" % (key) for key in norm_keys]
+    print "pk,name,email,study_group,social,%s,%s,%s,%s,%s" % \
+        ( \
+         ",".join(assign_keys), ",".join(ui_keys), ",".join(noui_keys), \
+         ",".join(ui_norm_keys), ",".join(noui_norm_keys) \
+        )
+    return (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys)
 
 def normalize(to_norm, norm_key):
     normalized = dict()
