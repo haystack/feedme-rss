@@ -69,11 +69,10 @@ def generate_statistics(sharers, start_time, end_time):
 
     return stats
 
-def userstatssince(numdays):
+def userstatssince(numdays, participants = StudyParticipant.objects.
+                   exclude(sharer__user__email__in = admins)):
     sinceday = datetime.datetime.now() - datetime.timedelta(days = numdays)
     now = datetime.datetime.now()
-    participants = StudyParticipant.objects \
-                    .exclude(sharer__user__email__in = admins)
     sharers = [sp.sharer for sp in participants]
     first = True
     keys = dict()
@@ -187,8 +186,12 @@ def normalize(to_norm, norm_key):
 
 if __name__ == "__main__":
     num_args = len(sys.argv)
-    if (num_args == 3) and (sys.argv[1] == 'user-stats-since'):
-        userstatssince(int(sys.argv[2]))
+    if sys.argv[1] == 'user-stats-since':
+        if len(sys.argv) == 3:
+            userstatssince(int(sys.argv[2]))
+        elif len(sys.argv) == 4:
+            person = StudyParticipant.objects.filter(sharer__user__email = sys.argv[3])
+            userstatssince(int(sys.argv[2]), person)
     elif (len(sys.argv) == 2) and (sys.argv[1] == 'user-stats'):
         userstats()
     else:
