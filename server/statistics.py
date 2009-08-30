@@ -126,7 +126,7 @@ def userstats_printreport(participant, report, key_lists):
     social = participant.social_features
     valstrings = [userstats_valstring(report, key_list) for key_list in key_lists]
     print ("%d,%s,%s,%s,%s,%s" % \
-           (pk, name, email, study_group, str(social),"".join(valstrings)) \
+           (pk, name, email, study_group, str(social),",".join(valstrings)) \
           ).encode('ascii', 'backslashreplace')
 
 def userstats_valstring(report, keys):
