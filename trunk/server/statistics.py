@@ -91,9 +91,8 @@ def userstatssince(numdays, participants = StudyParticipant.objects.
         stats_str = ",".join([str(stats[key]) for key in keys])
         print ("%s,%s,%s,%s,%s,%s" % (name, email, study_group, str(ui), str(social), stats_str)).encode('ascii', 'backslashreplace')
 
-def userstats():
-    participants = StudyParticipant.objects \
-                    .exclude(sharer__user__email__in = admins)
+def userstats(participants = StudyParticipant.objects
+              .exclude(sharer__user__email__in = admins)):
     first = True
     (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys) = ([], [], [], [], [])
     for participant in participants:
@@ -192,7 +191,11 @@ if __name__ == "__main__":
         elif len(sys.argv) == 4:
             person = StudyParticipant.objects.filter(sharer__user__email = sys.argv[3])
             userstatssince(int(sys.argv[2]), person)
-    elif (len(sys.argv) == 2) and (sys.argv[1] == 'user-stats'):
-        userstats()
+    elif sys.argv[1] == 'user-stats':
+        if len(sys.argv) == 2:
+            userstats()
+        elif len(sys.argv) == 3:
+            person = StudyParticipant.objects.filter(sharer__user__email = sys.argv[2])            
+            userstats(person)
     else:
         print "Arguments: [user-stats|user-stats-since num-days]"
