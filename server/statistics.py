@@ -32,7 +32,7 @@ def generate_statistics(sharers, start_time, end_time):
     # emails with thanks
     thanked = newposts.all() \
               .filter(thanks__gte = 1)
-    stats['thanks'] = thanked.count()
+    stats['thanks'] = sum([sp.thanks for sp in thanked])
     
     # total number of people (not unique) shared with
     recipients = Receiver.objects \
