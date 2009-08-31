@@ -25,7 +25,7 @@ def generate_splits(sp):
 
     splits = [ set() ] # useful for debugging output
     current_shared_post = sp    
-    earliest_time = earliest_share_time(sp)
+    earliest_time = sp_receivers[0].time
             
     for spr in sp_receivers:
         if spr.time - earliest_time >= split_delta:
@@ -39,12 +39,6 @@ def generate_splits(sp):
         splits[-1].add(spr)
 
     return splits
-
-def earliest_share_time(shared_post):
-    sprs = SharedPostReceiver.objects.filter(shared_post = shared_post) \
-           .order_by('time')
-
-    return sprs[0].time
 
 def update_splits(shared_post, splits):
     """updates the shared post receivers to a new shared post if necessary"""
