@@ -32,17 +32,13 @@ def close_participant(study_participant):
     study_participant.save()
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
-        user_emails = participant_info.people
-        study_participants = set()
-        for user_email in user_emails:
-            try:
-                participant = StudyParticipant.objects.get(sharer__user__email = user_email)
-                study_participants.add(participant)
-            except StudyParticipant.DoesNotExist:
-                print 'No study participant with e-mail ' + user_email
+    user_emails = participant_info.people
+    study_participants = set()
+    for user_email in user_emails:
+        try:
+            participant = StudyParticipant.objects.get(sharer__user__email = user_email)
+            study_participants.add(participant)
+        except StudyParticipant.DoesNotExist:
+            print 'No study participant with e-mail ' + user_email
 
         close_participants(study_participants)
-    else:
-        print "Arguments: [list of user emails]"
-
