@@ -13,7 +13,7 @@ def split_sharedposts():
         if len(splits) > 1:
             print [len(split) for split in splits]
         # uncomment the next line to actually make the change
-        # update_splits(sp, groups)
+        update_splits(sp, splits)
 
 def generate_splits(sp):        
     sp_receivers = SharedPostReceiver.objects \
@@ -43,6 +43,8 @@ def generate_splits(sp):
 def update_splits(shared_post, splits):
     """updates the shared post receivers to a new shared post if necessary"""
     for i, split in enumerate(splits):
+        if len(splits) > 1 and i == 0:
+            print 'split ' + str(i) + ': ' + str(shared_post.id)
         if i > 0: # the first group (index 0) can keep the original post
             sp_copy = copy_shared_post(shared_post)
             sp_copy.save()
@@ -50,9 +52,11 @@ def update_splits(shared_post, splits):
             for spr in split:
                 spr.shared_post = sp_copy
                 spr.save()
+            print 'split ' + str(i) + ': ' + str(sp_copy.id)
+
         
 
-def copy_shared_post(shared_post):
+def copy_shared_post(current_shared_post):
     new_shared_post = SharedPost( \
         post = current_shared_post.post,
         sharer = current_shared_post.sharer,
