@@ -176,9 +176,9 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
 
 def n_best_friends(post, sharer):
   begin_time = time.clock()
-  friends = Receiver.objects
-            .filter(sharedpostreceiver__shared_post__sharer=sharer)
-            .filter(recommend = True)
+  friends = Receiver.objects \
+            .filter(sharedpostreceiver__shared_post__sharer=sharer) \
+            .filter(recommend = True) \
             .distinct()
 
   #pseudocode
