@@ -5,6 +5,7 @@ from server.feedme.models import *
 import datetime
 import sys
 import numpy
+import participant_info
 from django.db import transaction
 
 @transaction.commit_on_success
@@ -32,7 +33,7 @@ def close_participant(study_participant):
 
 if __name__ == "__main__":
     if len(sys.argv) > 1:
-        user_emails = sys.argv[1:]
+        user_emails = participant_info.people
         study_participants = set()
         for user_email in user_emails:
             try:
