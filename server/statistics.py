@@ -27,7 +27,7 @@ def generate_statistics(sharers, start_time, end_time):
     # emails with clickthroughs
     clicked = newposts.all() \
               .filter(clickthroughs__gte = 1)
-    stats['clickthroughs'] = clicked.count()
+    stats['clickthroughs'] = sum([sp.clickthroughs for sp in clicked])
 
     # emails with thanks
     thanked = newposts.all() \
