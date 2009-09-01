@@ -41,4 +41,4 @@ if __name__ == "__main__":
         except StudyParticipant.DoesNotExist:
             print 'No study participant with e-mail ' + user_email
 
-        close_participants(study_participants)
+    close_participants(study_participants)
