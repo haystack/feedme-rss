@@ -16,6 +16,7 @@ def summarize_user(study_participant):
         .order_by('start_time')
 
     for spa in spas:
+        print 'participant assigment: ' + str(spa.start_time) + ' to ' + str(spa.end_time)
         start_midnight = datetime(day = spa.start_time.day,
                                   month = spa.start_time.month,
                                   year = spa.start_time.year)
@@ -29,7 +30,6 @@ def summarize_user(study_participant):
             date_points.append(deepcopy(date_cursor))
             date_cursor += timedelta(days = 1)
         date_points.append(spa.end_time)
-        print date_points
 
         for i in range(len(date_points)-1):
             start_iter = date_points[i]
@@ -39,6 +39,10 @@ def summarize_user(study_participant):
                           time__gte = start_iter,
                           time__lt = end_iter)
             print str(vps.count()) + ' ViewedPosts\t' + str(start_iter) + ' to ' + str(end_iter)
+        print
+    print
+    print
+    print
         
         
 if __name__ == '__main__':
