@@ -9,8 +9,8 @@ from django.db.models import F
 from datetime import timedelta
 
 # We don't want to show up in statistics
-admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
-          'karger@csail.mit.edu']
+admins = []#['msbernst@mit.edu', 'marcua@csail.mit.edu',
+         # 'karger@csail.mit.edu']
 
 def generate_statistics(sharers, start_time, end_time):
     """Returns a dictionary of useful statistics for the sharers"""
@@ -67,6 +67,10 @@ def generate_statistics(sharers, start_time, end_time):
     # number of viewed posts with a link clicked in the greader interface
     greader_clicked = viewed.all().filter(link_clickthrough = True)
     stats['greader_clicked'] = greader_clicked.count()
+
+    num_viewed_expanded = viewed.all().filter(expanded_view = True).count()
+    num_viewed_list = viewed.all().filter(expanded_view = False).count()
+    stats['expanded'] = (num_viewed_expanded > num_viewed_list)
 
     return stats
 
