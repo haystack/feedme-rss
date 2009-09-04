@@ -9,8 +9,8 @@ from django.db.models import F
 from datetime import timedelta
 
 # We don't want to show up in statistics
-admins = []#['msbernst@mit.edu', 'marcua@csail.mit.edu',
-         # 'karger@csail.mit.edu']
+admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
+          'karger@csail.mit.edu']
 
 def generate_statistics(sharers, start_time, end_time):
     """Returns a dictionary of useful statistics for the sharers"""
