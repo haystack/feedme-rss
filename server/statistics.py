@@ -6,6 +6,7 @@ import datetime
 import sys
 import numpy
 from django.db.models import F
+from datetime import timedelta
 
 # We don't want to show up in statistics
 admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
@@ -94,7 +95,7 @@ def userstatssince(numdays, participants = StudyParticipant.objects.
 def userstats(participants = StudyParticipant.objects
               .exclude(sharer__user__email__in = admins)):
     first = True
-    (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys) = ([], [], [], [], [])
+    (assign_keys, keys) = ([], [])
     for participant in participants:
         keyreport = dict()
         spas = StudyParticipantAssignment.objects \
@@ -102,18 +103,16 @@ def userstats(participants = StudyParticipant.objects
                .order_by("start_time")
         
         for (order, spa) in enumerate(spas):
-            stats = generate_statistics([participant.sharer], spa.start_time, spa.end_time)
-            normalized = normalize(stats, "viewed")
+            stats = generate_statistics([participant.sharer], spa.start_time + timedelta(days=1), spa.end_time)
             if first:
-                (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys) = \
-                    userstats_first(stats, normalized)
+                (assign_keys, keys) = \
+                    userstats_first(stats)
                 first = False
             keyreport = userstats_updateassignments(spa, order, keyreport)
             keyreport = userstats_updatereport(spa.user_interface, keyreport, stats)
-            keyreport = userstats_updatereport(spa.user_interface, keyreport, normalized)
 
-        userstats_printreport(participant, keyreport, \
-            [assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys])
+            userstats_printreport(participant, keyreport, \
+                [assign_keys, keys])
 
 def userstats_printreport(participant, report, key_lists):
     """ Prints a participant row """
@@ -123,9 +122,10 @@ def userstats_printreport(participant, report, key_lists):
     email = sharer.user.email
     participant = StudyParticipant.objects.get(sharer = sharer)
     study_group = participant.study_group
-    social = participant.social_features
+    social = participant.studyparticipantassignment_set \
+             .order_by('start_time')[0].social_features
     valstrings = [userstats_valstring(report, key_list) for key_list in key_lists]
-    print ("%d,%s,%s,%s,%s,%s" % \
+    print ("%d,\"%s\",%s,%s,%s,%s" % \
            (pk, name, email, study_group, str(social),",".join(valstrings)) \
           ).encode('ascii', 'backslashreplace')
 
@@ -143,34 +143,27 @@ def userstats_updateassignments(spa, order, assignments):
     assignments dictionary
     """
     ui = userstats_uistring(spa.user_interface)
-    assignments['order_%s' % (ui)] = order
-    assignments['start_time_%s' % (ui)] = spa.start_time
-    assignments['end_time_%s' % (ui)] = spa.end_time
+    assignments['order'] = order
+    assignments['start_time'] = spa.start_time
+    assignments['end_time'] = spa.end_time
+    assignments['ui'] = ui
     return assignments
 
 def userstats_updatereport(ui, report, stats):
     """ Updates the report with the statistics from stats """
-    uistring = userstats_uistring(ui)
     for k, v in stats.items():
-        report["%s_%s" % (k, uistring)] = v
+        report["%s" % (k)] = v
     return report
 
-def userstats_first(stats, normalized):
+def userstats_first(stats):
     """ Called on the very first iteration/user """
     keys = stats.keys()
-    norm_keys = normalized.keys()
-    assign_keys = ["order_ui", "order_noui", "start_time_ui", \
-        "start_time_noui", "end_time_ui", "end_time_noui"]
-    ui_keys = ["%s_ui" % (key) for key in keys]
-    noui_keys = ["%s_noui" % (key) for key in keys]
-    ui_norm_keys = ["%s_ui" % (key) for key in norm_keys]
-    noui_norm_keys = ["%s_noui" % (key) for key in norm_keys]
-    print "pk,name,email,study_group,social,%s,%s,%s,%s,%s" % \
+    assign_keys = ["order", "start_time", "end_time", "ui"]
+    print "pk,name,email,study_group,social,%s,%s" % \
         ( \
-         ",".join(assign_keys), ",".join(ui_keys), ",".join(noui_keys), \
-         ",".join(ui_norm_keys), ",".join(noui_norm_keys) \
+         ",".join(assign_keys), ",".join(keys) \
         )
-    return (assign_keys, ui_keys, noui_keys, ui_norm_keys, noui_norm_keys)
+    return (assign_keys, keys)
 
 def normalize(to_norm, norm_key):
     normalized = dict()
