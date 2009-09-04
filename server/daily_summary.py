@@ -8,6 +8,7 @@ from copy import deepcopy
 import numpy
 from django.db.models import F
 from datetime import datetime, timedelta
+import participant_info
 
 def summarize_user(study_participant):
     print study_participant.sharer.user.email + ' --------------------------'
@@ -26,10 +27,10 @@ def summarize_user(study_participant):
         date_points = [ spa.start_time ]
 
         date_cursor = deepcopy(start_midnight)
-        while(date_cursor < spa.end_time):
+        while(date_cursor < spa.end_time+timedelta(days=3)):
             date_points.append(deepcopy(date_cursor))
             date_cursor += timedelta(days = 1)
-        date_points.append(spa.end_time)
+        date_points.append(spa.end_time+timedelta(days=3))
 
         for i in range(len(date_points)-1):
             start_iter = date_points[i]
@@ -38,7 +39,10 @@ def summarize_user(study_participant):
                   .filter(sharer = study_participant.sharer,
                           time__gte = start_iter,
                           time__lt = end_iter)
-            print str(vps.count()) + ' ViewedPosts\t' + str(start_iter) + ' to ' + str(end_iter)
+            expanded = "zeroed"
+            if (vps.count() > 0):
+                expanded = str(vps[0].expanded_view)
+            print str(vps.count()) + ' ViewedPosts\t' + str(start_iter) + ' to ' + str(end_iter) + ' expanded: ' + expanded
         print
     print
     print
@@ -46,6 +50,7 @@ def summarize_user(study_participant):
         
         
 if __name__ == '__main__':
-    sp = StudyParticipant.objects.get(sharer__user__email = 'msbernst@mit.edu')
-    summarize_user(sp)
-        
+    emails = participant_info.people
+    for email in emails:
+        sp = StudyParticipant.objects.get(sharer__user__email = email)
+        summarize_user(sp)
