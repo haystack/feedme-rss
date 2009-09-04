@@ -21,7 +21,7 @@ def close_participant(study_participant):
         .encode('ascii', 'backslashreplace')
         return
 
-    print ('closing study for ' + str(study_participant)).encode('ascii', 'backslashreplace')
+    print ('closing study for ' + unicode(study_participant)).encode('ascii', 'backslashreplace')
 
     current_assignment = all_assignments.order_by('-start_time')[0]
     current_assignment.end_time = datetime.datetime.now()
