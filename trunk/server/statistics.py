@@ -107,7 +107,7 @@ def userstats(participants = StudyParticipant.objects
                .order_by("start_time")
         
         for (order, spa) in enumerate(spas):
-            stats = generate_statistics([participant.sharer], spa.start_time + timedelta(days=1), spa.end_time)
+            stats = generate_statistics([participant.sharer], spa.start_time, spa.end_time)
             if first:
                 (assign_keys, keys) = \
                     userstats_first(stats)
