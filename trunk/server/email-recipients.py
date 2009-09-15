@@ -12,6 +12,7 @@ from django.contrib.auth.models import User
 from django.db.models import F
 from datetime import timedelta
 from django.template import Context, loader
+from django.forms import EmailField
 
 NUM_POSTS = 5
 
@@ -21,7 +22,14 @@ admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
           'ericker@gmail.com']
 
 if __name__ == "__main__":
+    email_validator = EmailField()
     for receiver in Receiver.objects.all():
+        try:
+            email_validator.clean(receiver.user.email)
+        except django.forms.ValidationError:
+            print (receiver.user.email + ' is not a valid email').encode('ascii', 'backslashreplace')
+            continue
+        
         posts = SharedPost.objects \
                     .filter(sharedpostreceiver__receiver = receiver) \
                     .filter(sharedpostreceiver__sent = True) \

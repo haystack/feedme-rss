@@ -30,6 +30,10 @@ def generate_statistics(sharers, start_time, end_time):
               .filter(clickthroughs__gte = 1)
     stats['clickthroughs'] = sum([sp.clickthroughs for sp in clicked])
 
+    digests = newposts.all() \
+              .filter(sharedpostreceiver__digest = True)
+    stats['digests'] = digests.count()
+
     # emails with thanks
     thanked = newposts.all() \
               .filter(thanks__gte = 1)
