@@ -23,28 +23,30 @@ admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
 if __name__ == "__main__":
     for receiver in Receiver.objects.all():
         posts = SharedPost.objects \
-                    .filter(sharedpostreceiver_receiver = receiver) \
-                    .filter(sharedpostreceiver_sent = True) \
+                    .filter(sharedpostreceiver__receiver = receiver) \
+                    .filter(sharedpostreceiver__sent = True) \
                     .exclude(sharer__user__email__in = admins) \
-                    .order_by('?')
-        if posts.count() > NUM_POSTS:
-            posts = posts[0:NUM_POSTS]
-
-        context = Context({"shared_post": shared_post})
-        template = loader.get_template("recipient_survey.html")
-        html_content = template.render(context)
+                    .distinct() \
+                    .order_by('?')[:5]
+#        if posts.count() > NUM_POSTS:
+#            posts = posts[0:NUM_POSTS]
+        if posts.count() > 0:
+            context = Context({"shared_posts": posts})
+            template = loader.get_template("recipient_survey.html")
+            html_content = template.render(context)
         
-        plaintext_template = loader.get_template("recipient_survey_plaintext.html")
-        text_content = plaintext_template.render(context)
-        text_content = nltk.clean_html(text_content)
+            plaintext_template = loader.get_template("recipient_survey_plaintext.html")
+            text_content = plaintext_template.render(context)
+            text_content = nltk.clean_html(text_content)
 
-        subject = u"FeedMe Survey---Prize for Participating"
-        to_emails = [receiver.user.email]
-        print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('ascii', 'backslashreplace')
-        print (u'Text: ' + html_content).encode('ascii', 'backslashreplace')
-        print "-------------"
+            subject = u"FeedMe Survey---$30 Raffle for Participating"
+            to_emails = [receiver.user.email]
+            print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('ascii', 'backslashreplace')
+            #print (u'Text: ' + html_content).encode('ascii', 'backslashreplace')
+            #print "-------------"
 
-        from_email = "feedme@csail.mit.edu"
-      #  email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
-      #  email.attach_alternative(html_content, "text/html")
-      #  email.send()
+            from_email = "feedme@csail.mit.edu"
+            email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
+            #email.attach_alternative(html_content, "text/html")
+            email.send()
+            #sys.exit(0)
