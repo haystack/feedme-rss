@@ -1,0 +1,12 @@
+<p>Over the past few weeks, some of your friends (including {{ shared_posts.0.sharer.user.email}}) have been beta testing a sharing tool from MIT called FeedMe. We're the MIT researchers who built the darn thing, and we'd like to get a better sense of whether it's helping the world.  And by world, we mean <b>you</b>.<p>
+<p>If you fill out this very quick survey by answering the questions and replying to this e-mail, we'll enter you in a drawing to win a $30 gift certificate to Amazon.com! So get crackin'.</p>
+
+Here are one or more posts that you received from FeedMe. Just answer two questions below each post by replying to this e-mail:
+{% for shared_post in shared_posts %}
+<p>{% block post_title %}<a href="http://feedme.csail.mit.edu{% url server.feedme.clickthrough.clickthrough shared_post.pk %}{{ shared_post.post.url|urlencode }}">{{ shared_post.post.title }}</a>{% endblock %}, via {% block feed_title %}{{ shared_post.post.feed.title }}{% endblock %}<br />
+<span style="margin-left: 20px">from {{ shared_post.sharer.user.email }}{% ifnotequal shared_post.comment "" %}: "{{ shared_post.comment|escape|urlize|linebreaksbr }}"{% endifnotequal %}</span>
+<p>In a range from 1 (strongly disagree) to 7 (strongly agree), how strongly do you agree with the following statements?<br />
+---I am glad that I received this post: _____<br />
+---I remember seeing this post in another place besides the e-mail from {{ shared_post.sharer.user.email }}: _____<br />
+</p>
+{% endfor %}
