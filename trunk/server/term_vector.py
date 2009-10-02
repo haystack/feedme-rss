@@ -51,19 +51,19 @@ def update_receivers(receivers):
     # first cache all the tokens
     print "tokenizing"
     for receiver in receivers:
-        print "  tokenizing " + receiver.user.username
+        #print "  tokenizing " + receiver.user.username
         token_dict[receiver.user.username] = receiver.tokenize()
     print "creating terms in database"
     for receiver in receivers:
-        print u'  creating terms for: ' + receiver.user.username
+        #print u'  creating terms for: ' + receiver.user.username
         create_profile_terms(receiver, token_dict[receiver.user.username])
     print "updating tf-idf"
     for receiver in receivers:
-        print u'  preliminary tf*idf for: ' + receiver.user.username        
+        #print u'  preliminary tf*idf for: ' + receiver.user.username        
         update_tf_idf(receiver, token_dict[receiver.user.username])
     print "trimming to top terms"
     for receiver in receivers:
-        print u'  trimming tf*idf for: ' + receiver.user.username
+        #print u'  trimming tf*idf for: ' + receiver.user.username
         trim_profile_terms(receiver)
 
     for receiver in receivers:
@@ -73,7 +73,7 @@ def update_receivers(receivers):
 
 def create_profile_terms(receiver, frequency_distribution):
     """creates profile terms for this user -- does not set tf-idf"""
-    print '  ' + str(len(frequency_distribution.samples())) + ' words'
+    # print '  ' + str(len(frequency_distribution.samples())) + ' words'
 
     for frequency_item in frequency_distribution.items():
         # get or create the Term and the TermVectorCell
@@ -145,6 +145,11 @@ if __name__ == '__main__':
                 newposts = SharedPost.objects \
                            .filter(sharedpostreceiver__time__gte = yesterday) \
                            .distinct()
+                newpost_sharers = Sharer.objects \
+                                  .filter(sharedpost__in = newposts) \
+                                  .distinct()
+
+                print str(newpost_sharers.count()) + ' people shared since yesterday'
                 print str(newposts.count()) + ' shared posts since yesterday'
 
                 sp_clicked = SharedPost.objects \
