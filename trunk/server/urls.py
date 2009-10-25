@@ -43,5 +43,6 @@ urlpatterns = patterns('',
     url(r'^clickthrough/(?P<sharedpost_pk>\d+)/.*$', 'server.feedme.clickthrough.clickthrough', name='clickthrough'),
     url(r'^reader_click/', 'server.feedme.reader_click.reader_click', name='greader clickthrough'),
 
-    url(r'^$', 'server.feedme.study.study', name='study'),
+    url(r'^^study/', 'server.feedme.study.study', name='study'),
+    url(r'^$', 'server.feedme.homepage.homepage', name='homepage'),           
 )
