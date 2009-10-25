@@ -7,7 +7,13 @@ try:
     # If you have django-registration installed, this is a form you can
     # use for users that signup.
     from registration.forms import RegistrationFormUniqueEmail
+    from registration.forms import attrs_dict
     class EmailRegistrationForm(RegistrationFormUniqueEmail):
+        tos = forms.BooleanField(widget=forms.CheckboxInput(attrs=attrs_dict),
+                                 label=_(u'I understand FeedMe and agree to use this research software. (FeedMe has been reviewed by MIT\'s human subjects board; your data will not be shared.)'),
+                                 error_messages={ 'required': u"You must agree to the terms to register" })
+
+        
         def __init__(self, *args, **kwargs):
             super(EmailRegistrationForm, self).__init__(*args, **kwargs)
             del self.fields['username']
