@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}FeedMe{% endblock %}
+
+{% block logo %}
+<div class="feedme-logo-text">Making link sharing faster, better.</div>
+<div class="logo" style="float: inherit;"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" /></div>
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block body %}
+<div style="clear: both">
+  <div>FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" /> is a plug-in for Google Reader that learns what your friends like to hear about and helps you share it with them.</div>
+  <img src="http://groups.csail.mit.edu/haystack/feedme/demo.png" />
+
+  <br /><br />
+  <div>
+    <div>To get started:</div>
+    <table class="instructions">
+      <tr>
+      <td class="number">1</td>
+      <td class="text">Get <a href="http://www.getfirefox.com">Firefox 3.5</a> and the <a href="https://addons.mozilla.org/en-US/firefox/addon/748">Greasemonkey add-on</a>.</td>
+      </tr>
+
+      <tr>
+      <td class="number">2</td>
+      <td class="text"><a href="/accounts/register">Get a FeedMe account</a>.</td>
+      </tr>
+
+      <tr>
+      <td class="number">3</td>
+      <td class="text"><a href="{{ feedme_url }}">Install FeedMe</a> as a Greasemonkey script.</td>
+      </tr>
+
+      <tr>
+      <td class="number">4</td>
+      <td class="text">Go to <a href="http://reader.google.com">Google Reader</a> and open up a feed. Log in to FeedMe when prompted, and start sharing! Shared posts will get sent via e-mail. As you share, FeedMe learns who might be interested in the posts you're looking at, and suggests them as you read.</td>
+      </tr>
+
+      <tr>
+      <td class="number">5</td>
+      <td class="text">For bonus points, install the FeedMe bookmarklet by dragging the following link onto your bookmark bar:<br />
+<div><a href="javascript:document.getElementsByTagName('body')[0].appendChild(%20document.createElement('script')).setAttribute('src','http://groups.csail.mit.edu/haystack/feedme/bookmarklet.js');">Share with FeedMe</a></td>
+      </tr>
+
+      </table>
+
+      <div style="margin-top: 20px">If you want more detail, you can step through <a href="/tutorial/">our tutorial</a>.  Contact us at <a href="mailto:feedme@csail.mit.edu">feedme@csail.mit.edu</a>.</div>
+
+    </div>
+
+    <div>
+      <table width="100%">
+	<tr valign="bottom">
+	  <td align="left">
+	    <a href="http://web.mit.edu/"><img src="http://groups.csail.mit.edu/haystack/feedme/mit-greygrey-footer1.gif" /></a>
+	  </td>
+	  <td align="right">
+	    <a href="http://csail.mit.edu"><img src="http://groups.csail.mit.edu/haystack/feedme/csail.gif"></a>
+	  </td>
+    </div>
+  </div>
+</div>
+{% endblock %}
