@@ -23,7 +23,9 @@ def reindex_all():
     receivers = Receiver.objects.all()
     update_receivers(receivers)
 
+    print 'before committing: ' + str(datetime.datetime.now())
     transaction.commit()
+    print 'after committing: ' + str(datetime.datetime.now())
 
 @transaction.commit_manually
 def incremental_update():
@@ -40,7 +42,9 @@ def incremental_update():
 
 def update_receivers(receivers):
     # clear old vectors
-    TermVectorCell.objects.filter(receiver__in = receivers).delete()
+    print 'deleting old vectors'
+    TermVectorCell.objects.filter(receiver__in = receivers).delete() 
+    print 'deleted old vectors ' + str(datetime.datetime.now())   
     
     # do online updating of profiles of people who received the post
     # it is very inefficient to loop through three times, but this
@@ -53,23 +57,28 @@ def update_receivers(receivers):
     for receiver in receivers:
         #print "  tokenizing " + receiver.user.username
         token_dict[receiver.user.username] = receiver.tokenize()
+    print str(datetime.datetime.now())        
     print "creating terms in database"
     for receiver in receivers:
         #print u'  creating terms for: ' + receiver.user.username
         create_profile_terms(receiver, token_dict[receiver.user.username])
+    print str(datetime.datetime.now())        
     print "updating tf-idf"
     for receiver in receivers:
         #print u'  preliminary tf*idf for: ' + receiver.user.username        
         update_tf_idf(receiver, token_dict[receiver.user.username])
+    print str(datetime.datetime.now())        
     print "trimming to top terms"
     for receiver in receivers:
         #print u'  trimming tf*idf for: ' + receiver.user.username
         trim_profile_terms(receiver)
+    print str(datetime.datetime.now())
 
+    print 'saving new info'
     for receiver in receivers:
         receiver.term_vector_dirty = False
         receiver.save()
-
+    print str(datetime.datetime.now())
 
 def create_profile_terms(receiver, frequency_distribution):
     """creates profile terms for this user -- does not set tf-idf"""
@@ -141,6 +150,7 @@ if __name__ == '__main__':
                 incremental_update()
         elif mode == "reindex":
             with flock(lock_directory + '.feedme-reindex-termvector'):
+                print str(datetime.datetime.now()) + ' starting'
                 yesterday = datetime.datetime.now() - datetime.timedelta(days = 1)
                 newposts = SharedPost.objects \
                            .filter(sharedpostreceiver__time__gte = yesterday) \
@@ -150,29 +160,38 @@ if __name__ == '__main__':
                                   .distinct()
 
                 print str(newpost_sharers.count()) + ' people shared since yesterday'
+                print str(datetime.datetime.now())
                 print str(newposts.count()) + ' shared posts since yesterday'
+                print str(datetime.datetime.now())                
 
                 sp_clicked = SharedPost.objects \
                              .filter(sharedpostreceiver__time__gte = yesterday) \
                              .filter(clickthroughs__gte = 1) \
                              .distinct()
                 print str(sp_clicked.count()) + ' FeedMe links sent yesterday had at least one clickthrough to the link'
+                print str(datetime.datetime.now())
 
                 sp_thanked = SharedPost.objects \
                              .filter(sharedpostreceiver__time__gte = yesterday) \
                              .filter(thanks__gte = 1) \
                              .distinct()
-                print str(sp_thanked.count()) + ' FeedMe links sent yesterday had a thank you'                
+                print str(sp_thanked.count()) + ' FeedMe links sent yesterday had a thank you'
+                print str(datetime.datetime.now())
+                
                              
                 logins = LoggedIn.objects.filter(time__gte = yesterday)
                 print str(logins.count()) + ' GReader views/refreshes since yesterday'
+                print str(datetime.datetime.now())
+
 
                 viewed = ViewedPost.objects.filter(time__gte = yesterday)
                 print str(viewed.count()) + ' posts viewed since yesterday'
+                print str(datetime.datetime.now())
 
                 clicked = ViewedPost.objects.filter(time__gte = yesterday) \
                           .filter(link_clickthrough = True)
-                print str(clicked.count()) + ' GReader posts with clicked-through links yesterday'                
+                print str(clicked.count()) + ' GReader posts with clicked-through links yesterday'
+                print str(datetime.datetime.now())
 
                 print
                 print 'sharing records:'
@@ -182,9 +201,11 @@ if __name__ == '__main__':
                     shared_by_person = newposts.filter(sharer = sharer)
                     print sharer.user.email + ': ' \
                           + str(len(shared_by_person)) + ' posts'
+                    print str(datetime.datetime.now())
                 
                 print u'Updating receiver term vectors...'
                 reindex_all()
+                print str(datetime.datetime.now())
                 print u'term vectors updated!'
     else:
         print 'Requires one argument: "incremental" or "reindex"'
