@@ -94,4 +94,4 @@ ACCOUNT_ACTIVATION_DAYS = 1000000
 REGISTER_COMPLETE_URL = '/accounts/register/complete/'
 LOGIN_REDIRECT_URL = '/accounts/login/complete/'
 
-DEFAULT_FROM_EMAIL = 'FeedMe <feedme-owner@csail.mit.edu>' 
+DEFAULT_FROM_EMAIL = 'FeedMe <feedme-owner@lists.csail.mit.edu>' 
