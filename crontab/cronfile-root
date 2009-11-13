@@ -1,0 +1,6 @@
+# see http://www.adminschoice.com/docs/crontab.htm
+#
+# to install a cron job, type 'crontab -u username cronfile'
+# once the cron job is installed, edit it with 'crontab -u username -e'
+
+0 0 * * * /etc/init.d/feedme restart | mail feedme@csail.mit.edu
