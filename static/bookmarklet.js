@@ -19,7 +19,7 @@ if(!window.removeFeedMeIframe){
 
 if(!window.embedFeedMeIframe){
 	window.embedFeedMeIframe=function(){
-	    var port = 8000;
+	    var port = 80;
 	    var submitURL = 'http://feedme.csail.mit.edu:' + port + '/bookmarklet/'
 
 	    var feedMeHTML = document.body.innerHTML;
