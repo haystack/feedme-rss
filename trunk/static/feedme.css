@@ -17,6 +17,9 @@ a {
     color:          #0066CC;
 }
 
+a img {
+    border-style: none; 
+}
 table { font-size: 100% }
 
 .titletext {
@@ -63,4 +66,30 @@ table { font-size: 100% }
     background-color: rgb(255, 153, 0);
     height: 1em;
     margin-left: 10px;
+}
+
+.feedme-logo-icon {
+    position: relative;
+    right: 3px;
+    top: -3px;
+}
+
+.feedme-logo-text {
+    float: right;
+    width: 250px;
+    text-align: right;
+    margin-top: 60px;
+    font-size: 2em;
+    margin-right: 10px;
+}
+
+.instructions .number {
+    color: rgb(255, 153, 0);
+    font-size: 20pt;
+    vertical-align: text-top;
+    padding-right: 5px;
+}
+
+.instructions .text {
+    vertical-align: text-top;
 }
