@@ -3,7 +3,10 @@
 # to install a cron job, type 'crontab -u username cronfile'
 # once the cron job is installed, edit it with 'crontab -u username -e'
 #
+MAILTO=feedme@csail.mit.edu
+
 # m h  dom mon dow   command
-0 4 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py reindex | mail feedme@csail.mit.edu -s "Nightly Term Vector Script"
-* 0-3,5-23 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py incremental >/dev/null 2>&1
-0 15 * * 2,5 /usr/bin/python /var/virtualhost/sites/feedme/prod/server/digest.py | mail feedme@csail.mit.edu -s "Digest script output"
+0 4 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py reindex | mail feedme@csail.mit.edu,karger@csail.mit.edu -s "Nightly FeedMe Report" 2>&1
+*/5 0-3,5-23 * * * /usr/bin/python /var/virtualhost/sites/feedme/prod/server/term_vector.py incremental >/dev/null 2>&1
+0 15 * * 2,5 /usr/bin/python /var/virtualhost/sites/feedme/prod/server/digest.py | mail feedme@csail.mit.edu -s "Digest script output" 2>&1
+0 0 * * 1 /usr/bin/python /var/virtualhost/sites/feedme/prod/server/manage.py cleanupregistration
