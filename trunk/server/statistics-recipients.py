@@ -31,7 +31,7 @@ def stats_recipients():
     print '\n\n\n'
     print str(total_shared) + ' items shared total'
     print str(total_shared_with_user) + ' items shared with a FeedMe user'
-    print str(float(total_shared_with_user) / total_shared) + '%'
+    print str(float(total_shared_with_user) / total_shared)
 
 def count_shares(spa):
     receivers = Receiver.objects \
