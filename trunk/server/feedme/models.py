@@ -33,14 +33,15 @@ class Receiver(models.Model):
         """Creates a FreqDist representing all the posts shared
         with this person"""
         text = u''
+        posts = []
         received_posts = Post.objects.filter( \
             sharedpost__sharedpostreceiver__receiver = self)
         for received_post in received_posts:
-            post_text = textutil.clean_html(received_post.title) + u' ' + \
-                        textutil.clean_html(received_post.contents) + u' ' + \
-                        textutil.clean_html(received_post.feed.title)
-            text = text + post_text
-        
+            posts.append(textutil.clean_html(received_post.title))
+            posts.append(textutil.clean_html(received_post.contents))
+            posts.append(textutil.clean_html(received_post.feed.title))
+        text = u" ".join(posts)
+
         tokens = nltk.word_tokenize(text)
         
         porter = nltk.PorterStemmer()
