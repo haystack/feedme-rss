@@ -4,6 +4,7 @@ import random
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from models import *
+from django.conf import settings
 
 def get_settings_url(request):
   if not 'email' in request.POST:
@@ -34,7 +35,7 @@ def reset_seed(receiver):
 
 def email_settings_url(receiver_email, settings_seed):
   subject = u'[FeedMe] Subscription settings information for FeedMe'
-  from_email = u'feedme@csail.mit.edu'
+  from_email = settings.DEFAULT_FROM_EMAIL
   to_emails = [receiver_email]
 
   message = u"""
@@ -91,7 +92,7 @@ def settings_access_allowed(request, user_email, settings_seed):
   
 def email_settings_changed(receiver_email, settings_seed):
   subject = u'[FeedMe] Subscription settings changed for FeedMe'
-  from_email = u'feedme@csail.mit.edu'
+  from_email = settings.DEFAULT_FROM_EMAIL
   to_emails = [receiver_email]
 
   message = u"""

@@ -10,6 +10,7 @@ import operator
 from feedme.recommend import *
 import datetime
 from django.core.mail import EmailMultiAlternatives
+from django.conf import settings
 
 def rank_posts():
     week_ago = datetime.datetime.now() - datetime.timedelta(days = 7)
@@ -52,7 +53,7 @@ def rank_posts():
 def send_digest_posts(posts, receiver):
   """Sends the list of posts in an email to the recipient"""
   subject = u"FeedMe Personalized Newspaper: " + posts[0][0].title
-  from_email = 'FeedMe <feedme@csail.mit.edu>'
+  from_email = settings.DEFAULT_FROM_EMAIL
   to_emails = [receiver.user.email]
 
   print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('utf-8')

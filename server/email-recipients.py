@@ -13,6 +13,7 @@ from django.db.models import F
 from datetime import timedelta
 from django.template import Context, loader
 from django.forms import EmailField
+from django.conf import settings
 
 NUM_POSTS = 5
 
@@ -53,7 +54,7 @@ if __name__ == "__main__":
             #print (u'Text: ' + html_content).encode('ascii', 'backslashreplace')
             #print "-------------"
 
-            from_email = "feedme@csail.mit.edu"
+            from_email = settings.DEFAULT_FROM_EMAIL
             email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
             #email.attach_alternative(html_content, "text/html")
             email.send()
