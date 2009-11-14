@@ -44,7 +44,8 @@ def update_receivers(receivers):
     # clear old vectors
     print 'deleting old vectors'
     TermVectorCell.objects.filter(receiver__in = receivers).delete() 
-    print 'deleted old vectors ' + str(datetime.datetime.now())   
+    print 'deleted old vectors '
+    print str(datetime.datetime.now())   
     
     # do online updating of profiles of people who received the post
     # it is very inefficient to loop through three times, but this

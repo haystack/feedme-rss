@@ -7,6 +7,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template import Context, loader
 import sys, codecs
 from django.db import transaction
+from django.conf import settings
 
 # set stdout to Unicode so we can write Unicode strings to stdout
 # todo: create some sort of startup script which calls this
@@ -47,7 +48,7 @@ def send_digest_posts(posts, receiver):
   """Sends the list of posts in an email to the recipient"""
   subject = u"[FeedMe] Personalized Newspaper: " + posts[0].shared_post.post.title.strip().replace("\n"," ")
 
-  from_email = 'FeedMe <feedme@csail.mit.edu>'
+  from_email = settings.DEFAULT_FROM_EMAIL
   to_emails = [receiver.user.email]
 
   for post in posts:
@@ -80,7 +81,7 @@ def send_digest_report(shared_posts, sharer):
     subject = u"[FeedMe] Digest Report: " + \
               unicode(shared_posts.count()) + u' post' + \
               pluralize(shared_posts.count()) + ' shared'
-    from_email = 'FeedMe <feedme@csail.mit.edu>'
+    from_email = settings.DEFAULT_FROM_EMAIL
     to_emails = [sharer.user.email]
   
 

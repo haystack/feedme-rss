@@ -3,7 +3,7 @@ import os.path
 from private_settings import *
 
 ADMINS = (
-    ('FeedMe Team', 'feedme@csail.mit.edu'),
+    ('FeedMe Team', 'feedme-owner@lists.csail.mit.edu'),
 )
 
 MANAGERS = ADMINS
@@ -90,7 +90,7 @@ AUTHENTICATION_BACKENDS = (
 )
 
 # app-specific settings
-ACCOUNT_ACTIVATION_DAYS = 1000000
+ACCOUNT_ACTIVATION_DAYS = 14
 REGISTER_COMPLETE_URL = '/accounts/register/complete/'
 LOGIN_REDIRECT_URL = '/accounts/login/complete/'
 

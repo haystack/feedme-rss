@@ -3,6 +3,7 @@ from django.core.mail import EmailMultiAlternatives
 from django.template import Context, loader
 from models import *
 import codecs, sys
+from django.conf import settings
 
 # set stdout to Unicode so we can write Unicode strings to stdout
 # todo: create some sort of startup script which calls this
@@ -33,7 +34,7 @@ def send_thanks_email(shared_post):
   else:
     to_email = shared_post.sharer.user.email
   to_emails = [ to_email ]
-  from_email = "feedme@csail.mit.edu"
+  from_email = settings.DEFAULT_FROM_EMAIL
 
 #  receivers = [spr.receiver.user.email for spr in shared_post.sharedpostreceiver_set.all() ]
 #  if len(receivers) == 1:
