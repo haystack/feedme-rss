@@ -8,8 +8,9 @@ from server.feedme.models import *
 from django.db import transaction
 import math
 import datetime
-import sys, codecs
+import sys, codecs, traceback
 from flock import flock
+
 
 # set stdout to Unicode so we can write Unicode strings to stdout
 # todo: create some sort of startup script which calls this
@@ -19,13 +20,19 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 def reindex_all():
     """Intended as an offline process -- creates term vectors to describe
     individuals, and attaches them to the individuals"""
-    
-    receivers = Receiver.objects.all()
-    update_receivers(receivers)
 
-    print 'before committing: ' + str(datetime.datetime.now())
-    transaction.commit()
-    print 'after committing: ' + str(datetime.datetime.now())
+    try:
+        receivers = Receiver.objects.all()
+        update_receivers(receivers)
+    except:
+        exceptionType, exceptionValue, exceptionTraceback = sys.exc_info()
+        traceback.print_exception(exceptionType, exceptionValue, exceptionTraceback, file=sys.stdout)
+        transaction.rollback()
+    else:
+        print 'before committing: ' + str(datetime.datetime.now())
+        transaction.commit()
+        print 'after committing: ' + str(datetime.datetime.now())
+        
 
 @transaction.commit_manually
 def incremental_update():

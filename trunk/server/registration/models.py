@@ -199,7 +199,7 @@ class RegistrationManager(models.Manager):
         
         """
         for profile in self.all():
-            if profile.activation_key_expired():
+            if profile.activation_key_expired() and len(profile.user.receiver_set.all()) == 0:
                 user = profile.user
                 if not user.is_active:
                     user.delete()
