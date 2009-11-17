@@ -55,25 +55,18 @@ class RegistrationManager(models.Manager):
         # SHA1 hash; if it doesn't, no point trying to look it up in
         # the database.
         if SHA1_RE.search(activation_key):
-            print 'it is sha1'
             try:
                 profile = self.get(activation_key=activation_key)
             except self.model.DoesNotExist:
-                print 'does not exist'
                 return False
             if not profile.activation_key_expired():
-                print 'found them'
                 user = profile.user
                 user.is_active = True
-                print user
                 user.save()
                 profile.activation_key = self.model.ACTIVATED
                 profile.save()
                 user_activated.send(sender=self.model, user=user)
                 return user
-            elif profile.activation_key_expired():
-                print 'it expired!'
-            print 'returning false'
         return False
     
     def create_inactive_user(self, username, password, email,
