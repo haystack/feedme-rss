@@ -10,7 +10,7 @@ from django.db import transaction
 from django.template.loader import render_to_string
 from django.utils.hashcompat import sha_constructor
 from django.utils.translation import ugettext_lazy as _
-
+from feedme.models import *
 
 SHA1_RE = re.compile('^[a-f0-9]{40}$')
 
@@ -63,6 +63,8 @@ class RegistrationManager(models.Manager):
                 user = profile.user
                 user.is_active = True
                 user.save()
+                sharer = Sharer(user = user)
+                sharer.save()
                 profile.activation_key = self.model.ACTIVATED
                 profile.save()
                 user_activated.send(sender=self.model, user=user)
@@ -124,7 +126,10 @@ class RegistrationManager(models.Manager):
         new_user.is_active = False
         new_user.save()
         
-        registration_profile = self.create_profile(new_user)
+        try:
+            registration_profile = self.get(user = new_user)
+        except self.model.DoesNotExist:
+            registration_profile = self.create_profile(new_user)
         
         if send_email:
             from django.core.mail import send_mail
