@@ -6,13 +6,14 @@ import datetime
 import sys
 import numpy
 import nltk
+import time
 from django.core.mail import EmailMultiAlternatives
 from django.utils import html
 from django.contrib.auth.models import User
 from django.db.models import F
 from datetime import timedelta
 from django.template import Context, loader
-from django.forms import EmailField
+from django.forms import EmailField, ValidationError
 from django.conf import settings
 
 NUM_POSTS = 5
@@ -22,12 +23,14 @@ admins = ['msbernst@mit.edu', 'marcua@csail.mit.edu',
           'karger@csail.mit.edu', 'rthe@media.mit.edu',
           'ericker@gmail.com']
 
+noreceive = [u'marcua@mit.edu', u'pooch@redwater.net', u'msbernst@gmail.com', u'marcua@csail.mit.edu', u'emax@csail.mit.edu', u'meredith.blumenstock@gmail.com', u'glittle@gmail.com', u'atibbetts@gmail.com', u'jdtibbs@gmail.com', u'cowling@csail.mit.edu']
+
 if __name__ == "__main__":
     email_validator = EmailField()
-    for receiver in Receiver.objects.all():
+    for receiver in Receiver.objects.exclude(user__email__in = noreceive):
         try:
             email_validator.clean(receiver.user.email)
-        except django.forms.ValidationError:
+        except ValidationError:
             print (receiver.user.email + ' is not a valid email').encode('ascii', 'backslashreplace')
             continue
         
@@ -58,4 +61,5 @@ if __name__ == "__main__":
             email = EmailMultiAlternatives(subject, text_content, from_email, to_emails)
             #email.attach_alternative(html_content, "text/html")
             email.send()
+            time.sleep(1)
             #sys.exit(0)
