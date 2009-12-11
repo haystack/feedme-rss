@@ -168,37 +168,37 @@ if __name__ == '__main__':
                                   .distinct()
 
                 print str(newpost_sharers.count()) + ' people shared since yesterday'
-                print str(datetime.datetime.now())
                 print str(newposts.count()) + ' shared posts since yesterday'
-                print str(datetime.datetime.now())                
 
                 sp_clicked = SharedPost.objects \
                              .filter(sharedpostreceiver__time__gte = yesterday) \
                              .filter(clickthroughs__gte = 1) \
                              .distinct()
                 print str(sp_clicked.count()) + ' FeedMe links sent yesterday had at least one clickthrough to the link'
-                print str(datetime.datetime.now())
 
                 sp_thanked = SharedPost.objects \
                              .filter(sharedpostreceiver__time__gte = yesterday) \
                              .filter(thanks__gte = 1) \
                              .distinct()
                 print str(sp_thanked.count()) + ' FeedMe links sent yesterday had a thank you'
-                print str(datetime.datetime.now())
                 
                              
                 logins = LoggedIn.objects.filter(time__gte = yesterday)
                 print str(logins.count()) + ' GReader views/refreshes since yesterday'
-                print str(datetime.datetime.now())
 
 
                 viewed = ViewedPost.objects.filter(time__gte = yesterday)
                 print str(viewed.count()) + ' posts viewed since yesterday'
-                print str(datetime.datetime.now())
 
                 clicked = ViewedPost.objects.filter(time__gte = yesterday) \
                           .filter(link_clickthrough = True)
                 print str(clicked.count()) + ' GReader posts with clicked-through links yesterday'
+                signups = Sharer.objects.filter(user__is_active = True) \
+                                    .filter(user__date_joined__gte = \
+                                            yesterday) \
+                                    .distinct() \
+                                    .count()
+                print str(signups) + ' sharers signed up for FeedMe'
                 print str(datetime.datetime.now())
 
                 print
@@ -209,7 +209,7 @@ if __name__ == '__main__':
                     shared_by_person = newposts.filter(sharer = sharer)
                     print sharer.user.email + ': ' \
                           + str(len(shared_by_person)) + ' posts'
-                    print str(datetime.datetime.now())
+                print str(datetime.datetime.now())
                 
                 print u'Updating receiver term vectors...'
                 reindex_all()
