@@ -4,6 +4,7 @@
 <p>
 {{ shared_post.comment|escape|urlize|linebreaksbr }}
 </p>
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 {% endifnotequal %}
 <p><span style="font-style: italic;">via {% block feed_title %}{{ shared_post.post.feed.title.strip }}{% endblock %}:</span><br />
 <span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="http://feedme.csail.mit.edu{% url server.feedme.clickthrough.clickthrough shared_post.pk %}?redirect={{ shared_post.post.url|removehttp }}">{{ shared_post.post.title }}</a>{% endblock %}</span><br />
