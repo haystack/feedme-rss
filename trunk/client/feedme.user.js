@@ -239,7 +239,8 @@ function suggest_people(context) {
                             </div>');
     if (social_features) {
         controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
-        .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>');
+        .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>')
+        .append('<div class="feedme-clear-comment feedme-button feedme-toggle"><a class="" href="javascript:{}">Clear Comment</a></div>');
         //.append('<div class="feedme-toggle-hidden expand-container"><textarea class="comment-textarea"></textarea></div>');
     } else {
         controls.append('<div class="feedme-now-button no-social feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Send</a></div>')
@@ -264,6 +265,7 @@ function suggest_people(context) {
 
     context.find('.feedme-now-button').click(share_post);
     context.find('.feedme-later-button').click(share_post);
+    context.find('.feedme-clear-comment').click(clear_comment);
     context.find('.feedme-more-recommendations-button').click(function() {
         var post_url = context.find('.entry-title a').attr('href');
         var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
@@ -502,6 +504,28 @@ function recommendMorePeople(postToPopulate) {
             .find('.feedme-num-shared').text('Sent!');
         }
         */
+        
+		// use .outerWidth() to account for margin and padding
+		var containerWidth = postToPopulate.find("div.feedme-suggestions").outerWidth(true);  	
+       	// just check width of contents of newly added div  	
+        var contentWidth = 0;
+		expanded_div.children("div.feedme-person").each(function() {
+    		contentWidth += $(this).outerWidth(true);
+		});
+		contentWidth += expanded_div.find("div.feedme-more-recommendations-button").outerWidth(true);
+		contentWidth += expanded_div.find("input.feedme-autocomplete").outerWidth(true);
+		contentWidth += expanded_div.find("img.feedme-addImg").outerWidth(true);
+		
+		console.log(containerWidth);
+		console.log(contentWidth);
+		
+		while (contentWidth >= containerWidth) {
+			// remove last person from the newly added div
+			contentWidth -= expanded_div.find(".feedme-person:last").outerWidth(true);
+			expanded_div.find(".feedme-person:last").remove();
+			// decrement min_length so that start_person is set to correct value
+			min_length -= 1;
+		}
 
         postToPopulate.data('start_person', min_length);
         postToPopulate.find(".wait-for-suggestions").removeClass("wait-for-suggestions");
@@ -730,7 +754,14 @@ function animate_share(shareButton, context) {
     
     shareButton.animate(animateHighlight, 750)
     .animate(animateSelected, 750);
-}    
+} 
+
+function clear_comment(event) {
+    var context = $(this).parents('.entry');
+	context.find('.comment-textarea')
+		   .val(default_comment_text)
+           .css('color', 'gray');
+}
 
 var gdocs_autocompleteData = null;
 var feedme_autocompleteData = null;
@@ -1008,6 +1039,11 @@ function setupStyles() {
     .feedme-later-button { 
         -moz-border-radius-topleft: 0px;
         -moz-border-radius-bottomleft: 0px; 
+    }
+    .feedme-clear-comment {
+    	position: relative;
+        vertical-align: top;
+        top: 10px;
     }
     .feedme-more-recommendations {
         display: inline;
