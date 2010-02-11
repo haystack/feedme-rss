@@ -128,7 +128,13 @@ def send_post_email(shared_post, receivers):
     u' <' + sharer.email + u'>'
   else:
     from_email = shared_post.sharer.user.email
-  to_emails = [receiver.receiver.user.email for receiver in receivers]
+  
+  """Don't send emails to users who choose to subscribe to RSS only"""
+  
+  to_emails = []
+  for receiver in receivers:
+    if not receiver.receiver.feed_only:
+      to_emails.append(receiver.receiver.user.email)
   if shared_post.sharer.cc_me:
     to_emails.append(from_email)
 

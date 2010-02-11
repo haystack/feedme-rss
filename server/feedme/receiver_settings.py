@@ -31,7 +31,10 @@ def get_email_template(message):
                             {'message' : message})
 
 def reset_seed(receiver):
-  receiver.settings_seed = random.randrange(1,1000000)
+  '''To ensure consistency for feed access, only reset seed if it has never 
+  been set'''
+  if receiver.settings_seed == 0:
+    receiver.settings_seed = random.randrange(1,1000000)
 
 def email_settings_url(receiver_email, settings_seed):
   subject = u'[FeedMe] Subscription settings information for FeedMe'
@@ -59,6 +62,7 @@ def change_receiver_settings(request, user_email, settings_seed):
   if (not error) and request.POST:
     receiver.recommend = (request.POST['recommend'] == u'True')
     receiver.digest = (request.POST['digest'] == u'True')
+    receiver.feed_only = (request.POST['feed_only'] == u'True')
     reset_seed(receiver)
     email_settings_changed(user_email, receiver.settings_seed)
     receiver.save()
@@ -68,10 +72,13 @@ def change_receiver_settings(request, user_email, settings_seed):
     'error' : error,
     'message' : message,
   }
+
   if not error:
     template_arguments['recommend'] = receiver.recommend
     template_arguments['digest'] = receiver.digest
     template_arguments['user_email'] = user_email
+    template_arguments['settings_seed'] = settings_seed
+    template_arguments['feed_only'] = receiver.feed_only
 
   return render_to_response('change_settings.html', template_arguments)
 

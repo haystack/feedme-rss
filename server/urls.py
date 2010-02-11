@@ -1,9 +1,14 @@
 from django.conf.urls.defaults import *
+from feedme.feeds import PostFeed
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
 
 admin.autodiscover()
+
+feeds = {
+    'posts': PostFeed,
+}
 
 urlpatterns = patterns('',
     # Example:
@@ -44,5 +49,8 @@ urlpatterns = patterns('',
     url(r'^reader_click/', 'server.feedme.reader_click.reader_click', name='greader clickthrough'),
 
     url(r'^^study/', 'server.feedme.study.study', name='study'),
-    url(r'^$', 'server.feedme.homepage.homepage', name='homepage'),           
+    url(r'^$', 'server.feedme.homepage.homepage', name='homepage'),
+    
+    # rss feeds
+    url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
 )

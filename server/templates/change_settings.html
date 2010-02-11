@@ -29,6 +29,15 @@ to your interests?</b><br />
 <input type="radio" name="recommend" value="False" {% if not recommend %}checked="checked"{% endif %}> No
 <br />
 </p>
+
+<p> FeedMe generates an <a href="http://feedme.csail.mit.edu/feeds/posts/{{user_email}}/{{settings_seed}}/">RSS feed</a> 
+of all items recommended to you, so you can choose to follow that feed instead of receiving emails.
+<b>Would you like FeedMe to stop sending you emails?</b><br />
+<input type="radio" name="feed_only" value="True" {% if feed_only %}checked="checked"{% endif %}> Yes<br />
+<input type="radio" name="feed_only" value="False" {% if not feed_only %}checked="checked"{% endif %}> No
+<br />
+</p>
+
 <input type="submit" value="Save Settings">
 
 </form>
