@@ -25,6 +25,7 @@ class Receiver(models.Model):
     recommend = models.BooleanField(default = True)
     settings_seed = models.IntegerField(default = 0)
     term_vector_dirty = models.BooleanField(default = False)
+    feed_only = models.BooleanField(default = False)
 
     def tokenize(self):
         """Creates a FreqDist representing all the posts shared

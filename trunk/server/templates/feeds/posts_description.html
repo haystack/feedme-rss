@@ -1,0 +1,7 @@
+<p>Shared by <a href="mailto:{{obj.sharer.user.email}}">
+{% if obj.sharer.user.first_name %}{{obj.sharer.user.first_name}} {{obj.sharer.user.last_name}}{% else %}{{obj.sharar.user.email}}{% endif %}</a>.
+<a href="http://feedme.csail.mit.edu/thanks/{{obj.pk}}/">Send {% if obj.sharer.user.first_name %}{{ obj.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post!</p>
+
+<p><i>via <a href="{{ obj.post.feed.rss_url }}">{{ obj.post.feed.title.strip }}</a>:</i></p>
+
+{{ obj.post.contents|safe }}
