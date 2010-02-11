@@ -62,9 +62,9 @@ def run_test():
     # due to an increasing frequency_weight
     for friend in sorted_friends:
       if friend['receiver'].user.email == EMAIL_A:
-        print "RECOMMEND TEST: user A score", friend['score']
+        print "RECOMMEND TEST: user A score =", friend['score'], ", fw =", friend['fw']
       if friend['receiver'].user.email == EMAIL_B:
-        print "RECOMMEND TEST: user B score", friend['score']
+        print "RECOMMEND TEST: user B score =", friend['score'], ", fw =", friend['fw']
     
   clean_up()
 
