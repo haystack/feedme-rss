@@ -181,6 +181,10 @@ def n_best_friends(post, sharer):
             .filter(recommend = True) \
             .distinct()
 
+  shared_posts = Post.objects \
+                 .filter(sharedpost__sharer=sharer)
+  total_shared = shared_posts.count()
+
   #pseudocode
   # get freqdist (not term vector) for post
   #for each friend
@@ -201,13 +205,18 @@ def n_best_friends(post, sharer):
     if email_re.match(receiver.user.email) is None:
       continue
 
+    num_shared = shared_posts.filter(sharedpost__sharedpostreceiver__receiver=receiver).count()
+
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
                   .order_by('term__term').select_related('term')
+
     if len(term_vector) > 0:
       post_cosine_distance = cosine_distance(term_vector, freq_dist, freq_dist_counts)
+      frequency_weight = (num_shared) / float(total_shared)
       score = {}
       score['receiver'] = receiver
-      score['score'] = post_cosine_distance
+      score['score'] = post_cosine_distance * frequency_weight
+      score['fw'] = frequency_weight
       scores.append(score)
    
   # now find the top NUM_RECOMMENDATIONS
