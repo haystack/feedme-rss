@@ -10,6 +10,7 @@ import numpy
 from django.db.models import F
 from datetime import timedelta
 from statistics import admins
+from nltk import FreqDist
 
 participants = StudyParticipant.objects \
                .exclude(sharer__user__email__in = admins)
@@ -46,6 +47,19 @@ def count_shares(spa):
     print receiver_users
     return (receivers.count(), receiver_users.count())
 
+def recipient_degree():
+    degree = []
+    for receiver in Receiver.objects.all():
+        shared_posts = SharedPost.objects.filter(sharedpostreceiver__receiver = receiver, sharer__studyparticipant__in = participants)
+        shared_by = Sharer.objects.filter(sharedpost__in = shared_posts).distinct()
+        if shared_by.count() > 0 and receiver.user.email not in ['msbernst@mit.edu', 'msbernst@csail.mit.edu', 'feedme@csail.mit.edu']:
+            #print (receiver.user.email + u': ' + unicode(shared_by)).encode('utf-8', 'backslashreplace')
+            degree.append(shared_by.count())
+            print shared_by.count()
+    degree_dist = FreqDist(degree)
+    print degree_dist
+
 if __name__ == "__main__":
     stats_recipients()
+    recipient_degree()
 
