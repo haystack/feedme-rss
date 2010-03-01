@@ -1,3 +1,9 @@
+{% ifnotequal obj.comment "" %}
+<p>
+{{ obj.comment|escape|urlize|linebreaksbr }}
+</p>
+{% endifnotequal %}
+
 <p>Shared by <a href="mailto:{{obj.sharer.user.email}}">
 {% if obj.sharer.user.first_name %}{{obj.sharer.user.first_name}} {{obj.sharer.user.last_name}}{% else %}{{obj.sharar.user.email}}{% endif %}</a>.
 <a href="http://feedme.csail.mit.edu/thanks/{{obj.pk}}/">Send {% if obj.sharer.user.first_name %}{{ obj.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post!</p>
