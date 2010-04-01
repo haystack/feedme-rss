@@ -8,6 +8,7 @@
 
 	<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
 	<script type="text/javascript" src="spinner/jquery.spinner.js"></script>
+	<script type="text/javascript" src="feedme-chi.js"></script>
 
 	<script type="text/javascript">
 
@@ -222,37 +223,11 @@
 					filterSessions();
 				}
 			}
-
-            /** Given a sessionid and a 0-indexed paper number, sends a
-             * request to feedme for a recommendation, and calls the
-             * callback with the result
-             **/
-            function fm__request(session, index, callback) {
-			   var paper = $("td#" + session + "_details > div.paper:eq(" + index + ")");
-               var feed_url = "http://www.nirmalpatel.com/chiProgram/program.html";
-               var feed_title ="CHI 2010 Program";
-               var post_url = feed_url + "#" + session + "_" + index;
-               var post_title = $(".title", paper).html();
-               var post_abstract = $(".abstractText", paper).html()
-               var post_contents = post_title + " " + post_abstract;
-               var data = {
-                    feed_title: feed_title,
-                    feed_url: feed_url,
-                    post_url: post_url,
-                    post_title: post_title,
-                    post_contents: post_contents,
-                    expanded_view: false
-               };
-               var feedme_url = "http://feedme.csail.mit.edu:8002/recommend_jsonp/";
-               $.ajax({type: 'GET',
-                       url: feedme_url,
-                       data: data,
-                       success: function(data) {callback(data);},
-                       dataType: "jsonp"
-               });
-            }	
-		});
-		
+            
+            FeedMeChi();
+            
+        });
+        
 	</script>
 	
 	<style type="text/css">
@@ -506,6 +481,115 @@
 			font-variant: small-caps;
 			margin: 0em 1em;
 		}
+		
+		/* FeedMe styles */
+		a.fm-share {
+		    margin-left: 5px;
+		    color: #000000;
+		    text-decoration: underline;
+		    cursor: pointer;
+		}
+		
+		.feedme-suggestions { 
+            display: inline; 
+        }
+        .feedme-person { }
+        .feedme-placeholder { 
+            display: inline;
+        }
+        .feedme-button { 
+            display: inline-block; 
+            padding: 3px 6px; 
+            margin: 0px 10px 5px 0px; 
+            cursor: pointer; 
+            border: 1px solid white;
+            vertical-align: top; 
+            text-align: center;
+        }
+        .feedme-toggle { 
+            background-color: #f3f5fc;
+            border: 1px solid #d2d2d2;
+            -moz-border-radius: 5px; 
+        }
+        .feedme-sent {
+            -moz-border-radius: 5px;         
+        }
+        .feedme-autocomplete { 
+            width: 100px; 
+        }
+        .feedme-autocomplete-container { 
+            display: inline; 
+            vertical-align: middle;
+            margin-right: 10px; 
+        }
+        .feedme-autocomplete-added {
+        }
+        .feedme-autocompleteToggle { 
+            color: gray; 
+        }
+        .feedme-addImg { 
+            margin-left: 5px;
+            cursor: pointer;
+            }
+        .wait-for-suggestions { 
+            visibility: hidden;
+        }
+        .expand-container { 
+            display: none; 
+        }
+        .comment-textarea { 
+            height: 21px; 
+            width: 315px; 
+            margin-top: 10px;
+            margin-right: 5px; 
+        }
+        .feedme-num-shared { 
+            font-size: 7pt; 
+            text-align: right; 
+        }
+        .feedme-recommend-header { 
+            display: inline-block; 
+            margin-right: 5px; 
+        }
+        .feedme-share-button {
+            position: relative;
+            width: 30px;
+            vertical-align: top;
+            top: 10px;
+            /*border-color: #FF9900;*/
+        }
+        .feedme-now-button { 
+            -moz-border-radius-topright: 0px;
+            -moz-border-radius-bottomright: 0px;
+            margin-right: 0px; 
+            border-right: 0px;  
+        }
+        .feedme-now-button.no-social {
+            border: 1px solid #d2d2d2;
+            -moz-border-radius: 5px; 
+        }
+        .feedme-later-button { 
+            -moz-border-radius-topleft: 0px;
+            -moz-border-radius-bottomleft: 0px; 
+        }
+        .feedme-more-recommendations {
+            display: inline;
+        }
+        .feedme-recommendations-group {
+            position: relative;
+            right: 7px;
+        }
+
+        .feedme-logo-icon {
+            position: relative;
+            right: 3px;
+            top: -3px;
+        }
+        .feedme-send-individually-area {
+            opacity: 0;
+            position: relative;
+            right: 3    px;
+        }
 		
 	</style>
 
