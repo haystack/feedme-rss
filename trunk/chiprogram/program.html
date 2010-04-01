@@ -13,6 +13,7 @@
 
 		$(document).ready(function() {
 
+            fm__request("S1", 1);
 			var sessions = $("td.session");
 			var sessionDetails = $("td.session_details");
 			var searchTimeout = null;
@@ -58,7 +59,6 @@
 					//$(this).siblings("td.session").css("border-top-width", "1px");
 					$(this).addClass("expanded");
 				}
-
 			});
 									
 			function filterSessions() {
@@ -222,7 +222,39 @@
 					filterSessions();
 				}
 			}
-						
+
+            /** Given a sessionid and a 0-indexed paper number, sends a
+             * request to feedme for a recommendation, and calls the
+             * callback with the result
+             **/
+            function fm__request(session, index) {
+			   var paper = $("td#" + session + "_details > div.paper:eq(" + index + ")");
+               var feed_url = "http://www.nirmalpatel.com/chiProgram/program.html";
+               var feed_title ="CHI 2010 Program";
+               var post_url = feed_url + "#" + session + "_" + index;
+               var post_title = $(".title", paper).html();
+               var post_abstract = $("#abstractText", paper).html()
+               var post_contents = post_title + " " + post_abstract;
+               var data = {
+                    feed_title: feed_title,
+                    feed_url: feed_url,
+                    post_url: post_url,
+                    post_title: post_title,
+                    post_contents: post_contents,
+                    expanded_view: false
+               };
+               var success_func = function(data) {
+                alert("posted");
+               };
+               var feedme_url = "http://feedme.csail.mit.edu:8002/recommend/";
+               $.ajax({type: 'POST',
+                       url: feedme_url,
+                       data: data,
+                       success: success_func,
+                       dataType: "json"
+               });
+            }
+			
 		});
 		
 	</script>
