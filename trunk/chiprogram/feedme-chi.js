@@ -225,12 +225,14 @@ function FeedMeChi() {
     
     function populateRecommendedItems(json) {
         for (var i = 0; i < json.length; i++) {
-            var paper = $("#" + json[i].split("#")[1]);
+            var paper_id = json[i].split("#")[1];
             
             var starIcon = $("<img>").attr("src", "star.png")
                                      .attr("title", "Someone recommended this paper to you.")
                                      .height(20);
-            $("a.fm-share", paper).before(starIcon);	
+            $("span.type",  $("#" + paper_id)).after(starIcon);
+            
+            $("span.location", $("td#" + paper_id.split("_")[0])).after(starIcon.clone());
         }
     }
     
