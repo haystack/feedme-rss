@@ -7,7 +7,7 @@ function FeedMeChi() {
     var autocompleteData = null;
     /* number of recommendations to show when a person asks for more */
     var moreRecommendations = 6;   
-    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/";
+    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
         
@@ -151,10 +151,25 @@ function FeedMeChi() {
     function get_post_variables(context) {
        var post_abstract = $(".abstractText", context).html();
        var post_title = $(".title", context).html();
+       var post_authors = $(".authors", context).clone();
+       var authors = $(".author", post_authors);
+       var affiliations = $(".affiliation", post_authors);
+       var post_contents = "<b>" + post_title + "</b><br><br>" 
+       authors.each(function(index, element) {
+         post_contents = post_contents + $(element).text();
+         if (index < affiliations.length) {
+             post_contents = post_contents + " (" + $(affiliations[index]).text() + ")";
+         }
+         post_contents = post_contents + "<br>";
+       });
+       if (post_abstract) {
+           post_contents = post_contents + "<br>" + post_abstract;
+       }
+       console.log(post_contents);
        return {
          post_url: FEED_URL + "#" + context.attr("id"),
-         post_title: post_title,
-         post_contents: post_title + " " + post_abstract
+         post_title: "CHI 2010 Paper: " + post_title,
+         post_contents: post_contents
        };
     }
  
