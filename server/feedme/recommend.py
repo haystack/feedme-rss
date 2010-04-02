@@ -17,8 +17,8 @@ NUM_RECOMMENDATIONS = 21
 @transaction.commit_manually
 
 def recommend_jsonp(request):
-  response = get_recommendation_json(request);
-  response = "%s(%s);" % (request.REQUEST['callback'], response);
+  response = get_recommendation_json(request)
+  response = "%s(%s);" % (request.REQUEST['callback'], response)
   return HttpResponse(response, \
                       mimetype='application/json')
 
