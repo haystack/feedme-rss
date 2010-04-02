@@ -1,5 +1,6 @@
 from django.conf.urls.defaults import *
 from feedme.feeds import PostFeed
+import settings
 
 # Uncomment the next two lines to enable the admin:
 from django.contrib import admin
@@ -24,6 +25,8 @@ urlpatterns = patterns('',
     url(r'^address_book/', 'server.feedme.address_book.address_book', \
         name='address book'),
     url(r'^recommend/', 'server.feedme.recommend.recommend', name='recommend'),
+    url(r'^recommend_jsonp/', 'server.feedme.recommend.recommend_jsonp', name='recommend_jsonp'),
+    url(r'^recommendation_list/', 'server.feedme.recommendation_list.recommendation_list', name='recommendation_list'),
     url(r'^loggedin/', 'server.feedme.loggedin.logged_in', name='logged in'),
     url(r'^check_logged_in/', 'server.feedme.check_logged_in.check_logged_in', name='check login'),
     url(r'^share/', 'server.feedme.share.share', name='share'),
@@ -53,4 +56,7 @@ urlpatterns = patterns('',
     
     # rss feeds
     url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
+
+    # static content
+    url(r'^static/(?P<path>.*)$', 'django.views.static.serve', {'document_root': settings.MEDIA_ROOT}),
 )
