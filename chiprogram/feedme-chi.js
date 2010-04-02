@@ -137,24 +137,29 @@ function FeedMeChi() {
                 }
             });
     }
-    
-    
+
+    function get_post_variables(context) {
+       var post_abstract = $(".abstractText", context).html();
+       var post_title = $(".title", context).html();
+       return {
+         post_url: FEED_URL + "#" + context.attr("id"),
+         post_title: post_title,
+         post_contents: post_title + " " + post_abstract
+       };
+    }
+ 
     /** Given a sessionid and a 0-indexed paper number, sends a
      * request to feedme for a recommendation, and calls the
      * callback with the result
      **/
     function recommend_recipients(context, callback) {
-       var paper = context;
-       var post_url = FEED_URL + "#" + context.attr("id");
-       var post_title = $(".title", paper).html();
-       var post_abstract = $(".abstractText", paper).html()
-       var post_contents = post_title + " " + post_abstract;
+       post_variables = get_post_variables(context);
        var data = {
             feed_title: FEED_TITLE,
             feed_url: FEED_URL,
-            post_url: post_url,
-            post_title: post_title,
-            post_contents: post_contents,
+            post_url: post_variables.post_url,
+            post_title: post_variables.post_title,
+            post_contents: post_variables.post_contents,
             expanded_view: false
        };
        $.ajax({type: 'GET',
