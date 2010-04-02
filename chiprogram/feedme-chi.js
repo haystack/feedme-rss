@@ -10,14 +10,16 @@ function FeedMeChi() {
     var FEED_URL = "http://www.nirmalpatel.com/chiProgram/";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
-    
+        
     setupErrorMessages();    
-
+    
+    /* Set up recommend buttons */
     $("div.paper").each(function(i, elt) {
         var paper_id = $(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
         $(elt).attr("id", paper_id);
         
         var shareIcon = $("<img>").attr("src", "share.png")
+                                  .attr("title", "Share this paper with FeedMe!")
                                   .height(20);
         var shareAnchor = $("<a>").html(shareIcon)
                                   .attr("name", "#" + paper_id)
@@ -25,13 +27,21 @@ function FeedMeChi() {
                                   .click(onShareButtonClick);
         $("div.authors", $(elt)).before(shareAnchor);	
     });
-
-    
+ 
+    /* Set up recommended items */
+    get_recommended_items(populateRecommendedItems);
+ 
     function onShareButtonClick(e) {
+        var context = $(e.target).parents("div.paper");
+        var container = $(".feedme-suggestion-container", context);
+        
         // if user is not logged in, show log in/sign up lightbox
         
         // otherwise generate request to fill recommendations
-        suggest_people($(e.target).parents("div.paper"));
+        if (container.length == 0)
+            suggest_people(context);
+        else 
+            container.toggle();
     }	
     
     /* Attach error messages as invisible divs in the DOM so that if they occur,
@@ -213,6 +223,17 @@ function FeedMeChi() {
         postToPopulate.find('.feedme-placeholder').remove();
     }
     
+    function populateRecommendedItems(json) {
+        for (var i = 0; i < json.length; i++) {
+            var paper = $("#" + json[i].split("#")[1]);
+            
+            var starIcon = $("<img>").attr("src", "star.png")
+                                     .attr("title", "Someone recommended this paper to you.")
+                                     .height(20);
+            $("a.fm-share", paper).before(starIcon);	
+        }
+    }
+    
     function recommendMorePeople(postToPopulate) {
         console.log("recommending more people");
         var people = postToPopulate.data('people');
@@ -265,9 +286,6 @@ function FeedMeChi() {
             contentWidth += expanded_div.find("div.feedme-more-recommendations-button").outerWidth(true);
             contentWidth += expanded_div.find("input.feedme-autocomplete").outerWidth(true);
             contentWidth += expanded_div.find("img.feedme-addImg").outerWidth(true);
-            
-            console.log(containerWidth);
-            console.log(contentWidth);
             
             while (contentWidth >= containerWidth) {
                 // remove last person from the newly added div
@@ -502,14 +520,14 @@ function FeedMeChi() {
     } 
 }
 
-var JQ_autocomplete_uicore = document.createElement('script');
-JQ_autocomplete_uicore.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.core.js';
-JQ_autocomplete_uicore.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete_uicore); 
-var JQ_autocomplete = document.createElement('script');
-JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.autocomplete.js';
-JQ_autocomplete.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
+// var JQ_autocomplete_uicore = document.createElement('script');
+// JQ_autocomplete_uicore.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.core.js';
+// JQ_autocomplete_uicore.type = 'text/javascript';
+// document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete_uicore); 
+// var JQ_autocomplete = document.createElement('script');
+// JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.autocomplete.js';
+// JQ_autocomplete.type = 'text/javascript';
+// document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
 var ui_css_base = document.createElement('link');
 ui_css_base.rel = 'stylesheet';
 ui_css_base.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.all.css';
