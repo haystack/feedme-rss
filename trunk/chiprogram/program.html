@@ -213,17 +213,20 @@
 				fadeChecked();
 			});
 			
+            FeedMeChi();
+
 			var query = location.hash;
 			if (query != "") {
-				if ($("td" + query).length == 1) {
+				if ($("div" + query).length == 1) {
+				    $("td" + query.split("_")[0]).click();
+				    window.location = location.href;
+				} else if ($("td" + query).length == 1) {
 					$("td" + query).click();
 				} else {
 					$("input#filter").val(unescape(query.slice(1)));
 					filterSessions();
 				}
 			}
-            
-            FeedMeChi();
             
         });
         

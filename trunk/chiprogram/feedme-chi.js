@@ -22,7 +22,7 @@ function FeedMeChi() {
                                   .attr("title", "Share this paper with FeedMe!")
                                   .height(20);
         var shareAnchor = $("<a>").html(shareIcon)
-                                  .attr("name", "#" + paper_id)
+                                  .attr("name", paper_id)
                                   .addClass("fm-share")
                                   .click(onShareButtonClick);
         $("div.authors", $(elt)).before(shareAnchor);	
