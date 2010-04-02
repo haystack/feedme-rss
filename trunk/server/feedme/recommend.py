@@ -15,6 +15,13 @@ NUM_RECOMMENDATIONS = 21
 
 @login_required
 @transaction.commit_manually
+
+def recommend_jsonp(request):
+  response = get_recommendation_json(request);
+  response = "%s(%s);" % (request.REQUEST['callback'], response);
+  return HttpResponse(response, \
+                      mimetype='application/json')
+
 def recommend(request):
   return HttpResponse(get_recommendation_json(request), \
                       mimetype='application/json')
@@ -22,12 +29,12 @@ def recommend(request):
 def get_recommendation_json(request):
   sharer_user = request.user
 
-  feed_title = request.POST['feed_title']
-  feed_url = request.POST['feed_url']
-  post_url = request.POST['post_url']
-  post_title = request.POST['post_title']
-  post_contents = request.POST['post_contents']
-  expanded_view = (request.POST['expanded_view'] == 'true')
+  feed_title = request.REQUEST['feed_title']
+  feed_url = request.REQUEST['feed_url']
+  post_url = request.REQUEST['post_url']
+  post_title = request.REQUEST['post_title']
+  post_contents = request.REQUEST['post_contents']
+  expanded_view = (request.REQUEST['expanded_view'] == 'true')
   
   # If the feed or post or other items are viewed in two transactions at
   # the same time, one will fail with an IntegrityError.  We'll keep
