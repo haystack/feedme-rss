@@ -14,7 +14,6 @@
 
 		$(document).ready(function() {
 
-            fm__request("S1", 1);
 			var sessions = $("td.session");
 			var sessionDetails = $("td.session_details");
 			var searchTimeout = null;
@@ -369,7 +368,7 @@
 		}
 		
 		td.session_details div {
-			margin-bottom: 1em;
+			/*margin-bottom: 1em; (only applied to div.abstract, so I added it below) */
 		}
 		
 		
@@ -431,6 +430,7 @@
 		
 		div.abstract {
 			margin-left: 1em;
+			margin-bottom: 1em;
 		}
 		
 		span.toggleAbstract {
@@ -490,10 +490,22 @@
 		    cursor: pointer;
 		}
 		
-		.feedme-suggestions { 
+		.feedme-suggestion-container {
+		    background-color: #ffffff;
+		    padding: 5px;
+		}
+        .feedme-suggestion-container a { 
+            color: #333;
+        }		
+        .feedme-suggestion-container div { 
+            margin-bottom: 0px;
+        }	
+        
+        .feedme-suggestions { 
             display: inline; 
         }
         .feedme-person { }
+
         .feedme-placeholder { 
             display: inline;
         }
@@ -507,7 +519,7 @@
             text-align: center;
         }
         .feedme-toggle { 
-            background-color: #f3f5fc;
+            background-color: #EEEEFF;
             border: 1px solid #d2d2d2;
             -moz-border-radius: 5px; 
         }
@@ -546,6 +558,7 @@
         .feedme-num-shared { 
             font-size: 7pt; 
             text-align: right; 
+            color: #666;
         }
         .feedme-recommend-header { 
             display: inline-block; 
