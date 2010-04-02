@@ -5,6 +5,9 @@ function FeedMeChi() {
 
     // number of recommendations to show when a person asks for more
     var moreRecommendations = 6;
+    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/";
+    var FEED_TITLE ="CHI 2010 Program";
+    var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
     
     $("div.paper").each(function(i, elt) {
         var paper_id = $(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
@@ -87,7 +90,7 @@ function FeedMeChi() {
         
         setup_comment_area(context.find('.comment-textarea'));
         
-        fm__request(context, populateSuggestions);
+        recommend_recipients(context, populateSuggestions);
     }
     
     var default_comment_text = "Add an (optional) comment...";
@@ -112,31 +115,41 @@ function FeedMeChi() {
      * request to feedme for a recommendation, and calls the
      * callback with the result
      **/
-    function fm__request(context, callback) {
+    function recommend_recipients(context, callback) {
        var paper = context;
-       var feed_url = "http://www.nirmalpatel.com/chiProgram/program.html";
-       var feed_title ="CHI 2010 Program";
-       var post_url = feed_url + "#" + context.attr("id");
+       var post_url = FEED_URL + "#" + context.attr("id");
        var post_title = $(".title", paper).html();
        var post_abstract = $(".abstractText", paper).html()
        var post_contents = post_title + " " + post_abstract;
        var data = {
-            feed_title: feed_title,
-            feed_url: feed_url,
+            feed_title: FEED_TITLE,
+            feed_url: FEED_URL,
             post_url: post_url,
             post_title: post_title,
             post_contents: post_contents,
             expanded_view: false
        };
-       var feedme_url = "http://feedme.csail.mit.edu:8002/recommend_jsonp/";
        $.ajax({type: 'GET',
-               url: feedme_url,
+               url: FEEDME_URL + "recommend_jsonp/",
                data: data,
                success: function(data) {callback(data);},
                dataType: "jsonp"
        });
     }
-    
+ 
+    function get_recommended_items(callback) {
+        var data = {
+            limit: 100,
+            feed_url: FEED_URL,
+        };
+        $.ajax({type: 'GET',
+                 url: FEEDME_URL + "recommendation_list/",
+                 data: data,
+                 success: function(data) {callback(data);},
+                 dataType: "jsonp"
+        });
+    }
+
     function populateSuggestions(json) {
         console.log('populating suggestions');
         var people = json["users"];
