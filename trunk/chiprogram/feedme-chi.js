@@ -417,10 +417,13 @@ function FeedMeChi() {
         
         animate_share($(this), context);    
         var digest = $(this).hasClass("feedme-later-button");    
-        var recipients = new Array();
+        var recipients = ""
         for (var i=0; i < recipientDivs.length; i++)
         {
-            recipients[i] = recipientDivs[i].getAttribute("email");
+            recipients = recipients + recipientDivs[i].getAttribute("email");
+            if (i < recipientDivs.length - 1) {
+                recipients = recipients + ",";
+            }
         }
         
         var comment = context.find('.comment-textarea').val();
@@ -429,26 +432,23 @@ function FeedMeChi() {
             comment = '';
         }    
     
-        var send_individually = context.find('.feedme-send-individually').attr('checked');
-        
-        
-        // TODO: create jsonp share request
-
-//        var server_vars = get_post_variables(context);
-//        
-//         var url = "share/";
-//         console.log("Sharing post with: " + recipients);
-//         var data = {
-//             post_url: server_vars["post_url"],
-//             feed_url: server_vars["feed_url"],
-//             recipients: recipients,
-//             comment: comment,
-//             bookmarklet: bookmarklet,
-//             digest: digest,
-//             send_individually: send_individually
-//         }
-//         console.log(data);
-//         ajax_post(url, data, handle_ajax_response);
+        var send_individually = context.find('.feedme-send-individually').attr('checked'); 
+        var server_vars = get_post_variables(context); 
+        var data = {
+          post_url: server_vars.post_url,
+          feed_url: FEED_URL,
+          recipients: recipients,
+          comment: comment,
+          bookmarklet: false,
+          digest: digest,
+          send_individually: send_individually
+        };
+        $.ajax({type: 'GET',
+                url: FEEDME_URL + "share_jsonp/",
+                data: data,
+                success: function(data) {},
+                dataType: "jsonp"
+                });
     }
     
     function animate_share(shareButton, context) {
