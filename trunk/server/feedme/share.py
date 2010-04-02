@@ -16,20 +16,33 @@ import time
 # todo: create some sort of startup script which calls this
 sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
+
+@login_required
+def share_jsonp(request):
+  recipient_emails = request.REQUEST['recipients'].split(",")
+  response = get_share_json(request, recipient_emails)
+  response = "%s(%s);" % (request.REQUEST['callback'], response)
+  return HttpResponse(response, \
+                      mimetype='application/json')
+
 @login_required
 def share(request):
-  feed_url = request.POST['feed_url']
-  post_url = request.POST['post_url']
-  digest = (request.POST['digest'] == 'true')
+  recipient_emails = request.REQUEST.getlist('recipients')
+  return HttpResponse(get_share_json(request, recipient_emails), \
+                      mimetype='application/json')
+
+def get_share_json(request, recipient_emails):
+  feed_url = request.REQUEST['feed_url']
+  post_url = request.REQUEST['post_url']
+  digest = (request.REQUEST['digest'] == 'true')
   send_individually = False
-  if 'send_individually' in request.POST:
-    send_individually = (request.POST['send_individually'] == 'true')
+  if 'send_individually' in request.REQUEST:
+    send_individually = (request.REQUEST['send_individually'] == 'true')
 
-  recipient_emails = request.POST.getlist('recipients')
 
-  comment = request.POST['comment']
-  if 'bookmarklet' in request.POST:
-    bookmarklet = request.POST['bookmarklet'] == 'true' or request.POST['bookmarklet'] == '1'
+  comment = request.REQUEST['comment']
+  if 'bookmarklet' in request.REQUEST:
+    bookmarklet = request.REQUEST['bookmarklet'] == 'true' or request.REQUEST['bookmarklet'] == '1'
   else:
     bookmarklet = False
 
@@ -49,7 +62,7 @@ def share(request):
   send_post(shared_post, send_individually)
 
   script_output = "{\"response\": \"ok\"}"
-  return HttpResponse(script_output, mimetype='application/json')
+  return script_output
 
 def create_shared_post(user_sharer, post_url, feed_url, \
                        recipient_emails, comment, digest, bookmarklet):
