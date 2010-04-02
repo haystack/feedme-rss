@@ -3,12 +3,16 @@ try { console.log('Firebug console found.'); } catch(e) { console = { log: funct
 
 function FeedMeChi() {
 
-    // number of recommendations to show when a person asks for more
-    var moreRecommendations = 6;
+    /* data used to populate the autocomplete widget */
+    var autocompleteData = null;
+    /* number of recommendations to show when a person asks for more */
+    var moreRecommendations = 6;   
     var FEED_URL = "http://www.nirmalpatel.com/chiProgram/";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
     
+    setupErrorMessages();    
+
     $("div.paper").each(function(i, elt) {
         var paper_id = $(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
         $(elt).attr("id", paper_id);
@@ -21,6 +25,7 @@ function FeedMeChi() {
                                   .click(onShareButtonClick);
         $("div.authors", $(elt)).before(shareAnchor);	
     });
+
     
     function onShareButtonClick(e) {
         // if user is not logged in, show log in/sign up lightbox
@@ -29,6 +34,28 @@ function FeedMeChi() {
         suggest_people($(e.target).parents("div.paper"));
     }	
     
+    /* Attach error messages as invisible divs in the DOM so that if they occur,
+       callError() can bring them up in a fancybox */
+    function setupErrorMessages() {
+        setupErrorMessage('feedme-invalid-email', 'The email you entered is not a valid email address. Please enter a valid address, in the form "feedme@csail.mit.edu".');
+        setupErrorMessage('feedme-unselected-contact', 'Please select a contact to share the feed item with.');
+        setupErrorMessage('feedme-orphaned-email', "It looks like you have an e-mail address in the textbox, but haven't clicked '+' or pressed Enter to confirm the address. Please confirm the address or clear the textbox before sharing.");
+    }
+    
+    /* Attach error messages as invisible divs in the DOM so that if they occur,
+       callError() can bring them up in a fancybox */
+    function setupErrorMessage(errorname, errormessage) {
+        $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="display: none; margin: 20px; background-color: white" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div>');
+        $("a#" + errorname).fancybox( {
+            hideOnContentClick: true
+        });
+    }
+    
+    /* Bring up the error message generated in setupErrorMessage() */
+    function callError(errorname) {
+        $("a#" + errorname).click();
+    }
+
     var defaultAutocompleteText = "Add a name";
     function suggest_people(context) {
         console.log("suggesting people");
@@ -57,30 +84,31 @@ function FeedMeChi() {
                                 </div>');
         controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
         .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>')
-        
-        // Clear the autocomplete when they start typing
-        //suggest_autocomplete(context);
     
-        context.find('.feedme-autocomplete').focus(function() {
-            if ($(this).val() == defaultAutocompleteText) {
-                $(this).val('');
-            }
-            $(this).toggleClass('feedme-autocompleteToggle');
-        });
-        context.find('.feedme-autocomplete').blur(function() { 
-            if ($(this).val() == '') {
-                $(this).val(defaultAutocompleteText);
-            }
-            $(this).toggleClass('feedme-autocompleteToggle');
-            return true;
-        });
+        context.find('.feedme-autocomplete')
+            .focus(function() {
+                if ($(this).val() == defaultAutocompleteText) {
+                    $(this).val('');
+                }
+                $(this).toggleClass('feedme-autocompleteToggle');
+            })
+            .blur(function() { 
+                if ($(this).val() == '') {
+                    $(this).val(defaultAutocompleteText);
+                }
+                $(this).toggleClass('feedme-autocompleteToggle');
+                return true;
+            })
+            .keypress(function(event) {
+                if (event.keyCode == 13) {
+                    addFriendAndSelect(context.find('.feedme-autocomplete').val(), context);
+                }
+            });
     
         context.find('.feedme-now-button').click(share_post);
         context.find('.feedme-later-button').click(share_post);
         context.find('.feedme-more-recommendations-button').click(function() {
-            var post_url = context.find('.entry-title a').attr('href');
-            var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');
-            recommendMorePeople(postToPopulate);
+            recommendMorePeople(context);
         });
         context.find('.feedme-comment-button').click(function() {
             console.log("comment button clicked");
@@ -311,15 +339,16 @@ function FeedMeChi() {
         context.find('.feedme-autocomplete').val('');
         
         // Get social feedback information about them
-        var url = 'seen_it/';
-        var server_vars = get_post_variables(context);
-        var data = {
-            post_url: server_vars["post_url"],
-            feed_url: server_vars["feed_url"],
-            recipient: name
-        }
-        console.log(data);
-        ajax_post(url, data, seen_it_response);
+        // TODO: create jsonp request
+//         var url = 'seen_it/';
+//         var server_vars = get_post_variables(context);
+//         var data = {
+//             post_url: server_vars["post_url"],
+//             feed_url: server_vars["feed_url"],
+//             recipient: name
+//         }
+//         console.log(data);
+//         ajax_post(url, data, seen_it_response);
     }
     
     function seen_it_response(response) {
@@ -331,7 +360,7 @@ function FeedMeChi() {
         var sent = response['sent'];
         var email = response['email'];
         
-        var postToPopulate = $('.entry-title-link[href="' + post_url + '"]').parents('.entry');    
+        var postToPopulate = $('.a[name="' + post_url.split("#")[1] + '"]').parents('.paper');    
         var newPerson = postToPopulate.find('.feedme-person[email="' + email + '"]');
         
         set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent);
@@ -345,7 +374,7 @@ function FeedMeChi() {
     
     function toggle_friend_button(friend)
     {
-        var context = friend.parents('.entry');
+        var context = friend.parents('.paper');
         friend.removeClass("feedme-sent");
         friend.toggleClass("feedme-toggle");
         context.find(".feedme-controls").slideDown("normal");
@@ -365,7 +394,6 @@ function FeedMeChi() {
         console.log("sharing post.");
         var context = $(this).parents('.paper');
         
-        //var broadcast = (context.find('.feedme-suggest.feedme-toggle').length == 1);
         var recipientDivs = context.find(".feedme-person.feedme-toggle");
         if (recipientDivs.length == 0) {
             console.log("nobody to share with.");
@@ -398,10 +426,11 @@ function FeedMeChi() {
     
         var send_individually = context.find('.feedme-send-individually').attr('checked');
         
-        var server_vars = get_post_variables(context);
         
         // TODO: create jsonp share request
-        
+
+//        var server_vars = get_post_variables(context);
+//        
 //         var url = "share/";
 //         console.log("Sharing post with: " + recipients);
 //         var data = {
@@ -507,4 +536,6 @@ var JQ_color = document.createElement('script');
 JQ_color.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.color.js';
 JQ_color.type = 'text/javascript';
 document.getElementsByTagName('head')[0].appendChild(JQ_color);
+
+console.log("Libraries loaded.");
 
