@@ -1,0 +1,46 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://feedme/skin/feedme-bar.css" type="text/css"?>
+
+<overlay id="fm-bar-overlay" 
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul" 
+         xmlns:html="http://www.w3.org/1999/xhtml">
+
+  <script type="text/javascript" src="http://groups.csail.mit.edu/haystack/feedme/jquery-1.3.2.js"/>
+  <script type="text/javascript" src="chrome://feedme/content/feedme-bar.js"/>
+    
+    <statusbar id="status-bar">
+        <statusbarpanel id="fm-statusbar">
+            <image class="fm-logo urlbar-icon" onclick="FeedMe.toggleBar();" />
+        </statusbarpanel>
+    </statusbar>
+    
+    <vbox id="appcontent">
+        <hbox id="fm-bar" insertafter="content">
+            <!--image class="fm-logo-large" /-->
+            <vbox id="fm-app">
+                <label id="fm-error" collapsed="true"/>
+                <hbox id="fm-disabled" collapsed="true">
+                    <html:span>FeedMe is disabled for this website. </html:span>
+                    <html:a onclick="FeedMe.enableSite();">Click here to enable FeedMe</html:a>.
+                </hbox>
+                <label id="fm-loading" collapsed="true" value="Loading recommendations..."/>
+                <html:div id="fm-suggestions" />
+                <hbox id="fm-controls" collapsed="true">
+                    <textbox flex="1" id="fm-comment-box" />
+                    <html:div onclick="FeedMe.sharePost();" class="feedme-now-button feedme-share-button feedme-button feedme-toggle">Now</html:div>
+                    <html:div onclick="FeedMe.sharePost();" class="feedme-later-button feedme-share-button feedme-button feedme-toggle">Later</html:div>
+                    <!--html:div class="feedme-button feedme-preferences feedme-toggle">Preferences</html:div-->
+                    <textbox id="fm-add-email" />
+                    <image id="fm-add-email-button" class="fm-plus" height="16" width="16" tooltiptext="Add new email address" />
+                </hbox>
+            </vbox>
+            <hbox flex="1" id="fm-end">
+                <image id="fm-toggle-controls" class="fm-arrow-up" onclick="FeedMe.toggleControls();" tooltiptext="Expand FeedMe Bar" />
+                <image class="fm-disable" onclick="FeedMe.disableSite();" tooltiptext="Disable FeedMe Bar for this website" />
+                <image class="fm-close" onclick="FeedMe.toggleBar();" tooltiptext="Close FeedMe Bar" />
+            </hbox>
+        </hbox>
+    </vbox>
+
+</overlay>
+

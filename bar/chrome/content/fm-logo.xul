@@ -1,0 +1,10 @@
+<?xml version="1.0"?>
+<?xml-stylesheet href="chrome://feedme/skin/feedme-bar.css" type="text/css"?>
+
+<overlay id="fm-logo-overlay" 
+         xmlns="http://www.mozilla.org/keymaster/gatekeeper/there.is.only.xul">
+        <hbox id="urlbar-icons">
+        <image id="fm-logo" insertafter="go-button" class="urlbar-icon" />
+    </hbox>
+</overlay>
+
