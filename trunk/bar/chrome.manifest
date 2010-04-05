@@ -1,0 +1,4 @@
+content feedme	chrome/content/
+skin feedme feedme-skin chrome/skin/
+overlay	chrome://browser/content/browser.xul	chrome://feedme/content/fm-logo.xul
+overlay	chrome://browser/content/browser.xul	chrome://feedme/content/fm-bar.xul
