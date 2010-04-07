@@ -4,7 +4,7 @@
   <Description about="urn:mozilla:install-manifest">
     <em:id>feedme@margaret.leibovic</em:id>
     <em:name>FeedMe Bar</em:name>
-    <em:version>0.03</em:version>
+    <em:version>0.04</em:version>
     <em:creator>Margaret Leibovic</em:creator>
     <em:description>FeedMe for all websites!</em:description>
     <em:homepageURL>http://feedme.csail.mit.edu/</em:homepageURL>
