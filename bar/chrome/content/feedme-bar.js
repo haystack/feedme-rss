@@ -31,21 +31,24 @@ function log(aMsg) {
 
 var FeedMe = {
     
+    always_hidden: false,
+    
     logged_in: false,
     default_comment_text: "Add an (optional) comment...",
     default_autocomplete_text: "Add an email address...", 
+    
+    default_disabled_sites: ["www.google.com", 
+                             "mail.google.com",
+                             "docs.google.com",
+                             "facebook.com"],
 
     init: function() {        
         log("init");
-        // make sure user is logged in
-        if (!FeedMe.logged_in || aEvent.originalTarget.location.href != "http://feedme.csail.mit.edu/accounts/login/")
-            FeedMe.checkLoggedIn();
         
         var appcontent = document.getElementById("appcontent");
         if (appcontent) {
             appcontent.addEventListener("DOMContentLoaded", FeedMe.onPageLoad, false);
             appcontent.addEventListener("TabSelect", FeedMe.onPageLoad, false);   
-            //appcontent.addEventListener("TabClose", FeedMe.onTabClose, false);
         }
         
         FeedMe.setupCommentArea();
@@ -56,6 +59,7 @@ var FeedMe = {
     },
 
     checkLoggedIn: function() {
+        log("checkLoggedIn");
         $.ajax({
             type: "GET",
             dataType: "json",
@@ -70,10 +74,8 @@ var FeedMe = {
     onCheckLoggedInSuccess: function(json) {
         if (json["logged_in"] == false)          
             gBrowser.selectedTab = gBrowser.addTab("http://feedme.csail.mit.edu/accounts/login/");
-        else {
+        else
             FeedMe.logged_in = true;
-            log("logged in");
-        }
     },
     
     /*** ui setup ***/
@@ -139,6 +141,10 @@ var FeedMe = {
     
     suggestPeople: function() {
         log("suggestPeople");
+        // make sure user is logged in
+        if (!FeedMe.logged_in || location.href != "http://feedme.csail.mit.edu/accounts/login/")
+            FeedMe.checkLoggedIn();
+
         $.ajax({
             type: "POST",
             data: FeedMe.get_post_variables(),
@@ -147,7 +153,6 @@ var FeedMe = {
             success: FeedMe.fillRecommendations,
             error: function() {
                 FeedMe.showError("Oops, there was an error loading recommendations for this webpage.");
-                $("#fm-bar").attr("collapsed", "false");
             }
         });
         
@@ -170,9 +175,7 @@ var FeedMe = {
         $("#fm-suggestions").empty();
         for (var i = 0; i < people.length && i < 10; i++) {
             FeedMe.addPerson(people[i]);
-        }
-        
-        $("#fm-bar").attr("collapsed", "false");
+        }        
     },
     
     addPerson: function(person) {
@@ -279,6 +282,7 @@ var FeedMe = {
             recipients: recipients,
             comment: comment,
             bookmarklet: true,
+            client: "plugin",
             digest: $(this).hasClass("feedme-later-button"),
             send_individually: false
         }
@@ -374,6 +378,13 @@ var FeedMe = {
         if (!FeedMe.dbConn.tableExists("disabled_sites")) {
             log("create disabled_sites table");
             FeedMe.dbConn.createTable("disabled_sites", "id INTEGER PRIMARY KEY, domain VARCHAR(255)");
+            FeedMe.populateDisabledSites();
+        }
+    },
+    
+    populateDisabledSites: function() {
+        for (var i = 0; i < FeedMe.default_disabled_sites.length; i++) {
+            FeedMe.dbConn.executeSimpleSQL("INSERT INTO disabled_sites (domain) VALUES ('" + FeedMe.default_disabled_sites[i] + "')");
         }
     },
     
@@ -411,11 +422,14 @@ var FeedMe = {
                 if (row.getResultByIndex(0) != 0 || !content.document.domain) {
                     log("this site is disabled: " + content.document.domain);
                     $("#fm-disabled").attr("collapsed", "false");
-                    $("#fm-bar").attr("collapsed", "true");
+                    $("#fm-bar").attr("collapsed", "true");                        
                 } else {
                     FeedMe.suggestPeople();
                     $("#fm-disabled").attr("collapsed", "true");
-                    $("#fm-bar").attr("collapsed", "false");
+                    if (FeedMe.always_hidden)
+                        $("#fm-bar").attr("collapsed", "true");                        
+                    else
+                        $("#fm-bar").attr("collapsed", "false");
                 }
             },
             

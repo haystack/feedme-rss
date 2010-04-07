@@ -15,7 +15,7 @@
     </statusbar>
     
     <vbox id="appcontent">
-        <hbox id="fm-bar" insertafter="content">
+        <hbox id="fm-bar" insertafter="content" collapsed="true">
             <!--image class="fm-logo-large" /-->
             <vbox id="fm-app">
                 <label id="fm-error" collapsed="true"/>
