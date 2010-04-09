@@ -30,7 +30,7 @@ function FeedMeChi() {
             return false;
         }
         
-        if (openDialog || document.referrer.indexOf("feedme.csail.mit.edu/clickthrough/") != -1) {
+        if (openDialog || location.hash != "") {
             /* render login light box */
             requestLogin();
         }
