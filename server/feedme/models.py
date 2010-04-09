@@ -104,6 +104,7 @@ class SharedPost(models.Model):
     sharer = models.ForeignKey(Sharer)
     comment = models.TextField()
     bookmarklet = models.BooleanField(default = False)
+    client = models.TextField(default = "greader")
     thanks = models.IntegerField(default = 0)
     clickthroughs = models.IntegerField(default = 0)
     

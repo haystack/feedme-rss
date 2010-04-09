@@ -10,11 +10,14 @@
 <span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="http://feedme.csail.mit.edu{% url server.feedme.clickthrough.clickthrough shared_post.pk %}?redirect={{ shared_post.post.url|removehttp }}">{{ shared_post.post.title }}</a>{% endblock %}</span><br />
 {% if thanks %}<span><a href="http://feedme.csail.mit.edu/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link %}{% endblock %}</p>{% endif %}
 
+{% if not shared_post.bookmarklet %}
+
 {% block post_contents %}
 {{ shared_post.post.contents|safe}}
 {% endblock %}
-
 <p>---<br />
 {% if thanks %}<a href="http://feedme.csail.mit.edu/thanks/{{shared_post.pk}}/">Send {% if shared_post.sharer.user.first_name %}{{ shared_post.sharer.user.first_name }} {% endif %}a One-Click Thanks</a> if you liked this post! {% block thanks_link_2 %}{% endblock %}</p>{% endif %}
+
+{% endif %}
 
 <p>{{ shared_post.sharer.name }} is beta testing FeedMe, a sharing tool we're developing at MIT. You should try it yourself at <a href="http://feedme.csail.mit.edu">http://feedme.csail.mit.edu</a>, or {% block email %}<a href='mailto:feedme@csail.mit.edu'>email us</a>{% endblock %} with comments. {% block subscription %}<a href='http://feedme.csail.mit.edu/receiver/settings/'>Change your e-mail receiving settings</a>{% endblock %} to get only a digest, or to never be recommended posts.</p>
