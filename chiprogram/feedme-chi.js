@@ -90,10 +90,13 @@ function FeedMeChi() {
         
         $("body").append('<a style="display: none;" id="login-iframe" href="' + url + '">login</a>');
         $("a#login-iframe").fancybox({
-            frameWidth: 800,
-            frameHeight: 500,
-            hideOnContentClick: false,
-            onStart: function(){console.log("onclosed");},
+            type: "iframe",
+            width: "75%",
+            height: "75%",
+            onClosed: check_logged_in,
+            autoScale: false,
+            transitionIn: "none",
+            transitionOut: "none"
         });
 
     }
