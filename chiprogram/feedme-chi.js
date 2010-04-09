@@ -25,6 +25,9 @@ function FeedMeChi() {
         logged_in = json.logged_in;
         console.log(logged_in ? "logged in" : "logged out");
         if (logged_in) {
+            /* Set up recommended items */
+            get_recommended_items(populateRecommendedItems);
+            
             if (shareEvent)
                 onShareButtonClick(shareEvent);
             return false;
@@ -50,9 +53,6 @@ function FeedMeChi() {
                                   .click(onShareButtonClick);
         $("div.authors", $(elt)).before(shareAnchor);	
     });
- 
-    /* Set up recommended items */
-    get_recommended_items(populateRecommendedItems);
  
     function onShareButtonClick(e) {
         if (!logged_in) {
