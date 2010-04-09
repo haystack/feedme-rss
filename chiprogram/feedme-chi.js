@@ -475,13 +475,14 @@ function FeedMeChi() {
           recipients: recipients,
           comment: comment,
           bookmarklet: false,
+          client: "chiprogram",
           digest: digest,
           send_individually: send_individually
         };
         $.ajax({type: 'GET',
                 url: FEEDME_URL + "share_jsonp/",
                 data: data,
-                success: function(data) {},
+                success: function(data) { console.log("share success"); },
                 dataType: "jsonp"
                 });
     }
