@@ -133,8 +133,8 @@ function FeedMeChi() {
                                     <div class="display: inline;"><textarea class="comment-textarea"></textarea></div> \
                                     <div class="feedme-send-individually-area" style="display: inline;"><input class="feedme-send-individually" type="checkbox"></input>send individual emails</div> \
                                 </div>');
-        controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Now</a></div>')
-        .append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>')
+        controls.append('<div class="feedme-now-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Share</a></div>');
+        //.append('<div class="feedme-later-button feedme-share-button feedme-button feedme-toggle wait-for-suggestions"><a class="" href="javascript:{}">Later</a></div>')
     
         context.find('.feedme-autocomplete')
             .focus(function() {
