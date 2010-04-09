@@ -22,5 +22,5 @@ def sharer_settings(request):
             form.save()
     else:
         form = SharerForm(instance = sharer)
-
+        
     return render_to_response("sharer_settings.html", RequestContext(request, { "formset": form, "done": posted }))

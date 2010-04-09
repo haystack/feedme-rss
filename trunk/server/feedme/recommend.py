@@ -61,12 +61,12 @@ def get_recommendation_json(request):
   viewed_post = post_objects['viewed_post']
   study_participant = post_objects['study_participant']
 
-  print 'get recommendations'
+  #print 'get recommendations'
   if study_participant is None or study_participant.user_interface:
     recommendations, sorted_friends = n_best_friends(post, sharer)
-    print recommendations
+    #print recommendations
   else:
-    print 'no recommendations'
+    #print 'no recommendations'
     recommendations = []
     sorted_friends = []
     
@@ -231,7 +231,6 @@ def n_best_friends(post, sharer):
     scores, key=operator.itemgetter('score'), reverse=True)
   if len(sorted_friends) > NUM_RECOMMENDATIONS:
     sorted_friends = sorted_friends[0:NUM_RECOMMENDATIONS]
-  print sorted_friends
 
   print "time for recommendation: " + str(time.clock() - begin_time)
   return map(lambda friend:friend['receiver'].user, sorted_friends), sorted_friends
