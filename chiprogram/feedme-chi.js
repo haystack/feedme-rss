@@ -8,7 +8,8 @@ function FeedMeChi() {
     var autocompleteData = null;
     /* number of recommendations to show when a person asks for more */
     var moreRecommendations = 3;   
-    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
+//    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
+    var FEED_URL = "http://feedme.csail.mit.edu:8002/static/chiprogram/program.html";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
 
