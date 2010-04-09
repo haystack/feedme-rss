@@ -4,6 +4,11 @@
 {% block header %}Create a FeedMe account{% endblock %}
 
 {% block body %}
+<p>Welcome to FeedMe!  FeedMe helps you share webpages, google reader posts,
+and conference papers with your colleagues.</p>
+
+<p>Already have an account?  <a href="/accounts/login/">Sign in</a>!</p>
+
 <form method="post" action="">
 <dl>
 {% for field in form %}
