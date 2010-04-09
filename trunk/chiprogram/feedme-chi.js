@@ -10,8 +10,10 @@ function FeedMeChi() {
     var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
-        
-    setupErrorMessages();    
+ 
+    setupErrorMessages();
+    setupLogin();
+    requestLogin();
     
     /* Set up recommend buttons */
     $("div.paper").each(function(i, elt) {
@@ -59,6 +61,22 @@ function FeedMeChi() {
         $("a#" + errorname).fancybox( {
             hideOnContentClick: true
         });
+    }
+
+    function setupLogin() {
+        var url = FEEDME_URL + "accounts/register?iframe";
+        
+        $("body").append('<a style="display: none;" id="login-iframe" href="' + url + '">login</a>');
+        $("a#login-iframe").fancybox({
+            frameWidth: 800,
+            frameHeight: 500,
+            hideOnContentClick: false,
+        });
+
+    }
+
+    function requestLogin() {
+        $("a#login-iframe").click();        
     }
     
     /* Bring up the error message generated in setupErrorMessage() */
