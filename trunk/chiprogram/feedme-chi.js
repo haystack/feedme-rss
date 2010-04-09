@@ -12,19 +12,25 @@ function FeedMeChi() {
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
 
-    function check_logged_in() {
+    function check_logged_in(openDialog, shareEvent) {
+        console.log("check_logged_in");
         $.ajax({type: 'GET',
            url: FEEDME_URL + "check_logged_in_jsonp/",
-           success: function(data) {verify_login(data);},
+           success: function(data) {verify_login(data, openDialog, shareEvent);},
            dataType: "jsonp"
         });
     }
     
-    function verify_login(json) {
+    function verify_login(json, openDialog, shareEvent) {
         logged_in = json.logged_in;
         console.log(logged_in ? "logged in" : "logged out");
+        if (logged_in) {
+            if (shareEvent)
+                onShareButtonClick(shareEvent);
+            return false;
+        }
         
-        if (!logged_in && document.referrer.indexOf("feedme.csail.mit.edu/clickthrough/") != -1) {
+        if (openDialog || document.referrer.indexOf("feedme.csail.mit.edu/clickthrough/") != -1) {
             /* render login light box */
             requestLogin();
         }
@@ -50,8 +56,7 @@ function FeedMeChi() {
  
     function onShareButtonClick(e) {
         if (!logged_in) {
-            /* render login light box */
-            requestLogin();
+            check_logged_in(true, e);
             return false;
         }
     
@@ -89,6 +94,7 @@ function FeedMeChi() {
             frameWidth: 800,
             frameHeight: 500,
             hideOnContentClick: false,
+            onStart: function(){console.log("onclosed");},
         });
 
     }
@@ -575,7 +581,7 @@ function FeedMeChi() {
     
     setupErrorMessages();
     setupLogin();
-    check_logged_in();
+    check_logged_in(false, null);
 }
 
 // var JQ_autocomplete_uicore = document.createElement('script');
