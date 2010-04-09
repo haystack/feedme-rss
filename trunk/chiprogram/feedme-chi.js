@@ -3,6 +3,7 @@ try { console.log('Firebug console found.'); } catch(e) { console = { log: funct
 
 function FeedMeChi() {
 
+    var logged_in = false;
     /* data used to populate the autocomplete widget */
     var autocompleteData = null;
     /* number of recommendations to show when a person asks for more */
@@ -10,10 +11,24 @@ function FeedMeChi() {
     var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
- 
-    setupErrorMessages();
-    setupLogin();
-    requestLogin();
+
+    function check_logged_in() {
+        $.ajax({type: 'GET',
+           url: FEEDME_URL + "check_logged_in_jsonp/",
+           success: function(data) {verify_login(data);},
+           dataType: "jsonp"
+        });
+    }
+    
+    function verify_login(json) {
+        logged_in = json.logged_in;
+        console.log(logged_in ? "logged in" : "logged out");
+        
+        if (!logged_in && document.referrer.indexOf("feedme.csail.mit.edu/clickthrough/") != -1) {
+            /* render login light box */
+            requestLogin();
+        }
+    }
     
     /* Set up recommend buttons */
     $("div.paper").each(function(i, elt) {
@@ -34,12 +49,15 @@ function FeedMeChi() {
     get_recommended_items(populateRecommendedItems);
  
     function onShareButtonClick(e) {
+        if (!logged_in) {
+            /* render login light box */
+            requestLogin();
+            return false;
+        }
+    
         var context = $(e.target).parents("div.paper");
         var container = $(".feedme-suggestion-container", context);
-        
-        // if user is not logged in, show log in/sign up lightbox
-        
-        // otherwise generate request to fill recommendations
+                
         if (container.length == 0)
             suggest_people(context);
         else 
@@ -554,6 +572,10 @@ function FeedMeChi() {
         shareButton.animate(animateHighlight, 750)
         .animate(animateSelected, 750);
     } 
+    
+    setupErrorMessages();
+    setupLogin();
+    check_logged_in();
 }
 
 // var JQ_autocomplete_uicore = document.createElement('script');
