@@ -7,7 +7,7 @@ function FeedMeChi() {
     /* data used to populate the autocomplete widget */
     var autocompleteData = null;
     /* number of recommendations to show when a person asks for more */
-    var moreRecommendations = 6;   
+    var moreRecommendations = 3;   
     var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
     var FEED_TITLE ="CHI 2010 Program";
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
@@ -81,9 +81,7 @@ function FeedMeChi() {
        callError() can bring them up in a fancybox */
     function setupErrorMessage(errorname, errormessage) {
         $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="display: none; margin: 20px; background-color: white" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div>');
-        $("a#" + errorname).fancybox( {
-            hideOnContentClick: true
-        });
+        $("a#" + errorname).fancybox({ hideOnContentClick: true });
     }
 
     function setupLogin() {
@@ -115,6 +113,7 @@ function FeedMeChi() {
         context.find("div.authors").before('<div class="feedme-suggestion-container"></div>');
     
         context.find(".feedme-suggestion-container")
+        .append('<div class="feedme-loading">Loading recommendations...</div>')
         .append('<div class="feedme-suggestions"> \
                         <div class="feedme-placeholder"> \
                             <div class="feedme-person feedme-button"><div>&nbsp;</div></div> \
@@ -305,6 +304,8 @@ function FeedMeChi() {
                          start_person + moreRecommendations : people.length;
         var expanded_div = null;
         
+        $(".feedme-loading", postToPopulate).remove();
+        
         if (start_person < min_length || people.length == 0) {
             header.append('<div class="expand-container feedme-recommendations-group ' + div_class + '"></div>');
             expanded_div = postToPopulate.find('.' + div_class);
@@ -312,6 +313,7 @@ function FeedMeChi() {
                 var person = people[i];
                 addFriend(person['email'], person['email'], person['shared_today'], person['seen_it'], person['sent'], expanded_div, postToPopulate);
             }
+            console.log("1");
          
             if (start_person == 0) {
                 expanded_div.removeClass('expand-container');
@@ -333,29 +335,33 @@ function FeedMeChi() {
             }
             else {
                 expanded_div.slideToggle("normal");
-            }        
-        
-            // use .outerWidth() to account for margin and padding
-            var containerWidth = postToPopulate.find("div.feedme-suggestions").outerWidth(true);  	
-            // just check width of contents of newly added div  	
-            var contentWidth = 0;
-            expanded_div.children("div.feedme-person").each(function() {
-                contentWidth += $(this).outerWidth(true);
-            });
-            contentWidth += expanded_div.find("div.feedme-more-recommendations-button").outerWidth(true);
-            contentWidth += expanded_div.find("input.feedme-autocomplete").outerWidth(true);
-            contentWidth += expanded_div.find("img.feedme-addImg").outerWidth(true);
-            
-            while (contentWidth >= containerWidth) {
-                // remove last person from the newly added div
-                contentWidth -= expanded_div.find(".feedme-person:last").outerWidth(true);
-                expanded_div.find(".feedme-person:last").remove();
-                // decrement min_length so that start_person is set to correct value
-                min_length -= 1;
             }
+            console.log("2");
+        
+// use .outerWidth() to account for margin and padding
+//             var containerWidth = postToPopulate.find("div.feedme-suggestions").outerWidth(true);  	
+// just check width of contents of newly added div  	
+//             var contentWidth = 0;
+//             expanded_div.children("div.feedme-person").each(function() {
+//                 contentWidth += $(this).outerWidth(true);
+//             });
+//             contentWidth += expanded_div.find("div.feedme-more-recommendations-button").outerWidth(true);
+//             contentWidth += expanded_div.find("input.feedme-autocomplete").outerWidth(true);
+//             contentWidth += expanded_div.find("img.feedme-addImg").outerWidth(true);
+//             
+//             while (contentWidth >= containerWidth) {
+//                 console.log(contentWidth);
+//                 console.log(containerWidth);
+//                 // remove last person from the newly added div
+//                 contentWidth -= expanded_div.find(".feedme-person:last").outerWidth(true);
+//                 expanded_div.find(".feedme-person:last").remove();
+//                 // decrement min_length so that start_person is set to correct value
+//                 min_length -= 1;
+//             }
     
             postToPopulate.data('start_person', min_length);
             postToPopulate.find(".wait-for-suggestions").removeClass("wait-for-suggestions");
+            console.log("3");
         }
     }
 
@@ -367,6 +373,7 @@ function FeedMeChi() {
      * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
      */
     function addFriend(name, email, shared_today, seen_it, sent, header, context) {
+        console.log("addFriend");
         if (!is_valid_email(email)) {
             callError('feedme-invalid-email');
             return false;
@@ -383,6 +390,7 @@ function FeedMeChi() {
     }
     
     function set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent) {
+        console.log("set_social_feedback");
         if (sent) {
             num_shared.text('Sent!');
             newPerson.addClass("feedme-sent");            
@@ -583,46 +591,4 @@ function FeedMeChi() {
     setupLogin();
     check_logged_in(false, null);
 }
-
-// var JQ_autocomplete_uicore = document.createElement('script');
-// JQ_autocomplete_uicore.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.core.js';
-// JQ_autocomplete_uicore.type = 'text/javascript';
-// document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete_uicore); 
-// var JQ_autocomplete = document.createElement('script');
-// JQ_autocomplete.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/ui/ui.autocomplete.js';
-// JQ_autocomplete.type = 'text/javascript';
-// document.getElementsByTagName('head')[0].appendChild(JQ_autocomplete);    
-var ui_css_base = document.createElement('link');
-ui_css_base.rel = 'stylesheet';
-ui_css_base.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.all.css';
-ui_css_base.type = 'text/css';
-document.getElementsByTagName('head')[0].appendChild(ui_css_base);
-var link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery-ui-autocomplete/themes/base/ui.autocomplete.css';
-link.type = 'text/css';
-document.getElementsByTagName('head')[0].appendChild(link);
-
-var JQ_fancybox = document.createElement('script');
-JQ_fancybox.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.fancybox/jquery.fancybox-1.2.1.js';
-JQ_fancybox.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(JQ_fancybox);    
-link = document.createElement('link');
-link.rel = 'stylesheet';
-link.href = 'http://groups.csail.mit.edu/haystack/feedme/jquery.fancybox/jquery.fancybox.css';
-link.type = 'text/css';
-document.getElementsByTagName('head')[0].appendChild(link);
-
-var JQ_elastic = document.createElement('script');
-JQ_elastic.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.elastic-1.6.source.js';
-JQ_elastic.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(JQ_elastic);
-
-// Add jQuery-color animation
-var JQ_color = document.createElement('script');
-JQ_color.src = 'http://groups.csail.mit.edu/haystack/feedme/jquery.color.js';
-JQ_color.type = 'text/javascript';
-document.getElementsByTagName('head')[0].appendChild(JQ_color);
-
-console.log("Libraries loaded.");
 
