@@ -45,7 +45,9 @@ def get_share_json(request, recipient_emails):
     bookmarklet = request.REQUEST['bookmarklet'] == 'true' or request.REQUEST['bookmarklet'] == '1'
   else:
     bookmarklet = False
-  client = request.REQUEST['client']
+  client = "greader"
+  if 'client' in request.REQUEST:
+    client = request.REQUEST['client']
 
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
