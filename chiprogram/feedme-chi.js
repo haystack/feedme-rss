@@ -8,10 +8,10 @@ function FeedMeChi() {
     var autocompleteData = null;
     /* number of recommendations to show when a person asks for more */
     var moreRecommendations = 3;   
-//    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
-    var FEED_URL = "http://feedme.csail.mit.edu:8002/static/chiprogram/program.html";
+    var FEED_URL = "http://www.nirmalpatel.com/chiProgram/program.html?";
+//    var FEED_URL = "http://feedme.csail.mit.edu:8002/static/chiprogram/program.html";
     var FEED_TITLE ="CHI 2010 Program";
-    var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
+    var FEEDME_URL = "http://feedme.csail.mit.edu/";
 
     function check_logged_in(openDialog, shareEvent) {
         $.ajax({type: 'GET',
@@ -26,15 +26,12 @@ function FeedMeChi() {
         console.log(logged_in ? "logged in" : "logged out");
         if (logged_in) {
             /* Set up recommended items */
-            setup_likes(); 
             get_recommended_items(populateRecommendedItems);
             if (shareEvent)
                 onShareButtonClick(shareEvent);
             return false;
         }
         
-        setup_likes();
-
         if (openDialog || location.hash != "") {
             /* render login light box */
             requestLogin();
@@ -67,7 +64,7 @@ function FeedMeChi() {
     /* Attach error messages as invisible divs in the DOM so that if they occur,
        callError() can bring them up in a fancybox */
     function setupErrorMessage(errorname, errormessage) {
-        $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="width:500px;height:300px;overflow:auto;" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div>');
+        $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="display: none;"><div style="width:500px;height:300px;overflow:auto;" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin:20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div></div>');
       $("a#" + errorname).fancybox({
         'titlePosition'   : 'inside',
         'transitionIn'    : 'none',
@@ -598,6 +595,7 @@ function FeedMeChi() {
     setupErrorMessages();
     setupLogin();
     check_logged_in(false, null);
+    setup_likes();
     /* Set up recommend buttons */
 }
 
