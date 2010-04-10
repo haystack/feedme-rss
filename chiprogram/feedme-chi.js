@@ -14,7 +14,6 @@ function FeedMeChi() {
     var FEEDME_URL = "http://feedme.csail.mit.edu:8002/";
 
     function check_logged_in(openDialog, shareEvent) {
-        console.log("check_logged_in");
         $.ajax({type: 'GET',
            url: FEEDME_URL + "check_logged_in_jsonp/",
            success: function(data) {verify_login(data, openDialog, shareEvent);},
@@ -27,34 +26,21 @@ function FeedMeChi() {
         console.log(logged_in ? "logged in" : "logged out");
         if (logged_in) {
             /* Set up recommended items */
+            setup_likes(); 
             get_recommended_items(populateRecommendedItems);
-            
             if (shareEvent)
                 onShareButtonClick(shareEvent);
             return false;
         }
         
+        setup_likes();
+
         if (openDialog || location.hash != "") {
             /* render login light box */
             requestLogin();
         }
     }
     
-    /* Set up recommend buttons */
-    $("div.paper").each(function(i, elt) {
-        var paper_id = $(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
-        $(elt).attr("id", paper_id);
-        
-        var shareIcon = $("<img>").attr("src", "share.png")
-                                  .attr("title", "Share this paper with FeedMe!")
-                                  .height(20);
-        var shareAnchor = $("<a>").html(shareIcon)
-                                  .attr("name", paper_id)
-                                  .addClass("fm-share")
-                                  .click(onShareButtonClick);
-        $("div.authors", $(elt)).before(shareAnchor);	
-    });
- 
     function onShareButtonClick(e) {
         if (!logged_in) {
             check_logged_in(true, e);
@@ -81,8 +67,12 @@ function FeedMeChi() {
     /* Attach error messages as invisible divs in the DOM so that if they occur,
        callError() can bring them up in a fancybox */
     function setupErrorMessage(errorname, errormessage) {
-        $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="display: none; margin: 20px; background-color: white" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div>');
-        $("a#" + errorname).fancybox({ hideOnContentClick: true });
+        $("body").append('<a style="display: none" id="' + errorname + '" href="#' + errorname + '-data"></a><div style="width:500px;height:300px;overflow:auto;" id="' + errorname + '-data"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" style="width: 425px;" /><div style="margin: 20px;"><h2>Error</h2><div>' + errormessage + '</div></div></div>');
+      $("a#" + errorname).fancybox({
+        'titlePosition'   : 'inside',
+        'transitionIn'    : 'none',
+        'transitionOut'   : 'none'
+      });
     }
 
     function setupLogin() {
@@ -91,9 +81,9 @@ function FeedMeChi() {
         $("body").append('<a style="display: none;" id="login-iframe" href="' + url + '">login</a>');
         $("a#login-iframe").fancybox({
             type: "iframe",
-            width: "75%",
-            height: "75%",
-            onClosed: check_logged_in,
+            width: "90%",
+            height: "90%",
+            onClosed: function() { check_logged_in(false, null);},
             autoScale: false,
             transitionIn: "none",
             transitionOut: "none"
@@ -210,7 +200,6 @@ function FeedMeChi() {
        if (post_abstract) {
            post_contents = post_contents + "<br>" + post_abstract;
        }
-       console.log(post_contents);
        return {
          post_url: FEED_URL + "#" + context.attr("id"),
          post_title: "CHI 2010 Paper: " + post_title,
@@ -287,10 +276,10 @@ function FeedMeChi() {
         for (var i = 0; i < json.length; i++) {
             var paper_id = json[i].split("#")[1];
             
-            var starIcon = $("<img>").attr("src", "star.png")
+            var starIcon = $("<img>").attr("src", "http://groups.csail.mit.edu/haystack/feedme/star_bullet_transparent.gif")
                                      .attr("title", "Someone recommended this paper to you.")
                                      .height(20);
-            $("span.type",  $("#" + paper_id)).after(starIcon);
+            $("div.authors",  $("#" + paper_id)).before(starIcon);
             
             $("span.location", $("td#" + paper_id.split("_")[0])).after(starIcon.clone());
         }
@@ -317,7 +306,6 @@ function FeedMeChi() {
                 var person = people[i];
                 addFriend(person['email'], person['email'], person['shared_today'], person['seen_it'], person['sent'], expanded_div, postToPopulate);
             }
-            console.log("1");
          
             if (start_person == 0) {
                 expanded_div.removeClass('expand-container');
@@ -340,7 +328,6 @@ function FeedMeChi() {
             else {
                 expanded_div.slideToggle("normal");
             }
-            console.log("2");
         
 // use .outerWidth() to account for margin and padding
 //             var containerWidth = postToPopulate.find("div.feedme-suggestions").outerWidth(true);  	
@@ -365,7 +352,6 @@ function FeedMeChi() {
     
             postToPopulate.data('start_person', min_length);
             postToPopulate.find(".wait-for-suggestions").removeClass("wait-for-suggestions");
-            console.log("3");
         }
     }
 
@@ -377,7 +363,6 @@ function FeedMeChi() {
      * Adds a single friend to the suggestion div.  Takes the name of the friend and the element to append to.
      */
     function addFriend(name, email, shared_today, seen_it, sent, header, context) {
-        console.log("addFriend");
         if (!is_valid_email(email)) {
             callError('feedme-invalid-email');
             return false;
@@ -394,7 +379,6 @@ function FeedMeChi() {
     }
     
     function set_social_feedback(num_shared, newPerson, shared_today, seen_it, sent) {
-        console.log("set_social_feedback");
         if (sent) {
             num_shared.text('Sent!');
             newPerson.addClass("feedme-sent");            
@@ -483,7 +467,27 @@ function FeedMeChi() {
             cc_friends.animate({'opacity': 0});
         }
     }
-      
+
+  
+    function setup_likes() {
+      $("div.paper").each(function(i, elt) {
+        var paper_id = $(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
+        $(elt).attr("id", paper_id);
+        if ($("img.feedme-logo-icon", $(elt)).size() == 0) {
+          var shareIcon = $("<img>").attr("src", "http://groups.csail.mit.edu/haystack/feedme/like.png")
+                                   .attr("title", "Share this paper with FeedMe!")
+                                    .attr("class", "feedme-logo-icon");
+                                    //.height(20);
+          var shareAnchor = $("<a>").html(shareIcon)
+                                    .attr("name", paper_id)
+                                    .addClass("fm-share")
+                                    .click(onShareButtonClick);
+          $("span.type", $(elt)).after(shareAnchor);	
+        }
+      });
+    }
+ 
+
     function share_post(event) {
         console.log("sharing post.");
         var context = $(this).parents('.paper');
@@ -594,5 +598,6 @@ function FeedMeChi() {
     setupErrorMessages();
     setupLogin();
     check_logged_in(false, null);
+    /* Set up recommend buttons */
 }
 
