@@ -29,13 +29,15 @@ function log(aMsg) {
   dump("FeedMe: " + aMsg + "\n");
 }
 
+var FEEDME_URL = "http://feedme.csail.mit.edu:8003";
+
 var FeedMe = {
     
     always_hidden: false,
     
     logged_in: false,
     default_comment_text: "Add an (optional) comment...",
-    default_autocomplete_text: "Add an email address...", 
+    default_autocomplete_text: "Add an email address...",
     
     default_disabled_sites: ["www.google.com", 
                              "mail.google.com",
@@ -45,25 +47,19 @@ var FeedMe = {
     init: function() {        
         log("init");
         
-        var appcontent = document.getElementById("appcontent");
-        if (appcontent) {
-            appcontent.addEventListener("DOMContentLoaded", FeedMe.onPageLoad, false);
-            appcontent.addEventListener("TabSelect", FeedMe.onPageLoad, false);   
-        }
-        
         FeedMe.setupCommentArea();
         FeedMe.setupAutocomplete();
         FeedMe.setupDatabase();
-        
-        window.onresize = function() { $("#fm-suggestions").width(window.innerWidth - 60); }
+        FeedMe.setupEvents();            
     },
 
+    /*** login code ***/
+
     checkLoggedIn: function() {
-        log("checkLoggedIn");
         $.ajax({
             type: "GET",
             dataType: "json",
-            url: "http://feedme.csail.mit.edu/check_logged_in/",
+            url: FEEDME_URL + "/check_logged_in/",
             success: FeedMe.onCheckLoggedInSuccess,
             error: function() {
                 FeedMe.showError("Oops, there was an error checking your login information.");
@@ -72,14 +68,21 @@ var FeedMe = {
     },
     
     onCheckLoggedInSuccess: function(json) {
-        if (json["logged_in"] == false)          
-            gBrowser.selectedTab = gBrowser.addTab("http://feedme.csail.mit.edu/accounts/login/");
-        else
-            FeedMe.logged_in = true;
+        FeedMe.logged_in = json["logged_in"];
+        log("logged in: " + FeedMe.logged_in);
+        
+        FeedMe.hideError();
+        
+        if (!FeedMe.logged_in) {
+            $("#fm-logged-out").attr("collapsed", "false");
+        } else {
+            $("#fm-logged-out").attr("collapsed", "true");
+            FeedMe.getRecommendations();
+        }
     },
     
     /*** ui setup ***/
-    
+   
     setupCommentArea: function() {
         $("#fm-comment-box").val(FeedMe.default_comment_text)
             .css('color', 'gray')
@@ -120,6 +123,30 @@ var FeedMe = {
             });
     },
     
+    setupEvents: function() {
+        var appcontent = document.getElementById("appcontent");
+        if (appcontent) {
+            appcontent.addEventListener("DOMContentLoaded", FeedMe.onPageLoad, false);
+            appcontent.addEventListener("TabSelect", FeedMe.onPageLoad, false);   
+        }
+        
+        var bar = $("#fm-bar");
+        $(".feedme-share-button", bar).click(FeedMe.sharePost);
+        $(".fm-enable", bar).click(FeedMe.enableSite);
+        $(".fm-disable", bar).click(FeedMe.disableSite);
+        $(".fm-toggle-controls", bar).click(FeedMe.toggleControls);        
+        $(".fm-toggle-bar", bar).click(FeedMe.toggleBar);
+       
+        $(".fm-log-in", bar).click(function() {
+            content.document.location = FEEDME_URL + "/accounts/login/";    
+        });
+        
+        $("#status-bar .fm-toggle-bar").click(FeedMe.toggleBar);
+
+        window.onresize = function() { $("#fm-suggestions").width(window.innerWidth - 60); }
+    },
+    
+    
     /*** event handlers ***/
     
     onPageLoad: function(aEvent) {
@@ -142,17 +169,22 @@ var FeedMe = {
     suggestPeople: function() {
         log("suggestPeople");
         // make sure user is logged in
-        if (!FeedMe.logged_in || location.href != "http://feedme.csail.mit.edu/accounts/login/")
+        if (!FeedMe.logged_in)
             FeedMe.checkLoggedIn();
-
+        else
+            FeedMe.getRecommendations();
+    },
+    
+    getRecommendations: function() {
         $.ajax({
             type: "POST",
             data: FeedMe.get_post_variables(),
             dataType: "json",
-            url: "http://feedme.csail.mit.edu:8003/recommend/",
+            url: FEEDME_URL + "/recommend/",
             success: FeedMe.fillRecommendations,
             error: function() {
                 FeedMe.showError("Oops, there was an error loading recommendations for this webpage.");
+                FeedMe.checkLoggedIn();
             }
         });
         
@@ -162,7 +194,6 @@ var FeedMe = {
     },
     
     fillRecommendations: function(json) {
-        log("fillRecommendations");
         var people = json["users"];
         var post_url = json["posturl"];
         
@@ -208,6 +239,9 @@ var FeedMe = {
     },
     
     addNewPerson: function(email) {
+        if (!FeedMe.logged_in)
+            return false;
+        
         if (email == "" || email == FeedMe.default_autocomplete_text 
                         || !FeedMe.is_valid_email(email)) {
             FeedMe.showError("Oops, you didn't enter a valid email address.");
@@ -227,7 +261,7 @@ var FeedMe = {
             type: "POST",
             data: data,
             dataType: "json",
-            url: "http://feedme.csail.mit.edu:8003/seen_it/",
+            url: FEEDME_URL + "/seen_it/",
             success: FeedMe.renderNewPerson,
             error: function() {
                 FeedMe.showError("Oops, there was an error adding a new recipient.");
@@ -252,6 +286,10 @@ var FeedMe = {
     
     sharePost: function(aEvent) {
         log("sharePost");
+        if (!FeedMe.logged_in)
+            return false;
+        
+        var shareButton = $(aEvent.target);
         var context = $("#fm-bar");
         var recipientDivs = context.find(".feedme-person.feedme-toggle")
                                    .removeClass("feedme-toggle")
@@ -291,7 +329,7 @@ var FeedMe = {
             type: "POST",
             data: data,
             dataType: "json",
-            url: "http://feedme.csail.mit.edu:8003/share/",
+            url: FEEDME_URL + "/share/",
             success: function() {
                 log("email sent");
             },

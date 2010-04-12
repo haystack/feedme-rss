@@ -15,7 +15,7 @@ a, a:visited { color: #2244BB; text-decoration: underline; cursor: pointer; }
     border-top: 1px solid #999; 
 }
 
-#fm-disabled, #fm-loading, #fm-error { padding-top: 4px; padding-left: 3px; }
+.fm-message { padding-top: 4px; padding-left: 3px; }
 #fm-error { color: red; }
 #fm-loading { color: #666; }
 
