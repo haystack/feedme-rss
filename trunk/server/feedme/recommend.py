@@ -186,7 +186,9 @@ def n_best_friends(post, sharer):
   friends = Receiver.objects \
             .filter(sharedpostreceiver__shared_post__sharer=sharer) \
             .filter(recommend = True) \
-            .distinct()
+            .distinct()    
+  
+  blacklist = sharer.blacklist.all()
 
   shared_posts = Post.objects \
                  .filter(sharedpost__sharer=sharer)
@@ -208,8 +210,8 @@ def n_best_friends(post, sharer):
   freq_dist_counts = post.tokenize()
   freq_dist = sorted(freq_dist_counts)
   for receiver in friends:
-    # skip people who aren't real email addresses
-    if email_re.match(receiver.user.email) is None:
+    # skip people who aren't real email addresses or who are in blacklist
+    if email_re.match(receiver.user.email) is None or receiver in blacklist:
       continue
 
     num_shared = shared_posts.filter(sharedpost__sharedpostreceiver__receiver=receiver).count()

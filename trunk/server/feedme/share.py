@@ -163,6 +163,7 @@ def send_post_email(shared_post, receivers):
 
   context = Context({"shared_post": shared_post, "thanks": thanks})
   template = loader.get_template("share_email.html")
+  print context
   html_content = template.render(context)
   
   print (u'sending ' + subject + u' to ' + unicode(to_emails)).encode('ascii', 'backslashreplace')    
