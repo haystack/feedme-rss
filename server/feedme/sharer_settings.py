@@ -19,7 +19,8 @@ class SharerForm(ModelForm):
             self.fields['blacklist'].queryset = Receiver.objects \
                                                         .filter(sharedpostreceiver__shared_post__sharer = self.instance) \
                                                         .filter(recommend = True) \
-                                                        .distinct()
+                                                        .distinct() \
+                                                        .order_by('user__email')
 
 @login_required
 def sharer_settings(request):
