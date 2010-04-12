@@ -1,10 +1,14 @@
 {% load removehttp %}
 {% load clean_html %}
+
+{% ifequal shared_post.client "plugin" %}
+<p style="font-style:italic;">This email is part of a recommendation system for papers at CHI. Using <a href="http://www.nirmalpatel.com/chiProgram/program.html">Nirmal Patel's CHI Program</a>, you can recommend papers to your friends, and you can see which papers were recommended to you.</p>
+{% endifequal %}
+
 {% ifnotequal shared_post.comment "" %}
 <p>
 {{ shared_post.comment|escape|urlize|linebreaksbr }}
 </p>
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 {% endifnotequal %}
 <p><span style="font-style: italic;">via {% block feed_title %}{{ shared_post.post.feed.title.strip }}{% endblock %}:</span><br />
 <span style="font-size: 1.5em; font-weight: bold;">{% block post_title %}<a href="http://feedme.csail.mit.edu{% url server.feedme.clickthrough.clickthrough shared_post.pk %}?redirect={{ shared_post.post.url|removehttp }}">{{ shared_post.post.title }}</a>{% endblock %}</span><br />
