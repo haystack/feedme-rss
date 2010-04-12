@@ -4,20 +4,7 @@ import nltk
 import textutil
 
 # make email addresses be 75 characters like usernames
-User._meta.get_field_by_name('username')[0].max_length=75
-
-class Sharer(models.Model):
-    user = models.ForeignKey(User, unique=True)
-    cc_me = models.BooleanField("CC me on e-mails when I share a post", default = True)
-    
-    def __unicode__(self):
-        return self.name()
-    
-    def name(self):
-        if self.user.first_name != u'' or self.user.last_name != u'':
-            return self.user.first_name + u' ' + self.user.last_name
-        else:
-            return self.user.email        
+User._meta.get_field_by_name('username')[0].max_length=75     
     
 class Receiver(models.Model):
     user = models.ForeignKey(User, unique=True)
@@ -55,6 +42,20 @@ class Receiver(models.Model):
 
     def __unicode__(self):
         return unicode(self.user)
+
+class Sharer(models.Model):
+    user = models.ForeignKey(User, unique=True)
+    cc_me = models.BooleanField("CC me on e-mails when I share a post", default = True)
+    blacklist = models.ManyToManyField(Receiver)
+    
+    def __unicode__(self):
+        return self.name()
+    
+    def name(self):
+        if self.user.first_name != u'' or self.user.last_name != u'':
+            return self.user.first_name + u' ' + self.user.last_name
+        else:
+            return self.user.email   
 
 class Feed(models.Model):
     rss_url = models.TextField(unique=True) # the rss feed url

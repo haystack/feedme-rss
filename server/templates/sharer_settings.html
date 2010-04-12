@@ -7,7 +7,9 @@
 {% if done %}<div style="font-weight: bold">Changes set.</div>{% endif %}
 Here you can update preferences about your FeedMe experience.
 <form method="POST" action="">
-    {{ formset }}
-    <div style="margin-top: 20px;"><input type="submit" value="Done" /></div>
+    {% for field in form %}
+        {{ field.label_tag }}: {{ field }} <br>
+    {% endfor %}
+    <div><input type="submit" value="Done" /></div>
 </form>
 {% endblock %}
