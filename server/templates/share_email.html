@@ -1,8 +1,10 @@
 {% load removehttp %}
 {% load clean_html %}
 
-{% ifequal shared_post.client "plugin" %}
-<p style="font-style:italic;">This email is part of a recommendation system for papers at CHI. Using <a href="http://www.nirmalpatel.com/chiProgram/program.html">Nirmal Patel's CHI Program</a>, you can recommend papers to your friends, and you can see which papers were recommended to you.</p>
+{% ifequal shared_post.client "chiprogram" %}
+<p style="font-style:italic;">
+{{ shared_post.sharer.name }} thinks you might be interested in this paper at CHI. You can also make recommendations for your friends, while browsing the conference program at <a href="http://www.nirmalpatel.com/chiProgram/program.html">http://nirmalpatel.com/chiProgram/program.html</a>.
+</p>
 {% endifequal %}
 
 {% ifnotequal shared_post.comment "" %}
