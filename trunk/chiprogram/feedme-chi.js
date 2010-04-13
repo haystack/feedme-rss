@@ -1,6 +1,20 @@
 // Fail gracefully if Firebug's not installed
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
+function FeedMeChiActualPaperId(pid) {
+  var parts = pid.split("_");
+  // original paper format
+  if (parts.length == 2) {
+    var session_details = $("td#" + parts[0] + "_details");
+    if (session_details.length > 0) {
+      return $($(".paper", session_details)[parts[1]]).attr('id');
+    }
+  } else {
+    // this is a new paper format
+    return pid;
+  }
+}
+    
 function FeedMeChi() {
 
     var logged_in = false;
@@ -272,16 +286,24 @@ function FeedMeChi() {
     function populateRecommendedItems(json) {
         for (var i = 0; i < json.length; i++) {
             var paper_id = json[i].split("#")[1];
-            
+            paper_id = FeedMeChiActualPaperId(paper_id);
             var starIcon = $("<img>").attr("src", "http://groups.csail.mit.edu/haystack/feedme/star_bullet_transparent.gif")
                                      .attr("title", "Someone recommended this paper to you.")
                                      .height(20);
-            $("div.authors",  $("#" + paper_id)).before(starIcon);
-            
-            $("span.location", $("td#" + paper_id.split("_")[0])).after(starIcon.clone());
+            $("a.fm-share",  $("#" + paper_id)).before(starIcon);
+            var session_id = $("div#" + paper_id).parent().attr('id').split("_")[0];
+            var starDiv = $("td#" + session_id + " .fm-stars");
+            // Put stars on their own line in a session box
+            if (starDiv.length == 0) {
+              starDiv = $("<div class='fm-stars'>");
+              $("td#" + session_id).append(starDiv);
+            }
+            starIcon = starIcon.clone().attr("title", "Someone recommended a paper in this session to you.");
+            starDiv.append(starIcon);
         }
     }
     
+
     function recommendMorePeople(postToPopulate) {
         console.log("recommending more people");
         var people = postToPopulate.data('people');
@@ -468,18 +490,21 @@ function FeedMeChi() {
   
     function setup_likes() {
       $("div.paper").each(function(i, elt) {
-        var paper_id = $(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
-        $(elt).attr("id", paper_id);
+        var paper_id = $(elt).attr("id");//$(elt).parent().attr("id").split("_")[0] + "_" + $(elt).index();
+//        $(elt).attr("id", paper_id);
         if ($("img.feedme-logo-icon", $(elt)).size() == 0) {
-          var shareIcon = $("<img>").attr("src", "http://groups.csail.mit.edu/haystack/feedme/like.png")
+          var shareIcon = $("<img>").attr("src", "http://groups.csail.mit.edu/haystack/feedme/like2.png")
                                    .attr("title", "Share this paper with FeedMe!")
-                                    .attr("class", "feedme-logo-icon");
+                                    .attr("style",
+                                    "vertical-align:text-bottom;padding: 0px 2px 0px 5px");
                                     //.height(20);
           var shareAnchor = $("<a>").html(shareIcon)
                                     .attr("name", paper_id)
                                     .addClass("fm-share")
+                                    .attr("style", "border-style:solid;border-width:1px;padding: 2px 2px 2px 0px;background:white;text-decoration:none;")
                                     .click(onShareButtonClick);
-          $("span.type", $(elt)).after(shareAnchor);	
+          shareAnchor.append("<span style='vertical-align:middle;font-variant:small-caps'>share</span>");
+          $("div.authors", $(elt)).before(shareAnchor);	
         }
       });
     }
