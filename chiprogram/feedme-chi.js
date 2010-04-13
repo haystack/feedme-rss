@@ -111,7 +111,7 @@ function FeedMeChi() {
         $("a#" + errorname).click();
     }
 
-    var defaultAutocompleteText = "Add a name";
+    var defaultAutocompleteText = "Add an email address";
     function suggest_people(context) {
         console.log("suggesting people");
         
@@ -160,6 +160,13 @@ function FeedMeChi() {
                     addFriendAndSelect(context.find('.feedme-autocomplete').val(), context);
                 }
             });
+    
+        context.find('.feedme-addImg').click(function(event) {
+            text = context.find('.feedme-autocomplete').val();
+            if (text != '' && text != defaultAutocompleteText) {
+                addFriendAndSelect(text, context);
+            }
+        });
     
         context.find('.feedme-now-button').click(share_post);
         context.find('.feedme-later-button').click(share_post);
