@@ -32,9 +32,7 @@ function log(aMsg) {
 var FEEDME_URL = "http://feedme.csail.mit.edu:8003";
 
 var FeedMe = {
-    
-    always_hidden: false,
-    
+        
     logged_in: false,
     default_comment_text: "Add an (optional) comment...",
     default_autocomplete_text: "Add an email address...",
@@ -45,12 +43,26 @@ var FeedMe = {
                              "facebook.com"],
 
     init: function() {        
-        log("init");
-        
         FeedMe.setupCommentArea();
         FeedMe.setupAutocomplete();
         FeedMe.setupDatabase();
         FeedMe.setupEvents();            
+    },
+        
+    onPageLoad: function(aEvent) {
+        // don't request suggestions when frames load
+        if (aEvent.originalTarget instanceof HTMLDocument) {
+            var win = aEvent.originalTarget.defaultView;
+            if (win.frameElement) {
+                return;
+            }
+        }
+        
+        $("#fm-suggestions").empty();
+        FeedMe.hideControls();
+        
+        // this will fill the recommendations if the site is not disabled
+        FeedMe.checkDisabled();
     },
 
     /*** login code ***/
@@ -63,18 +75,19 @@ var FeedMe = {
             success: FeedMe.onCheckLoggedInSuccess,
             error: function() {
                 FeedMe.showError("Oops, there was an error checking your login information.");
+                $("#fm-bar").attr("collapsed", "true");
             }
         });
     },
     
     onCheckLoggedInSuccess: function(json) {
         FeedMe.logged_in = json["logged_in"];
-        log("logged in: " + FeedMe.logged_in);
         
         FeedMe.hideError();
         
         if (!FeedMe.logged_in) {
             $("#fm-logged-out").attr("collapsed", "false");
+            $("#fm-bar").attr("collapsed", "true");
         } else {
             $("#fm-logged-out").attr("collapsed", "true");
             FeedMe.getRecommendations();
@@ -96,6 +109,8 @@ var FeedMe = {
                     $(this).val(FeedMe.default_comment_text).css('color', 'gray');
                 }
             });
+            
+        $("#fm-bar").find(".feedme-send-individually-area").hide();
     },
     
     setupAutocomplete: function() {
@@ -138,7 +153,8 @@ var FeedMe = {
         $(".fm-toggle-bar", bar).click(FeedMe.toggleBar);
        
         $(".fm-log-in", bar).click(function() {
-            content.document.location = FEEDME_URL + "/accounts/login/";    
+            // Add tab, then make active
+            gBrowser.selectedTab = gBrowser.addTab(FEEDME_URL + "/accounts/login/");
         });
         
         $("#status-bar .fm-toggle-bar").click(FeedMe.toggleBar);
@@ -146,33 +162,17 @@ var FeedMe = {
         window.onresize = function() { $("#fm-suggestions").width(window.innerWidth - 60); }
     },
     
-    
-    /*** event handlers ***/
-    
-    onPageLoad: function(aEvent) {
-        // don't request suggestions when frames load
-        if (aEvent.originalTarget instanceof HTMLDocument) {
-            var win = aEvent.originalTarget.defaultView;
-            if (win.frameElement) {
-                return;
-            }
-        }
-        
-        $("#fm-suggestions").empty();
-        
-        // this will fill the recommendations if the site is not disabled
-        FeedMe.checkDisabled();
-    },
-    
     /** getting recommendations ***/
     
     suggestPeople: function() {
         log("suggestPeople");
         // make sure user is logged in
-        if (!FeedMe.logged_in)
+        if (!FeedMe.logged_in) {
+            $("#fm-bar").attr("collapsed", "true");
             FeedMe.checkLoggedIn();
-        else
+        } else {
             FeedMe.getRecommendations();
+        }
     },
     
     getRecommendations: function() {
@@ -184,6 +184,7 @@ var FeedMe = {
             success: FeedMe.fillRecommendations,
             error: function() {
                 FeedMe.showError("Oops, there was an error loading recommendations for this webpage.");
+                $("#fm-bar").attr("collapsed", "true");
                 FeedMe.checkLoggedIn();
             }
         });
@@ -196,14 +197,23 @@ var FeedMe = {
     fillRecommendations: function(json) {
         var people = json["users"];
         var post_url = json["posturl"];
-        
+
         $("#fm-loading").attr("collapsed", "true");
 
         // don't render recommendations for wrong tab
         if (post_url != content.document.location.href)
             return false;        
+                
+        $("#fm-bar").attr("collapsed", "false");
         
         $("#fm-suggestions").empty();
+        if (people.length == 0) {
+            FeedMe.showControls();
+            $("#fm-new").attr("collapsed", "false");
+        } else {
+            $("#fm-new").attr("collapsed", "true");            
+        }
+        
         for (var i = 0; i < people.length && i < 10; i++) {
             FeedMe.addPerson(people[i]);
         }        
@@ -282,6 +292,14 @@ var FeedMe = {
         friend.removeClass("feedme-sent");
         friend.toggleClass("feedme-toggle");
         FeedMe.showControls();
+        
+        var context = $("#fm-bar");
+        var cc_friends = context.find(".feedme-send-individually-area");
+        log(context.find(".feedme-person.feedme-toggle").size());
+        if (context.find(".feedme-person.feedme-toggle").size() > 1)
+            cc_friends.show();
+        else
+            cc_friends.hide();
     },
     
     sharePost: function(aEvent) {
@@ -300,7 +318,7 @@ var FeedMe = {
                                    .text('Sent!');
         
         if (recipientDivs.length == 0) {
-            showError("Oops, you didn't select anybody to share with!");
+            FeedMe.showError("Oops, you didn't select anybody to share with!");
             return;
         }
         
@@ -313,6 +331,8 @@ var FeedMe = {
         if (comment == FeedMe.default_comment_text)
             comment = "";
 
+        var send_individually = context.find('.feedme-send-individually:checked').length > 0;
+
         var server_vars = FeedMe.get_post_variables(context);
         var data = {
             post_url: server_vars["post_url"],
@@ -322,7 +342,7 @@ var FeedMe = {
             bookmarklet: true,
             client: "plugin",
             digest: $(this).hasClass("feedme-later-button"),
-            send_individually: false
+            send_individually: send_individually
         }
                 
         $.ajax({
@@ -332,6 +352,7 @@ var FeedMe = {
             url: FEEDME_URL + "/share/",
             success: function() {
                 log("email sent");
+                context.find("#fm-comment-box").val("").blur();
             },
             error: function() {
                 FeedMe.showError("Oops, there was an error sending this email.");
@@ -375,18 +396,21 @@ var FeedMe = {
         bar.attr("collapsed", bar.attr("collapsed") != "true");
     },
     
-    toggleControls: function() {
+    toggleControls: function() {        
         if ($("#fm-controls").attr("collapsed") == "true")
             FeedMe.showControls();
         else
             FeedMe.hideControls();
     },
     
-    showControls: function() {
+    showControls: function() {        
+        // don't show controls if site is disabled or user is logged out
+        if ($("#fm-disabled").attr("collapsed") == "false" || $("#fm-logged-out").attr("collapsed") == "false")
+            return false;
+            
         $("#fm-toggle-controls").addClass("fm-arrow-down")
                                 .removeClass("fm-arrow-up")
                                 .attr("tooltiptext", "Collapse FeedMe Bar");
-        $("#fm-bar .fm-extra-row").attr("collapsed", false);    
         $("#fm-controls").attr("collapsed", false);
         $("#fm-suggestions").css("overflow", "visible");
     },
@@ -395,7 +419,6 @@ var FeedMe = {
         $("#fm-toggle-controls").addClass("fm-arrow-up")
                                 .removeClass("fm-arrow-down")   
                                 .attr("tooltiptext", "Expand FeedMe Bar");
-        $("#fm-bar .fm-extra-row").attr("collapsed", true);
         $("#fm-controls").attr("collapsed", true);
         $("#fm-suggestions").css("overflow", "hidden");
     },
@@ -464,16 +487,13 @@ var FeedMe = {
                 } else {
                     FeedMe.suggestPeople();
                     $("#fm-disabled").attr("collapsed", "true");
-                    if (FeedMe.always_hidden)
-                        $("#fm-bar").attr("collapsed", "true");                        
-                    else
-                        $("#fm-bar").attr("collapsed", "false");
                 }
             },
             
             handleError: function(aError) {
                 log("Error: " + aError.message);
                 FeedMe.showError("Oops, there was an error checking whether or not this website is disabled.");
+                $("#fm-bar").attr("collapsed", "true");
             },
             
             handleCompletion: function(aReason) {

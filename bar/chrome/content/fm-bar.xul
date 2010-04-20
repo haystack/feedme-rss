@@ -27,19 +27,22 @@
                     <html:a class="fm-log-in">Click here to log in</html:a>.
                 </hbox>
                 <label id="fm-loading" class="fm-message" collapsed="true" value="Loading recommendations..."/>
+                <label id="fm-new" class="fm-message" collapsed="true" value="Welcome to FeedMe! Once you start sharing, friend recommendations will appear here. You can start by adding email addresses with the input box below!"/>
                 <html:div id="fm-suggestions" />
                 <hbox id="fm-controls" collapsed="true">
                     <textbox flex="1" id="fm-comment-box" />
-                    <html:div class="feedme-now-button feedme-share-button feedme-button feedme-toggle">Now</html:div>
-                    <html:div class="feedme-later-button feedme-share-button feedme-button feedme-toggle">Later</html:div>
                     <textbox id="fm-add-email" />
                     <image id="fm-add-email-button" class="fm-plus" height="16" width="16" tooltiptext="Add new email address" />
+                    <html:div class="feedme-share-button feedme-button feedme-toggle">Share website</html:div>
+                    <!--html:div class="feedme-now-button feedme-share-button feedme-button feedme-toggle">Now</html:div>
+                    <html:div class="feedme-later-button feedme-share-button feedme-button feedme-toggle">Later</html:div-->
+                    <html:div class="feedme-send-individually-area"><html:input class="feedme-send-individually" type="checkbox"></html:input>send individual emails</html:div>
                 </hbox>
             </vbox>
             <hbox flex="1" id="fm-end">
                 <image id="fm-toggle-controls" class="fm-arrow-up fm-toggle-controls" tooltiptext="Expand FeedMe Bar" />
                 <image class="fm-disable" tooltiptext="Disable FeedMe Bar for this website" />
-                <image class="fm-close fm-toggle-bar" tooltiptext="Close FeedMe Bar" />
+                <image class="fm-close fm-toggle-bar" tooltiptext="Hide FeedMe Bar" />
             </hbox>
         </hbox>
     </vbox>
