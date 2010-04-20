@@ -1,6 +1,6 @@
 .fm-logo { list-style-image: url("chrome://feedme/skin/fm-logo.png"); cursor: pointer; }
 .fm-logo-large { list-style-image: url("chrome://feedme/skin/fm-logo-large.png"); cursor: pointer; }
-.fm-plus { list-style-image: url("chrome://feedme/skin/plus.png"); cursor: pointer; }
+.fm-plus { list-style-image: url("chrome://feedme/skin/plus.png"); cursor: pointer; margin-right:5px; }
 .fm-close { list-style-image: url("chrome://feedme/skin/close.png"); cursor: pointer; align:right; margin-left:2px; }
 .fm-arrow-up { list-style-image: url("chrome://feedme/skin/arrow-up.png"); cursor: pointer; }
 .fm-arrow-down { list-style-image: url("chrome://feedme/skin/arrow-down.png"); cursor: pointer; }
