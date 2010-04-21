@@ -33,5 +33,7 @@ def sharer_settings(request):
             form.save()
     else:
         form = SharerForm(instance = sharer)
-        
-    return render_to_response("sharer_settings.html", RequestContext(request, { "form": form, "done": posted }))
+    
+    sp_receivers = SharedPostReceiver.objects.filter(shared_post__sharer = sharer).order_by('time').reverse()[:10]
+    
+    return render_to_response("sharer_settings.html", RequestContext(request, { "form": form, "done": posted, "sp_receivers": sp_receivers }))
