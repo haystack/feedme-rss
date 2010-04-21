@@ -13,7 +13,6 @@ import time
 
 NUM_RECOMMENDATIONS = 21
 
-@login_required
 @transaction.commit_manually
 
 def recommend_jsonp(request):
@@ -26,8 +25,13 @@ def recommend(request):
   return HttpResponse(get_recommendation_json(request), \
                       mimetype='application/json')
 
-def get_recommendation_json(request):
+def get_recommendation_json(request):  
   sharer_user = request.user
+  
+  if not sharer_user.is_authenticated():
+    response = dict()
+    response['auth_error'] = True
+    return simplejson.dumps(response)
 
   feed_title = request.REQUEST['feed_title']
   feed_url = request.REQUEST['feed_url']

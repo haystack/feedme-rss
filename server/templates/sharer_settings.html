@@ -12,4 +12,21 @@ Here you can update preferences about your FeedMe experience.
     {% endfor %}
     <div><input type="submit" value="Done" /></div>
 </form>
+
+<h2>Recent Shares</h2>
+
+<ul style="padding-left:10px;">
+    {% for spr in sp_receivers %}
+        <li style="margin-bottom:5px;list-style:none;">
+        <div><a href="{{ spr.shared_post.post.url }}">{{ spr.shared_post.post.title }}</a></div>
+        <div>Shared with {{ spr.receiver.user }} 
+        {% if spr.shared_post.thanks %}
+        <span style="font-weight:bold;color:#FF9900;">Thanks!</span>
+        {% endif %}
+        </div>
+        <div style="font-style:italic;">{{ spr.time|date:"P D, N d, Y" }}</div>
+        </li>
+    {% endfor %}
+</ul>
+
 {% endblock %}
