@@ -52,7 +52,6 @@ def get_share_json(request, recipient_emails):
   if 'referrer' in request.REQUEST:
     referrer = request.REQUEST['referrer']
 
-  print 'referrer:', referrer
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
                                    recipient_emails, comment, \
