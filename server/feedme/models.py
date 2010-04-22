@@ -108,6 +108,7 @@ class SharedPost(models.Model):
     client = models.TextField(default = "greader")
     thanks = models.IntegerField(default = 0)
     clickthroughs = models.IntegerField(default = 0)
+    referrer = models.TextField()
     
     def __unicode__(self):
         return unicode(self.sharer) + u' post: ' + unicode(self.post);

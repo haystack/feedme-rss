@@ -45,14 +45,19 @@ def get_share_json(request, recipient_emails):
     bookmarklet = request.REQUEST['bookmarklet'] == 'true' or request.REQUEST['bookmarklet'] == '1'
   else:
     bookmarklet = False
-  client = "greader"
+  client = 'greader'
   if 'client' in request.REQUEST:
     client = request.REQUEST['client']
+  referrer = ''
+  if 'referrer' in request.REQUEST:
+    referrer = request.REQUEST['referrer']
 
+  print 'referrer:', referrer
   shared_post = create_shared_post(request.user, \
                                    post_url, feed_url, \
                                    recipient_emails, comment, \
-                                   digest, bookmarklet, client)
+                                   digest, bookmarklet, \
+                                   client, referrer)
 
   receivers = Receiver.objects \
     .filter(sharedpostreceiver__shared_post = shared_post) \
@@ -68,7 +73,8 @@ def get_share_json(request, recipient_emails):
   return script_output
 
 def create_shared_post(user_sharer, post_url, feed_url, \
-                       recipient_emails, comment, digest, bookmarklet, client):
+                       recipient_emails, comment, digest, bookmarklet, \
+                       client, referrer):
   """Create all necessary objects to perform the sharing action"""
   # get the recipients, creating Users if necessary
   try:
@@ -81,7 +87,7 @@ def create_shared_post(user_sharer, post_url, feed_url, \
   post = Post.objects.filter(feed__rss_url = feed_url).get(url=post_url)
   shared_post = SharedPost(post = post, sharer = sharer, \
                            comment = comment, bookmarklet = bookmarklet, \
-                           client = client)
+                           client = client, referrer = referrer)
   shared_post.save()
 
   # get or create the recipients' User, Recipient and SharedPostRecipient
