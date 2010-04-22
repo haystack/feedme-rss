@@ -29,7 +29,7 @@ function log(aMsg) {
   dump("FeedMe: " + aMsg + "\n");
 }
 
-var FEEDME_URL = "http://feedme.csail.mit.edu:8003";
+var FEEDME_URL = "http://feedme.csail.mit.edu";
 
 var FeedMe = {
         
@@ -204,9 +204,6 @@ var FeedMe = {
         $("#fm-suggestions").empty();
         if (people.length == 0) {
             FeedMe.showControls();
-            $("#fm-new").attr("collapsed", "false");
-        } else {
-            $("#fm-new").attr("collapsed", "true");            
         }
         
         for (var i = 0; i < people.length && i < 10; i++) {
