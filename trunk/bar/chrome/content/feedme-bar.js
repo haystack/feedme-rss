@@ -33,7 +33,6 @@ var FEEDME_URL = "http://feedme.csail.mit.edu:8003";
 
 var FeedMe = {
         
-    logged_in: false,
     default_comment_text: "Add an (optional) comment...",
     default_autocomplete_text: "Add an email address...",
     
@@ -59,6 +58,8 @@ var FeedMe = {
         }
         
         $("#fm-suggestions").empty();
+        $("#fm-comment-box").val("").blur();
+
         FeedMe.hideControls();
         
         // this will fill the recommendations if the site is not disabled
@@ -80,17 +81,15 @@ var FeedMe = {
         });
     },
     
-    onCheckLoggedInSuccess: function(json) {
-        FeedMe.logged_in = json["logged_in"];
-        
+    onCheckLoggedInSuccess: function(json) {        
         FeedMe.hideError();
         
-        if (!FeedMe.logged_in) {
-            $("#fm-logged-out").attr("collapsed", "false");
-            $("#fm-bar").attr("collapsed", "true");
-        } else {
+        if (json["logged_in"]) {
             $("#fm-logged-out").attr("collapsed", "true");
             FeedMe.getRecommendations();
+        } else {
+            $("#fm-logged-out").attr("collapsed", "false");
+            $("#fm-bar").attr("collapsed", "true");            
         }
     },
     
@@ -163,18 +162,7 @@ var FeedMe = {
     },
     
     /** getting recommendations ***/
-    
-    suggestPeople: function() {
-        log("suggestPeople");
-        // make sure user is logged in
-        if (!FeedMe.logged_in) {
-            $("#fm-bar").attr("collapsed", "true");
-            FeedMe.checkLoggedIn();
-        } else {
-            FeedMe.getRecommendations();
-        }
-    },
-    
+
     getRecommendations: function() {
         $.ajax({
             type: "POST",
@@ -189,12 +177,19 @@ var FeedMe = {
             }
         });
         
+        $("#fm-logged-out").attr("collapsed", "true");
         $("#fm-loading").attr("collapsed", "false");
         FeedMe.hideError();
         FeedMe.hideControls();
     },
     
     fillRecommendations: function(json) {
+        if (json["auth_error"]) {
+            $("#fm-bar").attr("collapsed", "true");
+            FeedMe.checkLoggedIn();
+            return false;
+        }
+        
         var people = json["users"];
         var post_url = json["posturl"];
 
@@ -249,9 +244,6 @@ var FeedMe = {
     },
     
     addNewPerson: function(email) {
-        if (!FeedMe.logged_in)
-            return false;
-        
         if (email == "" || email == FeedMe.default_autocomplete_text 
                         || !FeedMe.is_valid_email(email)) {
             FeedMe.showError("Oops, you didn't enter a valid email address.");
@@ -295,18 +287,13 @@ var FeedMe = {
         
         var context = $("#fm-bar");
         var cc_friends = context.find(".feedme-send-individually-area");
-        log(context.find(".feedme-person.feedme-toggle").size());
         if (context.find(".feedme-person.feedme-toggle").size() > 1)
             cc_friends.show();
         else
             cc_friends.hide();
     },
     
-    sharePost: function(aEvent) {
-        log("sharePost");
-        if (!FeedMe.logged_in)
-            return false;
-        
+    sharePost: function(aEvent) {       
         var shareButton = $(aEvent.target);
         var context = $("#fm-bar");
         var recipientDivs = context.find(".feedme-person.feedme-toggle")
@@ -342,7 +329,8 @@ var FeedMe = {
             bookmarklet: true,
             client: "plugin",
             digest: $(this).hasClass("feedme-later-button"),
-            send_individually: send_individually
+            send_individually: send_individually,
+            referrer: content.document.referrer
         }
                 
         $.ajax({
@@ -352,7 +340,6 @@ var FeedMe = {
             url: FEEDME_URL + "/share/",
             success: function() {
                 log("email sent");
-                context.find("#fm-comment-box").val("").blur();
             },
             error: function() {
                 FeedMe.showError("Oops, there was an error sending this email.");
@@ -467,12 +454,10 @@ var FeedMe = {
         FeedMe.dbConn.executeSimpleSQL("DELETE FROM disabled_sites WHERE domain = '" + domain + "'");
     
         $("#fm-disabled").attr("collapsed", "true");
-        FeedMe.suggestPeople();
+        FeedMe.getRecommendations();
     },
     
-    checkDisabled: function() {
-        log("checkDisabled");
-        
+    checkDisabled: function() {        
         var statement = FeedMe.dbConn.createStatement("SELECT COUNT(*) FROM disabled_sites WHERE domain = :domain"); 
         statement.params.domain = content.document.domain;
         
@@ -485,7 +470,7 @@ var FeedMe = {
                     $("#fm-disabled").attr("collapsed", "false");
                     $("#fm-bar").attr("collapsed", "true");                        
                 } else {
-                    FeedMe.suggestPeople();
+                    FeedMe.getRecommendations();
                     $("#fm-disabled").attr("collapsed", "true");
                 }
             },
