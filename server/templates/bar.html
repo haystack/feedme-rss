@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}FeedMe Bar -- In Limited Beta{% endblock %}
+
+{% block logo %}
+<div class="feedme-logo-text">Making sharing faster, better.</div>
+<div class="logo" style="float: inherit;"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" /></div>
+{% endblock %}
+
+{% block header %}
+
+{% endblock %}
+
+{% block body %}
+<div style="clear: both">
+  <div>The FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" /> Bar is a Firefox extension that learns what your friends like to hear about and helps you share it with them. Basically, the FeedMe Bar lets you know which of your friends may be interested in the website you're looking at and makes it easy for you to send them a quick email with a link to the website.</div>
+    
+   <table class="instructions">
+      <tr>
+      <td class="number">1</td>
+      <td class="text">If you don't have Firefox 3.5 or higher, <a href="http://www.getfirefox.com">download it here</a>.</td>
+      </tr>
+
+      <tr>
+      <td class="number">2</td>
+      <td class="text"><a href="/accounts/register">Register</a> for a FeedMe account, or <a href="/accounts/login">log in</a> if you already have one.</td>
+      </tr>
+
+      <tr>
+      <td class="number">3</td>
+      <td class="text"><a href="http://groups.csail.mit.edu/haystack/feedme/feedme.xpi">Install the FeedMe Bar</a> as a Firefox extension.</td>
+      </tr>
+
+      <tr>
+      <td class="number">4</td>
+      <td class="text">Go to any webpage, and start sharing! Shared links will get sent via e-mail. As you share, FeedMe learns who might be interested in the websites you're looking at, and suggests them as you read.</td>
+      </tr>
+
+      </table>
+  
+</div>
+{% endblock %}

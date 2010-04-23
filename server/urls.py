@@ -54,6 +54,7 @@ urlpatterns = patterns('',
     url(r'^reader_click/', 'server.feedme.reader_click.reader_click', name='greader clickthrough'),
 
     url(r'^^study/', 'server.feedme.study.study', name='study'),
+    url(r'^^bar/', 'server.feedme.bar.bar', name='bar'),
     url(r'^$', 'server.feedme.homepage.homepage', name='homepage'),
     
     # rss feeds
