@@ -168,9 +168,10 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
     shared_users.append(shared_user.receiver.user)
 
   # log the view
-  viewed = ViewedPost(post=post, sharer=sharer, \
+  if study_participant:
+    viewed = ViewedPost(post=post, sharer=sharer, \
                         expanded_view = expanded_view)
-  viewed.save()
+    viewed.save()
     
 
   post_objects = dict()
