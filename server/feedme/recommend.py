@@ -76,7 +76,8 @@ def get_recommendation_json(request):
     
   seen_it = who_has_seen_it(recommendations, post)
 
-  log_recommendations(viewed_post, sorted_friends)
+  if viewed_post:
+    log_recommendations(viewed_post, sorted_friends)
 
   response = dict()
   response['posturl'] = post.url
@@ -156,6 +157,10 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
 
   try:
     study_participant = StudyParticipant.objects.get(sharer = sharer)
+    # check to see if study participant assignment is over
+    assignment = StudyParticipantAssignment.objects.get(study_participant = study_participant)
+    if assignment.end_time != assignment.start_time:
+       study_participant = None
   except StudyParticipant.DoesNotExist:
     study_participant = None
 
@@ -167,13 +172,12 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
   for shared_user in shared_post_receivers:
     shared_users.append(shared_user.receiver.user)
 
-  #viewed = None
-  # log the view
-  #if study_participant:
-  viewed = ViewedPost(post=post, sharer=sharer, \
-                      expanded_view = expanded_view)
-  viewed.save()
-    
+  viewed = None
+  # only log the view for active study participants
+  if study_participant:
+    viewed = ViewedPost(post=post, sharer=sharer, \
+                        expanded_view = expanded_view)
+    viewed.save()
 
   post_objects = dict()
   post_objects['feed'] = feed
