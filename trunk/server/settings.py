@@ -3,7 +3,7 @@ import os.path
 from private_settings import *
 
 ADMINS = (
-    ('FeedMe Team', 'feedme-owner@lists.csail.mit.edu'),
+    ('FeedMe Team', 'feedme@lists.csail.mit.edu'),
 )
 
 MANAGERS = ADMINS
