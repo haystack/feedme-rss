@@ -1,16 +1,17 @@
 {% extends "base.html" %}
 
-{% block title %}Thanks! - {{ shared_post.post.title }}{% endblock %}
-{% block header %}Thanks, {{ shared_post.sharer.user.first_name }}!{% endblock %}
+{% block title %}Thanks! {% if shared_post %} - {{ shared_post.post.title }} {% else %} Statistics {% endif %}{% endblock %}
+{% block header %}Thanks, {% if shared_post %}{{ shared_post.sharer.user.first_name }}{% else %}{{ sharer.user.first_name }}{% endif %}!{% endblock %}
 
 {% block body %}
+
+{% if shared_post %}
 <div>{{ shared_post.post.title}}</div>
+<p>We've sent a one-click thanks along to {{ shared_post.sharer.user.first_name }}. Thanks to you for letting them know that the effort was appreciated!</p>
+{% endif %}
 
-<p>We've sent a one-click thanks along to {{ shared_post.sharer.user.first_name }}. Thanks to you for letting them know that the effort was appreciated!
-</p>
-
-<div><b>Who has thanked {{ shared_post.sharer.user.first_name}} the most?</b></div>
-<div style="font-size: 80%; font-style: italic; margin-bottom: .5em;">Total number of posts thanking {{shared_post.sharer.user.first_name}}</div>
+<div><b>Who has thanked {% if shared_post %} {{ shared_post.sharer.user.first_name}} {% else %} you {% endif %} the most?</b></div>
+<div style="font-size: 80%; font-style: italic; margin-bottom: .5em;">Total number of posts thanking {{sharer.user.first_name}}</div>
 <table cellspacing="0"><tbody>
 {% for receiver in receiver_info %}
 <tr>

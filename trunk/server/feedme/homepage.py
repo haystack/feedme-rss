@@ -9,4 +9,4 @@ sys.stdout = codecs.getwriter('utf8')(sys.stdout)
 
 def homepage(request):
     return render_to_response('index.html',
-                            {'feedme_url' : versionutils.latest_url()})
+                            {'feedme_url' : versionutils.latest_url(), 'user': request.user})
