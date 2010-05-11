@@ -699,7 +699,7 @@ function share_post(event)
         recipients: recipients,
         comment: comment,
         bookmarklet: bookmarklet,
-        client: bookmarklet ? "bookmarklet" : "greader";
+        client: bookmarklet ? "bookmarklet" : "greader",
         
         digest: digest,
         send_individually: send_individually
