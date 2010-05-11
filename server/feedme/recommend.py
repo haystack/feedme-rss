@@ -155,14 +155,8 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
     sharer = Sharer(user=sharer_user)
     sharer.save()
 
-  try:
-    study_participant = StudyParticipant.objects.get(sharer = sharer)
-    # check to see if study participant assignment is over
-    assignment = StudyParticipantAssignment.objects.filter(study_participant = study_participant).order_by('-start_time')[0]
-    if assignment.end_time < datetime.datetime.now():
-       study_participant = None
-  except StudyParticipant.DoesNotExist:
-    study_participant = None
+  # returns none if study participant is not active
+  study_participant = sharer.get_study_participant()
 
   # find out if we've already shared it with anyone
   shared_posts = SharedPost.objects.filter(post=post, sharer=sharer)
