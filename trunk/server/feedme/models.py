@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 import nltk
 import textutil
+import datetime
 
 # make email addresses be 75 characters like usernames
 User._meta.get_field_by_name('username')[0].max_length=75     
@@ -55,7 +56,19 @@ class Sharer(models.Model):
         if self.user.first_name != u'' or self.user.last_name != u'':
             return self.user.first_name + u' ' + self.user.last_name
         else:
-            return self.user.email   
+            return self.user.email
+
+    def get_study_participant(self):
+        try:
+            study_participant = StudyParticipant.objects.get(sharer = self)
+            # check to see if study participant assignment is over
+            assignment = StudyParticipantAssignment.objects.filter(study_participant = study_participant).order_by('-start_time')[0]
+            if assignment.end_time < datetime.datetime.now():
+                study_participant = None
+        except StudyParticipant.DoesNotExist:
+            study_participant = None
+
+        return study_participant
 
 class Feed(models.Model):
     rss_url = models.TextField(unique=True) # the rss feed url
