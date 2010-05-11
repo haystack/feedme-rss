@@ -36,7 +36,7 @@
 try { console.log('Firebug console found.'); } catch(e) { console = { log: function() {} }; }
 
 var port = 80;
-var script_version = 0.22;
+var script_version = 0.25;
 /* data used to populate the autocomplete widget */
 var autocompleteData = null;
 /* for toggling on and off parts of the interface */
@@ -700,6 +700,7 @@ function share_post(event)
         comment: comment,
         bookmarklet: bookmarklet,
         client: bookmarklet ? "bookmarklet" : "greader";
+        
         digest: digest,
         send_individually: send_individually
     }
