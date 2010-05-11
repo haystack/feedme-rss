@@ -29,4 +29,13 @@ Here you can update preferences about your FeedMe experience.
     {% endfor %}
 </ul>
 
+
+<p>
+FeedMe also generates an RSS feed of all items you share, which is available here:
+<a href="http://feedme.csail.mit.edu:8003/feeds/shares/{{user_email}}/{{settings_seed}}/">
+http://feedme.csail.mit.edu/feeds/posts/{{user_email}}/{{settings_seed}}/</a>
+</p>
+
+
+
 {% endblock %}

@@ -16,9 +16,16 @@ def thanks(request, sharedpost_pk):
     shared_post.save()
 
     send_thanks_email(shared_post)
-    receiver_info = get_receiver_info(shared_post)
+    receiver_info = get_receiver_info(shared_post.sharer)
 
     context = {'shared_post': shared_post, 'receiver_info': receiver_info}
+    return render_to_response('thanks.html', context)
+
+def stats(request):
+    sharer = Sharer.objects.get(user=request.user)
+    receiver_info = get_receiver_info(sharer)
+
+    context = {'sharer': sharer, 'receiver_info': receiver_info}
     return render_to_response('thanks.html', context)
 
 def send_thanks_email(shared_post):
@@ -60,14 +67,14 @@ def send_thanks_email(shared_post):
   email.attach_alternative(html_content, "text/html")
   email.send()    
 
-def get_receiver_info(shared_post):
+def get_receiver_info(sharer):
     """Prepares the dictionary for the template"""
     receiver_info = []
-    receivers = Receiver.objects.filter(sharedpostreceiver__shared_post__sharer = shared_post.sharer).distinct()
+    receivers = Receiver.objects.filter(sharedpostreceiver__shared_post__sharer = sharer).distinct()
     for receiver in receivers:
         thanks = SharedPost.objects \
                  .filter(sharedpostreceiver__receiver = receiver) \
-                 .filter(sharer = shared_post.sharer) \
+                 .filter(sharer = sharer) \
                  .filter(thanks__gt = 0)
         count = thanks.count()
 

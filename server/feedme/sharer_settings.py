@@ -36,4 +36,5 @@ def sharer_settings(request):
     
     sp_receivers = SharedPostReceiver.objects.filter(shared_post__sharer = sharer).order_by('time').reverse()[:10]
     
-    return render_to_response("sharer_settings.html", RequestContext(request, { "form": form, "done": posted, "sp_receivers": sp_receivers }))
+    return render_to_response("sharer_settings.html", RequestContext(request, \
+                             { "form": form, "done": posted, "sp_receivers": sp_receivers, 'user_email': request.user.email, 'settings_seed': Receiver.objects.get(user=request.user).settings_seed }))

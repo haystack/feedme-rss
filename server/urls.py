@@ -1,5 +1,5 @@
 from django.conf.urls.defaults import *
-from feedme.feeds import PostFeed
+from feedme.feeds import *
 import settings
 
 # Uncomment the next two lines to enable the admin:
@@ -9,6 +9,7 @@ admin.autodiscover()
 
 feeds = {
     'posts': PostFeed,
+    'shares': ShareFeed
 }
 
 urlpatterns = patterns('',
@@ -38,6 +39,7 @@ urlpatterns = patterns('',
     url(r'^bookmarklet/', 'server.feedme.bookmarklet.bookmarklet', name='bookmarklet'),
     url(r'^bookmarklet_install/', 'server.feedme.bookmarklet_install.bookmarklet_install', name='bookmarklet installation'),
     url(r'^thanks/(?P<sharedpost_pk>\d+)/$', 'server.feedme.thanks.thanks', name='thanks'),
+    url(r'^thanks/$', 'server.feedme.thanks.stats', name='thanks stats'),
     url(r'^seen_it/$', 'server.feedme.seen_it.seen_it', name='seen it'),
     url(r'^tutorial/$', 'server.feedme.tutorial.tutorial', name='tutorial start'),
     url(r'^tutorial/firefox/$', 'server.feedme.tutorial.firefox', name='firefox tutorial'),

@@ -3,6 +3,14 @@
 {% block title %}FeedMe{% endblock %}
 
 {% block logo %}
+<div style="text-align:right;">
+{% if user.first_name %}
+Welcome, {{ user.first_name }} | <a href="/sharer/settings/">Settings</a> | <a href="/thanks/">Thanks! Statistics</a> | <a href="/accounts/logout/">Log Out</a>
+{% else %}
+You are not logged in to FeedMe | <a href="/accounts/login/">Log In</a> or <a href="/accounts/register/">Register Here</a>
+{% endif %}
+</div>
+
 <div class="feedme-logo-text">Making link sharing faster, better.</div>
 <div class="logo" style="float: inherit;"><img src="http://groups.csail.mit.edu/haystack/feedme/logo.png" /></div>
 {% endblock %}
@@ -12,6 +20,7 @@
 {% endblock %}
 
 {% block body %}
+
 <div style="clear: both">
   <p>FeedMe<img src="http://groups.csail.mit.edu/haystack/feedme/like.png" class="feedme-logo-icon" /> is a recommendation system that learns what your friends like to hear about and helps you share it with them. You can use FeedMe through a Google Reader plug-in or a Firefox extension.</p>
   <img src="http://groups.csail.mit.edu/haystack/feedme/demo.png" />
