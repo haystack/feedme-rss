@@ -22,15 +22,19 @@ def reader_click(request):
     while keep_looping:
         try:
             sharer = Sharer.objects.get(user = request.user)
-            viewed_posts = ViewedPost.objects \
-                           .filter(post__feed__rss_url = feed_url) \
-                           .filter(post__url=post_url) \
-                           .filter(sharer = sharer) \
-                           .order_by('-time')
-            if viewed_posts.count() == 0:
-                transaction.rollback()
+            if sharer.get_study_participant() is None: # they're not a study participant
+                script_output = "{\"response\": \"ok\"}"
+                return HttpResponse(script_output, mimetype='application/json')
             else:
-                keep_looping = False
+                viewed_posts = ViewedPost.objects \
+                               .filter(post__feed__rss_url = feed_url) \
+                               .filter(post__url=post_url) \
+                               .filter(sharer = sharer) \
+                               .order_by('-time')
+                if viewed_posts.count() == 0:
+                    transaction.rollback()
+                else:
+                    keep_looping = False
         except Sharer.DoesNotExist:
             transaction.rollback()
     
@@ -41,5 +45,4 @@ def reader_click(request):
     transaction.commit()
     script_output = "{\"response\": \"ok\"}"
     return HttpResponse(script_output, mimetype='application/json')
-    
-    
+
