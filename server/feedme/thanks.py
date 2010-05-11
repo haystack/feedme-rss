@@ -1,6 +1,7 @@
 from django.shortcuts import render_to_response
 from django.core.mail import EmailMultiAlternatives
 from django.template import Context, loader
+from django.contrib.auth.decorators import login_required
 from models import *
 import codecs, sys
 from django.conf import settings
@@ -21,6 +22,7 @@ def thanks(request, sharedpost_pk):
     context = {'shared_post': shared_post, 'receiver_info': receiver_info}
     return render_to_response('thanks.html', context)
 
+@login_required
 def stats(request):
     sharer = Sharer.objects.get(user=request.user)
     receiver_info = get_receiver_info(sharer)
