@@ -10,6 +10,7 @@ import math
 import operator
 import datetime
 import time
+from django.core.cache import cache
 
 NUM_RECOMMENDATIONS = 21
 
@@ -26,6 +27,7 @@ def recommend(request):
                       mimetype='application/json')
 
 def get_recommendation_json(request):  
+  total_time = time.time()
   sharer_user = request.user
   
   if not sharer_user.is_authenticated():
@@ -65,12 +67,9 @@ def get_recommendation_json(request):
   viewed_post = post_objects['viewed_post']
   study_participant = post_objects['study_participant']
 
-  #print 'get recommendations'
   if study_participant is None or study_participant.user_interface:
     recommendations, sorted_friends = n_best_friends(post, sharer)
-    #print recommendations
   else:
-    #print 'no recommendations'
     recommendations = []
     sorted_friends = []
     
@@ -85,6 +84,7 @@ def get_recommendation_json(request):
   response_json = simplejson.dumps(response)
  
   transaction.commit()
+  print "total time for recommendation: " + str(time.time() - total_time)
   return response_json
 
 
@@ -186,7 +186,6 @@ def get_post_objects(feed_title, feed_url, post_url, post_title, \
 
 
 def n_best_friends(post, sharer):
-  begin_time = time.clock()
   friends = Receiver.objects \
             .filter(sharedpostreceiver__shared_post__sharer=sharer) \
             .filter(recommend = True) \
@@ -217,8 +216,13 @@ def n_best_friends(post, sharer):
     # skip people who aren't real email addresses or who are in blacklist
     if email_re.match(receiver.user.email) is None or receiver in blacklist:
       continue
-
-    num_shared = shared_posts.filter(sharedpost__sharedpostreceiver__receiver=receiver).count()
+    
+    # concat usernames to create key for cache
+    num_shared_key = "numshared:" + sharer.user.username + receiver.user.username
+    num_shared = cache.get(num_shared_key)
+    if num_shared is None:
+        num_shared = shared_posts.filter(sharedpost__sharedpostreceiver__receiver=receiver).count()
+        cache.set(num_shared_key, num_shared)
 
     term_vector = TermVectorCell.objects.filter(receiver = receiver) \
                   .order_by('term__term').select_related('term')
@@ -238,7 +242,6 @@ def n_best_friends(post, sharer):
   if len(sorted_friends) > NUM_RECOMMENDATIONS:
     sorted_friends = sorted_friends[0:NUM_RECOMMENDATIONS]
 
-  print "time for recommendation: " + str(time.clock() - begin_time)
   return map(lambda friend:friend['receiver'].user, sorted_friends), sorted_friends
 
 

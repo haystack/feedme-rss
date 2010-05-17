@@ -95,3 +95,6 @@ REGISTER_COMPLETE_URL = '/accounts/register/complete/'
 LOGIN_REDIRECT_URL = '/accounts/login/complete/'
 
 DEFAULT_FROM_EMAIL = 'FeedMe <feedme-owner@lists.csail.mit.edu>' 
+
+CACHE_BACKEND = 'memcached://127.0.0.1:11211/'
+
