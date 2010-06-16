@@ -46,7 +46,9 @@ def get_recommendation_json(request):
   # the same time, one will fail with an IntegrityError.  We'll keep
   # looping until we either load them or create them in new transactions
   keep_looping = True
+  num_loops = 0
   while keep_looping:
+    num_loops += 1
     try:
       post_objects = get_post_objects(feed_url=feed_url, post_url=post_url, \
                                       post_title=post_title, \
@@ -56,7 +58,10 @@ def get_recommendation_json(request):
                                       expanded_view = expanded_view)
       keep_looping = False
     except IntegrityError:
-      transaction.rollback()
+      if num_loops <= 100:
+        transaction.rollback()
+      else:
+        raise
 
   feed = post_objects['feed']
   post = post_objects['post']
