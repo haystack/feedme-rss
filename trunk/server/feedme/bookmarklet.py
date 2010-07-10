@@ -11,6 +11,8 @@ import versionutils
 
 @login_required
 def bookmarklet(request):
+    if 'post_contents' not in request.POST:
+        return HttpResponse("Not a valid request.")
     text = request.POST['post_contents']
     parser = html5lib.HTMLParser(tree=treebuilders.getTreeBuilder("beautifulsoup"))
     soup = parser.parse(text)
