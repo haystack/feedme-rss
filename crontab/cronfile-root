@@ -4,4 +4,5 @@
 # once the cron job is installed, edit it with 'crontab -u username -e'
 
 # m h  dom mon dow   command
-0 0 * * * /etc/init.d/feedme restart | mail feedme@csail.mit.edu
+PATH=$PATH:/sbin:/usr/bin:/bin
+#23 17 * * * /etc/init.d/feedme restart 2>&1
