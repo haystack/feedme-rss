@@ -158,7 +158,7 @@ var FeedMe = {
         
         $("#status-bar .fm-toggle-bar").click(FeedMe.toggleBar);
 
-        window.onresize = function() { $("#fm-suggestions").width(window.innerWidth - 60); }
+        window.onresize = function() { $("#fm-suggestions").width(window.content.innerWidth - 60); }
     },
     
     /** getting recommendations ***/
@@ -392,16 +392,16 @@ var FeedMe = {
         if ($("#fm-disabled").attr("collapsed") == "false" || $("#fm-logged-out").attr("collapsed") == "false")
             return false;
             
-        $("#fm-toggle-controls").addClass("fm-arrow-down")
-                                .removeClass("fm-arrow-up")
+        $("#fm-toggle-controls").addClass("fm-arrow-up")
+                                .removeClass("fm-arrow-down")
                                 .attr("tooltiptext", "Collapse FeedMe Bar");
         $("#fm-controls").attr("collapsed", false);
         $("#fm-suggestions").css("overflow", "visible");
     },
    
     hideControls: function() {
-        $("#fm-toggle-controls").addClass("fm-arrow-up")
-                                .removeClass("fm-arrow-down")   
+        $("#fm-toggle-controls").addClass("fm-arrow-down")
+                                .removeClass("fm-arrow-up")   
                                 .attr("tooltiptext", "Expand FeedMe Bar");
         $("#fm-controls").attr("collapsed", true);
         $("#fm-suggestions").css("overflow", "hidden");
