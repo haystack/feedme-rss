@@ -6,6 +6,13 @@
 {{ shared_post.sharer.name }} thinks you might be interested in this paper at CHI. You can also make recommendations for your friends, while browsing the conference program at <a href="http://www.nirmalpatel.com/chiProgram/program.html">http://nirmalpatel.com/chiProgram/program.html</a>.
 </p>
 {% endifequal %}
+{% ifequal shared_post.client "eventmaps" %}
+<p style="font-style:italic;">
+{{ shared_post.sharer.name }} thinks you might be interested in this event.
+You can also make recommendations for your friends while browsing
+conference programs at <a href="https://researcher.ibm.com/eventmaps/">Event Maps</a>.
+</p>
+{% endifequal %}
 
 {% ifnotequal shared_post.comment "" %}
 <p>
