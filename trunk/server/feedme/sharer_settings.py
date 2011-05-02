@@ -21,6 +21,7 @@ class SharerForm(ModelForm):
                                                         .filter(recommend = True) \
                                                         .distinct() \
                                                         .order_by('user__email')
+            self.fields['blacklist'].required = False
 
 @login_required
 def sharer_settings(request):
