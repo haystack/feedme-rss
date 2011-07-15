@@ -40,7 +40,7 @@
                     <textbox flex="1" id="fm-comment-box" />
                     <textbox id="fm-add-email" />
                     <image id="fm-add-email-button" class="fm-plus" height="16" width="16" tooltiptext="Add new email address" />
-                    <html:div class="feedme-share-button feedme-button feedme-toggle">Share website</html:div>
+                    <html:div class="feedme-share-button feedme-button feedme-toggle">Share link</html:div>
                     <!--html:div class="feedme-now-button feedme-share-button feedme-button feedme-toggle">Now</html:div>
                     <html:div class="feedme-later-button feedme-share-button feedme-button feedme-toggle">Later</html:div-->
                     <html:div class="feedme-send-individually-area"><html:input class="feedme-send-individually" type="checkbox"></html:input>send individual emails</html:div>
