@@ -1,0 +1,11 @@
+User-agent: *
+Disallow: /thanks/
+Disallow: /recommend/
+Disallow: /accounts/
+Disallow: /recommend_jsonp/
+Disallow: /recommendation_list/
+Disallow: /loggedin/
+Disallow: /share/
+Disallow: /share_jsonp/
+Disallow: /check_logged_in/
+Disallow: /check_logged_in_jsonp/

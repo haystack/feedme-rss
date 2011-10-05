@@ -58,6 +58,7 @@ urlpatterns = patterns('',
     url(r'^^study/', 'server.feedme.study.study', name='study'),
     url(r'^^bar/', 'server.feedme.bar.bar', name='bar'),
     url(r'^$', 'server.feedme.homepage.homepage', name='homepage'),
+    url(r'^robots.txt$', 'server.feedme.robots.robots', name='robots'),
     
     # rss feeds
     url(r'^feeds/(?P<url>.*)/$', 'django.contrib.syndication.views.feed', {'feed_dict': feeds}),
